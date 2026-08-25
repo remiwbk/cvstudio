@@ -86,6 +86,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 const SECTION_COLUMN_IDS = {
@@ -249,26 +250,36 @@ const CVPreview = forwardRef<
     const [editMode, setEditMode] =
       useState(false);
 
+    const [isPrinting, setIsPrinting] =
+      useState(false);
+
     /**
      * =========================================================
      * DND-KIT
      * =========================================================
      */
 
-    const sensors = useSensors(
-      useSensor(PointerSensor, {
-        activationConstraint: {
-          distance: 8,
-        },
-      }),
+    const sensors =
+      useSensors(
+        useSensor(
+          PointerSensor,
+          {
+            activationConstraint: {
+              distance: 8,
+            },
+          }
+        ),
 
-      useSensor(TouchSensor, {
-        activationConstraint: {
-          delay: 180,
-          tolerance: 8,
-        },
-      })
-    );
+        useSensor(
+          TouchSensor,
+          {
+            activationConstraint: {
+              delay: 180,
+              tolerance: 8,
+            },
+          }
+        )
+      );
 
     /**
      * =========================================================
@@ -305,47 +316,51 @@ const CVPreview = forwardRef<
           theme.fontBody
         );
 
-      const s = data.style;
+      const s =
+        data.style;
 
-      const colors: ThemeColors = {
-        primary:
-          s.primary ||
-          theme.colors.primary,
+      const colors: ThemeColors =
+        {
+          primary:
+            s.primary ||
+            theme.colors.primary,
 
-        secondary:
-          s.secondary ||
-          theme.colors.secondary,
+          secondary:
+            s.secondary ||
+            theme.colors.secondary,
 
-        accent:
-          s.accent ||
-          theme.colors.accent,
+          accent:
+            s.accent ||
+            theme.colors.accent,
 
-        text:
-          s.text ||
-          theme.colors.text,
+          text:
+            s.text ||
+            theme.colors.text,
 
-        muted:
-          s.muted ||
-          theme.colors.muted,
+          muted:
+            s.muted ||
+            theme.colors.muted,
 
-        background:
-          theme.colors.background,
+          background:
+            theme.colors.background,
 
-        surface:
-          s.surface ||
-          theme.colors.surface,
+          surface:
+            s.surface ||
+            theme.colors.surface,
 
-        border:
-          s.border ||
-          theme.colors.border,
-      };
+          border:
+            s.border ||
+            theme.colors.border,
+        };
 
       return {
         colors,
 
         fonts: {
-          heading: fontStack,
-          body: fontStack,
+          heading:
+            fontStack,
+          body:
+            fontStack,
         },
 
         fontScale:
@@ -405,12 +420,6 @@ const CVPreview = forwardRef<
 
     const collisionDetectionStrategy: CollisionDetection =
       (args) => {
-        /**
-         * =====================================================
-         * TEMPLATES MONO-COLONNE
-         * =====================================================
-         */
-
         if (
           !isTwoColumnTemplate
         ) {
@@ -429,24 +438,12 @@ const CVPreview = forwardRef<
           );
         }
 
-        /**
-         * =====================================================
-         * TEMPLATES À DEUX COLONNES
-         * =====================================================
-         */
-
         const pointer =
           args.pointerCoordinates;
 
         if (!pointer) {
           return [];
         }
-
-        /**
-         * -----------------------------------------------------
-         * TROUVER LA COLONNE SOUS LE CURSEUR
-         * -----------------------------------------------------
-         */
 
         const columnContainers =
           args.droppableContainers.filter(
@@ -533,20 +530,15 @@ const CVPreview = forwardRef<
           return [];
         }
 
-        /**
-         * -----------------------------------------------------
-         * SECTIONS DE LA COLONNE
-         * -----------------------------------------------------
-         */
-
-        const sectionCandidates: Array<{
-          id: CVSectionId;
-          rect: NonNullable<
-            ReturnType<
-              typeof args.droppableRects.get
-            >
-          >;
-        }> = [];
+        const sectionCandidates:
+          Array<{
+            id: CVSectionId;
+            rect: NonNullable<
+              ReturnType<
+                typeof args.droppableRects.get
+              >
+            >;
+          }> = [];
 
         for (
           const container of
@@ -616,12 +608,6 @@ const CVPreview = forwardRef<
             b.rect.top
         );
 
-        /**
-         * -----------------------------------------------------
-         * CURSEUR DANS UNE SECTION
-         * -----------------------------------------------------
-         */
-
         for (
           const candidate of
             sectionCandidates
@@ -650,12 +636,6 @@ const CVPreview = forwardRef<
           }
         }
 
-        /**
-         * -----------------------------------------------------
-         * ENTRE DEUX SECTIONS
-         * -----------------------------------------------------
-         */
-
         for (
           const candidate of
             sectionCandidates
@@ -674,12 +654,6 @@ const CVPreview = forwardRef<
             ];
           }
         }
-
-        /**
-         * -----------------------------------------------------
-         * ZONE FINALE DE LA COLONNE
-         * -----------------------------------------------------
-         */
 
         if (
           sectionCandidates.length >
@@ -739,12 +713,6 @@ const CVPreview = forwardRef<
             ];
           }
         }
-
-        /**
-         * -----------------------------------------------------
-         * COLONNE VIDE
-         * -----------------------------------------------------
-         */
 
         const emptyBottomId =
           targetColumn ===
@@ -822,15 +790,7 @@ const CVPreview = forwardRef<
         active.id as CVSectionId;
 
       const overId =
-        String(
-          over.id
-        );
-
-      /**
-       * =======================================================
-       * TEMPLATES À DEUX COLONNES
-       * =======================================================
-       */
+        String(over.id);
 
       if (
         isTwoColumnTemplate
@@ -839,12 +799,6 @@ const CVPreview = forwardRef<
           getSectionColumn(
             activeId
           );
-
-        /**
-         * -----------------------------------------------------
-         * DROP EN BAS D'UNE COLONNE
-         * -----------------------------------------------------
-         */
 
         if (
           overId ===
@@ -894,14 +848,11 @@ const CVPreview = forwardRef<
 
           onChange?.({
             ...data,
-
             sectionOrder:
               nextOrder,
-
             sectionColumns: {
               ...(data.sectionColumns ??
                 {}),
-
               [activeId]:
                 targetColumn,
             },
@@ -909,12 +860,6 @@ const CVPreview = forwardRef<
 
           return;
         }
-
-        /**
-         * -----------------------------------------------------
-         * DROP DIRECTEMENT SUR UNE COLONNE
-         * -----------------------------------------------------
-         */
 
         if (
           overId ===
@@ -964,14 +909,11 @@ const CVPreview = forwardRef<
 
           onChange?.({
             ...data,
-
             sectionOrder:
               nextOrder,
-
             sectionColumns: {
               ...(data.sectionColumns ??
                 {}),
-
               [activeId]:
                 targetColumn,
             },
@@ -979,12 +921,6 @@ const CVPreview = forwardRef<
 
           return;
         }
-
-        /**
-         * -----------------------------------------------------
-         * DROP SUR UNE SECTION
-         * -----------------------------------------------------
-         */
 
         const overSectionId =
           over.id as CVSectionId;
@@ -1000,12 +936,6 @@ const CVPreview = forwardRef<
           getSectionColumn(
             overSectionId
           );
-
-        /**
-         * -----------------------------------------------------
-         * CHANGEMENT DE COLONNE
-         * -----------------------------------------------------
-         */
 
         if (
           activeColumn !==
@@ -1035,14 +965,11 @@ const CVPreview = forwardRef<
 
           onChange?.({
             ...data,
-
             sectionOrder:
               nextOrder,
-
             sectionColumns: {
               ...(data.sectionColumns ??
                 {}),
-
               [activeId]:
                 targetColumn,
             },
@@ -1050,12 +977,6 @@ const CVPreview = forwardRef<
 
           return;
         }
-
-        /**
-         * -----------------------------------------------------
-         * MÊME COLONNE
-         * -----------------------------------------------------
-         */
 
         const columnItems =
           sectionOrder.filter(
@@ -1079,8 +1000,7 @@ const CVPreview = forwardRef<
         if (
           oldIndex === -1 ||
           newIndex === -1 ||
-          oldIndex ===
-            newIndex
+          oldIndex === newIndex
         ) {
           return;
         }
@@ -1093,11 +1013,9 @@ const CVPreview = forwardRef<
           );
 
         const newOrder:
-          CVSectionId[] =
-          [];
+          CVSectionId[] = [];
 
-        let columnIndex =
-          0;
+        let columnIndex = 0;
 
         for (
           const sectionId of
@@ -1135,19 +1053,12 @@ const CVPreview = forwardRef<
 
         onChange?.({
           ...data,
-
           sectionOrder:
             newOrder,
         });
 
         return;
       }
-
-      /**
-       * =======================================================
-       * TEMPLATES MONO-COLONNE
-       * =======================================================
-       */
 
       if (
         String(over.id) ===
@@ -1175,19 +1086,12 @@ const CVPreview = forwardRef<
 
         onChange?.({
           ...data,
-
           sectionOrder:
             nextOrder,
         });
 
         return;
       }
-
-      /**
-       * -------------------------------------------------------
-       * DROP SUR UNE SECTION
-       * -------------------------------------------------------
-       */
 
       const overSectionId =
         over.id as CVSectionId;
@@ -1235,7 +1139,6 @@ const CVPreview = forwardRef<
 
       onChange?.({
         ...data,
-
         sectionOrder:
           newOrder,
       });
@@ -1243,12 +1146,15 @@ const CVPreview = forwardRef<
 
     /**
      * =========================================================
-     * FIT PREVIEW
+     * RECALCUL DU FIT PREVIEW
      * =========================================================
      */
 
     useLayoutEffect(() => {
-      if (captureMode) {
+      if (
+        captureMode ||
+        isPrinting
+      ) {
         setFitScale(1);
         return;
       }
@@ -1284,25 +1190,24 @@ const CVPreview = forwardRef<
           compute
         );
 
-      ro.observe(
-        pane
-      );
+      ro.observe(pane);
 
       return () => {
         ro.disconnect();
       };
     }, [
       captureMode,
+      isPrinting,
     ]);
 
     /**
      * =========================================================
-     * AUTO SCALE
+     * RECALCUL DU SCALE DU CONTENU
      * =========================================================
      */
 
-    useLayoutEffect(() => {
-      const compute = () => {
+    const recomputeContentScale =
+      () => {
         const content =
           contentRef.current;
 
@@ -1334,11 +1239,14 @@ const CVPreview = forwardRef<
         );
       };
 
-      compute();
+    useLayoutEffect(() => {
+      recomputeContentScale();
 
       const ro =
         new ResizeObserver(
-          compute
+          () => {
+            recomputeContentScale();
+          }
         );
 
       const content =
@@ -1360,6 +1268,70 @@ const CVPreview = forwardRef<
       fontScale,
       sectionOrder,
     ]);
+
+    /**
+     * =========================================================
+     * PRINT
+     * =========================================================
+     */
+
+    useLayoutEffect(() => {
+      const handleBeforePrint =
+        async () => {
+          setIsPrinting(true);
+          setFitScale(1);
+          setZoomScale(1);
+
+          /*
+           * Laisse React terminer son rendu avant
+           * de recalculer la hauteur naturelle.
+           */
+          await new Promise<void>(
+            (resolve) =>
+              requestAnimationFrame(
+                () => resolve()
+              )
+          );
+
+          if (
+            document.fonts &&
+            document.fonts.ready
+          ) {
+            try {
+              await document.fonts.ready;
+            } catch {
+              // Rien à faire si le navigateur
+              // ne permet pas d'attendre les polices.
+            }
+          }
+
+          recomputeContentScale();
+        };
+
+      const handleAfterPrint =
+        () => {
+          setIsPrinting(false);
+        };
+
+      window.addEventListener(
+        'beforeprint',
+        () => {
+          void handleBeforePrint();
+        }
+      );
+
+      window.addEventListener(
+        'afterprint',
+        handleAfterPrint
+      );
+
+      return () => {
+        window.removeEventListener(
+          'afterprint',
+          handleAfterPrint
+        );
+      };
+    }, []);
 
     /**
      * =========================================================
@@ -1442,9 +1414,7 @@ const CVPreview = forwardRef<
         }
       >
         <div
-          ref={
-            paneRef
-          }
+          ref={paneRef}
           className="
             preview-scroll
             relative
@@ -1470,10 +1440,8 @@ const CVPreview = forwardRef<
               className="
                 absolute
                 z-[100]
-
                 top-3
                 right-3
-
                 sm:top-4
                 sm:right-4
 
@@ -1489,10 +1457,6 @@ const CVPreview = forwardRef<
                 p-1
               "
             >
-              {/* =================================================
-                  MODE RÉORGANISATION
-              ================================================== */}
-
               <button
                 type="button"
                 onClick={() =>
@@ -1504,19 +1468,13 @@ const CVPreview = forwardRef<
                 className={`
                   h-8
                   sm:h-9
-
                   px-2.5
                   sm:px-3
-
                   rounded-lg
-
                   text-[11px]
                   sm:text-xs
-
                   font-semibold
-
                   transition
-
                   flex
                   items-center
                   gap-1.5
@@ -1550,10 +1508,6 @@ const CVPreview = forwardRef<
 
               <div className="w-px h-6 bg-slate-200" />
 
-              {/* =================================================
-                  ZOOM -
-              ================================================== */}
-
               <button
                 type="button"
                 onClick={
@@ -1566,36 +1520,25 @@ const CVPreview = forwardRef<
                 className="
                   w-8
                   h-8
-
                   sm:w-9
                   sm:h-9
-
                   rounded-lg
-
                   flex
                   items-center
                   justify-center
-
                   text-slate-700
                   text-lg
                   font-medium
-
                   hover:bg-slate-100
                   active:bg-slate-200
-
                   disabled:opacity-30
                   disabled:cursor-not-allowed
-
                   transition
                 "
                 title="Dézoomer"
               >
                 −
               </button>
-
-              {/* =================================================
-                  ZOOM %
-              ================================================== */}
 
               <button
                 type="button"
@@ -1605,20 +1548,14 @@ const CVPreview = forwardRef<
                 className="
                   min-w-[48px]
                   sm:min-w-[62px]
-
                   h-8
                   sm:h-9
-
                   px-2
-
                   rounded-lg
-
                   text-[11px]
                   sm:text-xs
-
                   font-semibold
                   text-slate-600
-
                   hover:bg-slate-100
                   transition
                 "
@@ -1630,10 +1567,6 @@ const CVPreview = forwardRef<
                 )}
                 %
               </button>
-
-              {/* =================================================
-                  ZOOM +
-              ================================================== */}
 
               <button
                 type="button"
@@ -1647,26 +1580,19 @@ const CVPreview = forwardRef<
                 className="
                   w-8
                   h-8
-
                   sm:w-9
                   sm:h-9
-
                   rounded-lg
-
                   flex
                   items-center
                   justify-center
-
                   text-slate-700
                   text-lg
                   font-medium
-
                   hover:bg-slate-100
                   active:bg-slate-200
-
                   disabled:opacity-30
                   disabled:cursor-not-allowed
-
                   transition
                 "
                 title="Zoomer"
@@ -1685,11 +1611,9 @@ const CVPreview = forwardRef<
               <div
                 className="
                   fixed
-
                   bottom-4
                   left-1/2
                   -translate-x-1/2
-
                   z-[100]
 
                   flex
@@ -1704,12 +1628,10 @@ const CVPreview = forwardRef<
 
                   px-3
                   sm:px-4
-
                   py-2.5
 
                   text-[11px]
                   sm:text-xs
-
                   font-medium
 
                   shadow-xl
@@ -1727,11 +1649,13 @@ const CVPreview = forwardRef<
 
                 <span className="text-center">
                   <span className="hidden sm:inline">
-                    Mode réorganisation activé — glissez les sections
+                    Mode réorganisation activé —
+                    glissez les sections
                   </span>
 
                   <span className="sm:hidden">
-                    Glissez les sections pour les réorganiser
+                    Glissez les sections pour
+                    les réorganiser
                   </span>
                 </span>
               </div>
@@ -1742,6 +1666,11 @@ const CVPreview = forwardRef<
           ====================================================== */}
 
           <div
+            className="
+              cv-preview-scale-wrapper
+              relative
+              shrink-0
+            "
             style={{
               width:
                 PAGE_PX_WIDTH *
@@ -1751,12 +1680,11 @@ const CVPreview = forwardRef<
                 PAGE_PX_HEIGHT *
                 previewScale,
             }}
-            className="
-              relative
-              shrink-0
-            "
           >
             <div
+              className="
+                cv-preview-transform-wrapper
+              "
               style={{
                 transform:
                   `scale(${previewScale})`,
@@ -1769,9 +1697,7 @@ const CVPreview = forwardRef<
               }}
             >
               <div
-                ref={
-                  pageRef
-                }
+                ref={pageRef}
                 className="
                   a4-page
                   cv-export-page
@@ -1801,6 +1727,9 @@ const CVPreview = forwardRef<
                 }}
               >
                 <div
+                  className="
+                    cv-content-scale-wrapper
+                  "
                   style={{
                     transform:
                       `scale(${contentScale})`,
@@ -1813,9 +1742,7 @@ const CVPreview = forwardRef<
                   }}
                 >
                   <div
-                    ref={
-                      contentRef
-                    }
+                    ref={contentRef}
                     className="
                       relative
                     "

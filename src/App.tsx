@@ -72,7 +72,8 @@ type AppRoute =
   | 'privacy';
 
 function getRoute(): AppRoute {
-  const path = window.location.pathname;
+  const path =
+    window.location.pathname;
 
   if (
     path === '/app' ||
@@ -88,7 +89,8 @@ function getRoute(): AppRoute {
   }
 
   if (
-    path === '/politique-confidentialite'
+    path ===
+    '/politique-confidentialite'
   ) {
     return 'privacy';
   }
@@ -100,39 +102,38 @@ function getRoute(): AppRoute {
  * ---------------------------------------------------------
  * NORMALISATION DES DONNÉES CV
  * ---------------------------------------------------------
- *
- * Permet de charger les anciens CV créés avant l'ajout
- * de nouveaux champs sans faire planter l'application.
  */
 
 function normalizeCVData(
   data: CVData
 ): CVData {
-  const defaultSectionOrder: CVSectionId[] = [
-    'summary',
-    'experiences',
-    'education',
-    'skills',
-    'projects',
-    'interests',
-    'certifications',
-  ];
+  const defaultSectionOrder: CVSectionId[] =
+    [
+      'summary',
+      'experiences',
+      'education',
+      'skills',
+      'projects',
+      'interests',
+      'certifications',
+    ];
 
-  const sectionOrder: CVSectionId[] =
+  const sectionOrder:
+    CVSectionId[] =
     data.sectionOrder?.length
-      ? [...data.sectionOrder]
-      : [...defaultSectionOrder];
+      ? [
+          ...data.sectionOrder,
+        ]
+      : [
+          ...defaultSectionOrder,
+        ];
 
   const certifications =
     data.certifications ?? [];
 
-  /*
-   * Les anciens CV peuvent contenir
-   * des certifications sans avoir encore
-   * la section dans sectionOrder.
-   */
   if (
-    certifications.length > 0 &&
+    certifications.length >
+      0 &&
     !sectionOrder.includes(
       'certifications'
     )
@@ -149,12 +150,6 @@ function normalizeCVData(
 
     sectionOrder,
 
-    /*
-     * Compatibilité avec les anciens CV :
-     * on conserve leurs éventuels titres
-     * et on complète les nouveaux champs manquants
-     * avec les titres par défaut.
-     */
     sectionTitles: {
       ...DEFAULT_SECTION_TITLES,
       ...(data.sectionTitles ?? {}),
@@ -170,69 +165,99 @@ export default function App() {
    */
 
   const [route, setRoute] =
-    useState<AppRoute>(getRoute);
+    useState<AppRoute>(
+      getRoute
+    );
 
-  const openEditor = useCallback(
-    (selectedTemplate?: TemplateId) => {
-      if (selectedTemplate) {
-        setTemplate(selectedTemplate);
-      }
+  const openEditor =
+    useCallback(
+      (
+        selectedTemplate?: TemplateId
+      ) => {
+        if (
+          selectedTemplate
+        ) {
+          setTemplate(
+            selectedTemplate
+          );
+        }
 
+        window.history.pushState(
+          {},
+          '',
+          '/app'
+        );
+
+        setRoute('editor');
+
+        window.scrollTo(
+          0,
+          0
+        );
+      },
+      []
+    );
+
+  const goToLanding =
+    useCallback(() => {
       window.history.pushState(
         {},
         '',
-        '/app'
+        '/'
       );
 
-      setRoute('editor');
+      setRoute('landing');
 
-      window.scrollTo(0, 0);
-    },
-    []
-  );
+      window.scrollTo(
+        0,
+        0
+      );
+    }, []);
 
-  const goToLanding = useCallback(() => {
-    window.history.pushState(
-      {},
-      '',
-      '/'
-    );
+  const goToLegal =
+    useCallback(() => {
+      window.history.pushState(
+        {},
+        '',
+        '/mentions-legales'
+      );
 
-    setRoute('landing');
+      setRoute('legal');
 
-    window.scrollTo(0, 0);
-  }, []);
+      window.scrollTo(
+        0,
+        0
+      );
+    }, []);
 
-  const goToLegal = useCallback(() => {
-    window.history.pushState(
-      {},
-      '',
-      '/mentions-legales'
-    );
+  const goToPrivacy =
+    useCallback(() => {
+      window.history.pushState(
+        {},
+        '',
+        '/politique-confidentialite'
+      );
 
-    setRoute('legal');
+      setRoute('privacy');
 
-    window.scrollTo(0, 0);
-  }, []);
-
-  const goToPrivacy = useCallback(() => {
-    window.history.pushState(
-      {},
-      '',
-      '/politique-confidentialite'
-    );
-
-    setRoute('privacy');
-
-    window.scrollTo(0, 0);
-  }, []);
+      window.scrollTo(
+        0,
+        0
+      );
+    }, []);
 
   useEffect(() => {
-    const handlePopState = () => {
-      setRoute(getRoute());
+    const handlePopState =
+      () => {
+        setRoute(
+          getRoute()
+        );
 
-      window.scrollTo(0, 0);
-    };
+        window.scrollTo(
+          0,
+          0
+        );
+      };
 
     window.addEventListener(
       'popstate',
@@ -254,48 +279,80 @@ export default function App() {
    */
 
   const [data, setData] =
-    useState<CVData>(emptyCV);
+    useState<CVData>(
+      emptyCV
+    );
 
   const [template, setTemplate] =
-    useState<TemplateId>('modern');
+    useState<TemplateId>(
+      'modern'
+    );
 
-  const [currentCVId, setCurrentCVId] =
-    useState<string | null>(null);
+  const [
+    currentCVId,
+    setCurrentCVId,
+  ] = useState<string | null>(
+    null
+  );
 
-  const [currentCVName, setCurrentCVName] =
-    useState('Mon CV');
+  const [
+    currentCVName,
+    setCurrentCVName,
+  ] = useState(
+    'Mon CV'
+  );
 
   const [library, setLibrary] =
     useState<SavedCV[]>([]);
 
-  const [libraryOpen, setLibraryOpen] =
-    useState(false);
+  const [
+    libraryOpen,
+    setLibraryOpen,
+  ] = useState(false);
 
-  const [templateOpen, setTemplateOpen] =
-    useState(false);
+  const [
+    templateOpen,
+    setTemplateOpen,
+  ] = useState(false);
 
-  const [loadingStorage, setLoadingStorage] =
-    useState(true);
+  const [
+    loadingStorage,
+    setLoadingStorage,
+  ] = useState(true);
 
   const [saving, setSaving] =
     useState(false);
 
-  const [lastSaved, setLastSaved] =
-    useState<number | null>(null);
+  const [
+    lastSaved,
+    setLastSaved,
+  ] = useState<number | null>(
+    null
+  );
 
   const [busy, setBusy] =
-    useState<'pdf' | 'png' | null>(null);
+    useState<
+      'pdf' | 'png' | null
+    >(null);
 
-  const [mobileView, setMobileView] =
-    useState<'edit' | 'preview'>('edit');
+  const [
+    mobileView,
+    setMobileView,
+  ] = useState<
+    'edit' | 'preview'
+  >('edit');
 
   const previewRef =
-    useRef<CVPreviewHandle>(null);
-
-  const saveTimerRef =
-    useRef<ReturnType<typeof setTimeout> | null>(
+    useRef<CVPreviewHandle>(
       null
     );
+
+  const saveTimerRef =
+    useRef<
+      ReturnType<
+        typeof setTimeout
+      > | null
+    >(null);
 
   /**
    * ---------------------------------------------------------
@@ -317,8 +374,11 @@ export default function App() {
 
         setLibrary(cvs);
 
-        if (cvs.length > 0) {
-          const latest = cvs[0];
+        if (
+          cvs.length > 0
+        ) {
+          const latest =
+            cvs[0];
 
           setCurrentCVId(
             latest.id
@@ -345,22 +405,29 @@ export default function App() {
           const now =
             Date.now();
 
-          const initialCV: SavedCV = {
-            id: createCVId(),
-            name: 'Mon CV',
-            data: {
-              ...emptyCV,
-              sectionOrder: [
-                ...emptyCV.sectionOrder,
-              ],
-              sectionTitles: {
-                ...emptyCV.sectionTitles,
+          const initialCV:
+            SavedCV = {
+              id: createCVId(),
+              name: 'Mon CV',
+
+              data: {
+                ...emptyCV,
+
+                sectionOrder: [
+                  ...emptyCV.sectionOrder,
+                ],
+
+                sectionTitles: {
+                  ...emptyCV.sectionTitles,
+                },
               },
-            },
-            template: 'modern',
-            createdAt: now,
-            updatedAt: now,
-          };
+
+              template:
+                'modern',
+
+              createdAt: now,
+              updatedAt: now,
+            };
 
           await saveCV(
             initialCV
@@ -397,7 +464,9 @@ export default function App() {
         );
       } finally {
         if (!cancelled) {
-          setLoadingStorage(false);
+          setLoadingStorage(
+            false
+          );
         }
       }
     }
@@ -423,92 +492,105 @@ export default function App() {
       return;
     }
 
-    if (saveTimerRef.current) {
+    if (
+      saveTimerRef.current
+    ) {
       clearTimeout(
         saveTimerRef.current
       );
     }
 
     saveTimerRef.current =
-      setTimeout(async () => {
-        setSaving(true);
+      setTimeout(
+        async () => {
+          setSaving(true);
 
-        try {
-          const existing =
-            library.find(
-              (cv) =>
-                cv.id ===
-                currentCVId
+          try {
+            const existing =
+              library.find(
+                (cv) =>
+                  cv.id ===
+                  currentCVId
+              );
+
+            const now =
+              Date.now();
+
+            const saved:
+              SavedCV = {
+                id: currentCVId,
+
+                name:
+                  currentCVName ||
+                  'Mon CV',
+
+                data,
+
+                template,
+
+                createdAt:
+                  existing?.createdAt ??
+                  now,
+
+                updatedAt: now,
+              };
+
+            await saveCV(
+              saved
             );
 
-          const now =
-            Date.now();
+            setLastSaved(
+              now
+            );
 
-          const saved: SavedCV = {
-            id: currentCVId,
-            name:
-              currentCVName ||
-              'Mon CV',
-            data,
-            template,
-            createdAt:
-              existing?.createdAt ??
-              now,
-            updatedAt: now,
-          };
+            setLibrary(
+              (previous) => {
+                const exists =
+                  previous.some(
+                    (cv) =>
+                      cv.id ===
+                      saved.id
+                  );
 
-          await saveCV(
-            saved
-          );
+                const next =
+                  exists
+                    ? previous.map(
+                        (cv) =>
+                          cv.id ===
+                          saved.id
+                            ? saved
+                            : cv
+                      )
+                    : [
+                        saved,
+                        ...previous,
+                      ];
 
-          setLastSaved(
-            now
-          );
-
-          setLibrary(
-            (previous) => {
-              const exists =
-                previous.some(
-                  (cv) =>
-                    cv.id ===
-                    saved.id
+                return [
+                  ...next,
+                ].sort(
+                  (a, b) =>
+                    b.updatedAt -
+                    a.updatedAt
                 );
-
-              const next =
-                exists
-                  ? previous.map(
-                      (cv) =>
-                        cv.id ===
-                        saved.id
-                          ? saved
-                          : cv
-                    )
-                  : [
-                      saved,
-                      ...previous,
-                    ];
-
-              return [
-                ...next,
-              ].sort(
-                (a, b) =>
-                  b.updatedAt -
-                  a.updatedAt
-              );
-            }
-          );
-        } catch (error) {
-          console.error(
-            'Erreur autosave :',
-            error
-          );
-        } finally {
-          setSaving(false);
-        }
-      }, 500);
+              }
+            );
+          } catch (error) {
+            console.error(
+              'Erreur autosave :',
+              error
+            );
+          } finally {
+            setSaving(false);
+          }
+        },
+        500
+      );
 
     return () => {
-      if (saveTimerRef.current) {
+      if (
+        saveTimerRef.current
+      ) {
         clearTimeout(
           saveTimerRef.current
         );
@@ -545,16 +627,23 @@ export default function App() {
 
   const handleSectionOrderChange =
     useCallback(
-      (order: CVData['sectionOrder']) => {
-        setData((previous) => ({
-          ...previous,
-          sectionOrder: order,
-        }));
+      (
+        order:
+          | CVSectionId[]
+          | undefined
+      ) => {
+        setData(
+          (previous) => ({
+            ...previous,
+
+            sectionOrder:
+              order ??
+              previous.sectionOrder,
+          })
+        );
       },
       []
     );
-
-
 
   /**
    * ---------------------------------------------------------
@@ -566,7 +655,10 @@ export default function App() {
     useCallback(
       (id: TemplateId) => {
         setTemplate(id);
-        setTemplateOpen(false);
+
+        setTemplateOpen(
+          false
+        );
       },
       []
     );
@@ -578,108 +670,123 @@ export default function App() {
    */
 
   const handleNewCV =
-    useCallback(async () => {
-      const name =
-        window.prompt(
-          'Nom du nouveau CV :',
-          'Nouveau CV'
-        );
+    useCallback(
+      async () => {
+        const name =
+          window.prompt(
+            'Nom du nouveau CV :',
+            'Nouveau CV'
+          );
 
-      if (
-        name === null
-      ) {
-        return;
-      }
+        if (
+          name === null
+        ) {
+          return;
+        }
 
-      const cleanName =
-        name.trim() ||
-        'Nouveau CV';
+        const cleanName =
+          name.trim() ||
+          'Nouveau CV';
 
-      const now =
-        Date.now();
+        const now =
+          Date.now();
 
-      const newCV: SavedCV = {
-        id: createCVId(),
-        name: cleanName,
-        data: {
-          ...emptyCV,
-          sectionOrder: [
-            ...emptyCV.sectionOrder,
-          ],
-          sectionTitles: {
-            ...DEFAULT_SECTION_TITLES,
-          },
-        },
-        template: 'modern',
-        createdAt: now,
-        updatedAt: now,
-      };
+        const newCV:
+          SavedCV = {
+            id: createCVId(),
 
-      try {
-        await saveCV(
-          newCV
-        );
+            name: cleanName,
 
-        setCurrentCVId(
-          newCV.id
-        );
+            data: {
+              ...emptyCV,
 
-        setCurrentCVName(
-          newCV.name
-        );
+              sectionOrder: [
+                ...emptyCV.sectionOrder,
+              ],
 
-        setData({
-          ...newCV.data,
-          sectionOrder: [
-            ...newCV.data.sectionOrder,
-          ],
-          sectionTitles: {
-            ...newCV.data.sectionTitles,
-          },
-        });
+              sectionTitles: {
+                ...DEFAULT_SECTION_TITLES,
+              },
+            },
 
-        setTemplate(
-          'modern'
-        );
+            template:
+              'modern',
 
-        setLastSaved(
-          now
-        );
+            createdAt: now,
+            updatedAt: now,
+          };
 
-        setLibrary(
-          (previous) =>
-            [
-              newCV,
-              ...previous,
-            ].sort(
-              (a, b) =>
-                b.updatedAt -
-                a.updatedAt
-            )
-        );
+        try {
+          await saveCV(
+            newCV
+          );
 
-        setLibraryOpen(
-          false
-        );
+          setCurrentCVId(
+            newCV.id
+          );
 
-        setTemplateOpen(
-          false
-        );
+          setCurrentCVName(
+            newCV.name
+          );
 
-        setMobileView(
-          'edit'
-        );
-      } catch (error) {
-        console.error(
-          'Erreur création CV :',
-          error
-        );
+          setData({
+            ...newCV.data,
 
-        alert(
-          'Impossible de créer le CV.'
-        );
-      }
-    }, []);
+            sectionOrder: [
+              ...newCV.data
+                .sectionOrder,
+            ],
+
+            sectionTitles: {
+              ...newCV.data
+                .sectionTitles,
+            },
+          });
+
+          setTemplate(
+            'modern'
+          );
+
+          setLastSaved(
+            now
+          );
+
+          setLibrary(
+            (previous) =>
+              [
+                newCV,
+                ...previous,
+              ].sort(
+                (a, b) =>
+                  b.updatedAt -
+                  a.updatedAt
+              )
+          );
+
+          setLibraryOpen(
+            false
+          );
+
+          setTemplateOpen(
+            false
+          );
+
+          setMobileView(
+            'edit'
+          );
+        } catch (error) {
+          console.error(
+            'Erreur création CV :',
+            error
+          );
+
+          alert(
+            'Impossible de créer le CV.'
+          );
+        }
+      },
+      []
+    );
 
   /**
    * ---------------------------------------------------------
@@ -690,7 +797,9 @@ export default function App() {
   const handleOpenCV =
     useCallback(
       (cv: SavedCV) => {
-        if (saveTimerRef.current) {
+        if (
+          saveTimerRef.current
+        ) {
           clearTimeout(
             saveTimerRef.current
           );
@@ -761,12 +870,15 @@ export default function App() {
           return;
         }
 
-        const renamed: SavedCV = {
-          ...cv,
-          name: cleanName,
-          updatedAt:
-            Date.now(),
-        };
+        const renamed:
+          SavedCV = {
+            ...cv,
+
+            name: cleanName,
+
+            updatedAt:
+              Date.now(),
+          };
 
         try {
           await saveCV(
@@ -844,15 +956,21 @@ export default function App() {
         const now =
           Date.now();
 
-        const duplicate: SavedCV = {
-          id: createCVId(),
-          name: cleanName,
-          data: cv.data,
-          template:
-            cv.template,
-          createdAt: now,
-          updatedAt: now,
-        };
+        const duplicate:
+          SavedCV = {
+            id: createCVId(),
+
+            name: cleanName,
+
+            data: cv.data,
+
+            template:
+              cv.template,
+
+            createdAt: now,
+
+            updatedAt: now,
+          };
 
         try {
           await saveCV(
@@ -992,7 +1110,8 @@ export default function App() {
         const file =
           event.target.files?.[0];
 
-        event.target.value = '';
+        event.target.value =
+          '';
 
         if (!file) {
           return;
@@ -1007,15 +1126,20 @@ export default function App() {
           const now =
             Date.now();
 
-          const importedCV: SavedCV = {
+          const importedCV:
+            SavedCV = {
             id: createCVId(),
+
             name:
               imported.name ||
               'CV importé',
+
             data:
               imported.data,
+
             template:
               imported.template,
+
             createdAt: now,
             updatedAt: now,
           };
@@ -1089,6 +1213,12 @@ export default function App() {
    * ---------------------------------------------------------
    * PDF
    * ---------------------------------------------------------
+   *
+   * L'export passe par window.print().
+   *
+   * IMPORTANT :
+   * on conserve le contentScale présent
+   * dans la page clonée afin d'éviter le crop.
    */
 
   const handlePDF =
@@ -1100,6 +1230,7 @@ export default function App() {
         alert(
           "Impossible de trouver le CV à exporter."
         );
+
         return;
       }
 
@@ -1119,6 +1250,7 @@ export default function App() {
           );
 
           setBusy(null);
+
           return;
         }
 
@@ -1131,25 +1263,38 @@ export default function App() {
               'style, link[rel="stylesheet"]'
             )
           )
-            .map((node) => {
-              if (
-                node.tagName ===
-                'STYLE'
-              ) {
-                return node.outerHTML;
+            .map(
+              (
+                node
+              ) => {
+                if (
+                  node.tagName ===
+                  'STYLE'
+                ) {
+                  return node.outerHTML;
+                }
+
+                const link =
+                  node as HTMLLinkElement;
+
+                return `<link rel="stylesheet" href="${link.href}">`;
               }
-
-              const link =
-                node as HTMLLinkElement;
-
-              return `<link rel="stylesheet" href="${link.href}">`;
-            })
+            )
             .join('\n');
 
         const clonedPage =
           page.cloneNode(
             true
           ) as HTMLElement;
+
+        /*
+         * On supprime uniquement le transform
+         * de la page elle-même.
+         *
+         * On NE TOUCHE PAS aux transforms
+         * des enfants : le contentScale doit
+         * rester actif.
+         */
 
         clonedPage.style.transform =
           'none';
@@ -1181,30 +1326,8 @@ export default function App() {
         clonedPage.style.boxShadow =
           'none';
 
-        clonedPage
-          .querySelectorAll<HTMLElement>(
-            '[style*="transform"]'
-          )
-          .forEach(
-            (element) => {
-              const transform =
-                element.style
-                  .transform;
-
-              if (
-                transform &&
-                transform.includes(
-                  'scale('
-                )
-              ) {
-                element.style.transform =
-                  'none';
-
-                element.style.transformOrigin =
-                  'top left';
-              }
-            }
-          );
+        clonedPage.style.overflow =
+          'hidden';
 
         printWindow.document.open();
 
@@ -1214,10 +1337,12 @@ export default function App() {
             <head>
               <meta charset="UTF-8" />
 
-              <title>CV - ${escapeHtml(
-                data.name ||
-                  'Mon CV'
-              )}</title>
+              <title>
+                CV - ${escapeHtml(
+                  data.name ||
+                    'Mon CV'
+                )}
+              </title>
 
               ${styles}
 
@@ -1231,8 +1356,10 @@ export default function App() {
                 body {
                   margin: 0 !important;
                   padding: 0 !important;
+
                   width: 210mm !important;
                   min-width: 210mm !important;
+
                   background: white !important;
                 }
 
@@ -1248,7 +1375,8 @@ export default function App() {
                   print-color-adjust: exact !important;
                 }
 
-                .a4-page {
+                .a4-page,
+                .cv-export-page {
                   width: 210mm !important;
                   min-width: 210mm !important;
                   max-width: 210mm !important;
@@ -1262,6 +1390,8 @@ export default function App() {
 
                   box-shadow: none !important;
 
+                  position: relative !important;
+
                   overflow: hidden !important;
                 }
 
@@ -1274,10 +1404,13 @@ export default function App() {
                   html,
                   body {
                     width: 210mm !important;
+                    min-width: 210mm !important;
                     height: 297mm !important;
+                    min-height: 297mm !important;
                   }
 
-                  .a4-page {
+                  .a4-page,
+                  .cv-export-page {
                     page-break-after: avoid !important;
                     break-after: avoid !important;
                   }
@@ -1289,18 +1422,30 @@ export default function App() {
               ${clonedPage.outerHTML}
 
               <script>
-                window.addEventListener('load', function () {
-                  setTimeout(function () {
-                    window.focus();
-                    window.print();
-                  }, 500);
-                });
+                window.addEventListener(
+                  'load',
+                  function () {
+                    setTimeout(
+                      function () {
+                        window.focus();
+                        window.print();
+                      },
+                      700
+                    );
+                  }
+                );
 
-                window.addEventListener('afterprint', function () {
-                  setTimeout(function () {
-                    window.close();
-                  }, 300);
-                });
+                window.addEventListener(
+                  'afterprint',
+                  function () {
+                    setTimeout(
+                      function () {
+                        window.close();
+                      },
+                      300
+                    );
+                  }
+                );
               </script>
             </body>
           </html>
@@ -1317,11 +1462,16 @@ export default function App() {
           'La génération du PDF a échoué.'
         );
       } finally {
-        setTimeout(() => {
-          setBusy(null);
-        }, 500);
+        setTimeout(
+          () => {
+            setBusy(null);
+          },
+          1000
+        );
       }
-    }, [data.name]);
+    }, [
+      data.name,
+    ]);
 
   /**
    * ---------------------------------------------------------
@@ -1330,222 +1480,265 @@ export default function App() {
    */
 
   const handlePNG =
-    useCallback(async () => {
-      const page =
-        previewRef.current?.getPageEl();
+    useCallback(
+      async () => {
+        const page =
+          previewRef.current?.getPageEl();
 
-      if (!page) {
-        alert(
-          "Impossible de trouver le CV à exporter."
-        );
-        return;
-      }
-
-      setBusy('png');
-
-      let clone: HTMLElement | null =
-        null;
-
-      try {
-        clone =
-          page.cloneNode(
-            true
-          ) as HTMLElement;
-
-        clone.style.position =
-          'fixed';
-
-        clone.style.left =
-          '-100000px';
-
-        clone.style.top =
-          '0';
-
-        clone.style.transform =
-          'none';
-
-        clone.style.transformOrigin =
-          'top left';
-
-        clone.style.width =
-          '210mm';
-
-        clone.style.minWidth =
-          '210mm';
-
-        clone.style.maxWidth =
-          '210mm';
-
-        clone.style.height =
-          '297mm';
-
-        clone.style.minHeight =
-          '297mm';
-
-        clone.style.background =
-          'white';
-
-        clone.style.boxShadow =
-          'none';
-
-        document.body.appendChild(
-          clone
-        );
-
-        clone
-          .querySelectorAll<HTMLElement>(
-            '[style*="transform"]'
-          )
-          .forEach(
-            (element) => {
-              if (
-                element.style.transform.includes(
-                  'scale('
-                )
-              ) {
-                element.style.transform =
-                  'none';
-
-                element.style.transformOrigin =
-                  'top left';
-              }
-            }
+        if (!page) {
+          alert(
+            "Impossible de trouver le CV à exporter."
           );
 
-        const images =
-          Array.from(
-            clone.querySelectorAll(
-              'img'
+          return;
+        }
+
+        setBusy('png');
+
+        let clone:
+          | HTMLElement
+          | null = null;
+
+        try {
+          clone =
+            page.cloneNode(
+              true
+            ) as HTMLElement;
+
+          clone.style.position =
+            'fixed';
+
+          clone.style.left =
+            '-100000px';
+
+          clone.style.top =
+            '0';
+
+          clone.style.transform =
+            'none';
+
+          clone.style.transformOrigin =
+            'top left';
+
+          clone.style.width =
+            '210mm';
+
+          clone.style.minWidth =
+            '210mm';
+
+          clone.style.maxWidth =
+            '210mm';
+
+          clone.style.height =
+            '297mm';
+
+          clone.style.minHeight =
+            '297mm';
+
+          clone.style.maxHeight =
+            '297mm';
+
+          clone.style.background =
+            'white';
+
+          clone.style.boxShadow =
+            'none';
+
+          clone.style.overflow =
+            'hidden';
+
+          document.body.appendChild(
+            clone
+          );
+
+          /*
+           * NE PAS parcourir tous les enfants
+           * pour supprimer leurs transforms.
+           *
+           * Le transform du content wrapper
+           * contient le contentScale nécessaire
+           * au fit A4.
+           */
+
+          const images =
+            Array.from(
+              clone.querySelectorAll(
+                'img'
+              )
+            );
+
+          await Promise.all(
+            images.map(
+              (img) => {
+                if (
+                  img.complete
+                ) {
+                  return Promise.resolve();
+                }
+
+                return new Promise<void>(
+                  (
+                    resolve
+                  ) => {
+                    img.onload =
+                      () =>
+                        resolve();
+
+                    img.onerror =
+                      () =>
+                        resolve();
+                  }
+                );
+              }
             )
           );
 
-        await Promise.all(
-          images.map((img) => {
-            if (img.complete) {
-              return Promise.resolve();
+          if (
+            'fonts' in
+            document
+          ) {
+            await document.fonts.ready;
+          }
+
+          /*
+           * Deux frames permettent de laisser
+           * le clone prendre sa mise en page
+           * définitive avant html2canvas.
+           */
+
+          await new Promise<void>(
+            (
+              resolve
+            ) => {
+              requestAnimationFrame(
+                () => {
+                  requestAnimationFrame(
+                    () =>
+                      resolve()
+                  );
+                }
+              );
             }
+          );
 
-            return new Promise<void>(
-              (resolve) => {
-                img.onload =
-                  () =>
-                    resolve();
+          const canvas =
+            await html2canvas(
+              clone,
+              {
+                scale: 3,
 
-                img.onerror =
-                  () =>
-                    resolve();
+                useCORS:
+                  true,
+
+                allowTaint:
+                  false,
+
+                backgroundColor:
+                  '#ffffff',
+
+                logging:
+                  false,
+
+                width:
+                  clone.offsetWidth,
+
+                height:
+                  clone.offsetHeight,
+
+                windowWidth:
+                  clone.offsetWidth,
+
+                windowHeight:
+                  clone.offsetHeight,
+
+                scrollX: 0,
+
+                scrollY: 0,
               }
             );
-          })
-        );
 
-        if (
-          'fonts' in
-          document
-        ) {
-          await document.fonts
-            .ready;
-        }
+          if (
+            clone.parentNode
+          ) {
+            clone.parentNode.removeChild(
+              clone
+            );
+          }
 
-        const canvas =
-          await html2canvas(
-            clone,
-            {
-              scale: 3,
-              useCORS: true,
-              allowTaint: false,
-              backgroundColor:
-                '#ffffff',
-              logging: false,
+          clone = null;
 
-              width:
-                clone.scrollWidth,
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                alert(
+                  'Impossible de générer le PNG.'
+                );
 
-              height:
-                clone.scrollHeight,
+                setBusy(null);
 
-              windowWidth:
-                clone.scrollWidth,
+                return;
+              }
 
-              windowHeight:
-                clone.scrollHeight,
-            }
-          );
+              const url =
+                URL.createObjectURL(
+                  blob
+                );
 
-        if (
-          clone.parentNode
-        ) {
-          clone.parentNode.removeChild(
-            clone
-          );
-        }
+              const link =
+                document.createElement(
+                  'a'
+                );
 
-        clone = null;
+              link.href =
+                url;
 
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              alert(
-                'Impossible de générer le PNG.'
+              link.download =
+                'mon-cv.png';
+
+              document.body.appendChild(
+                link
+              );
+
+              link.click();
+
+              link.remove();
+
+              setTimeout(
+                () => {
+                  URL.revokeObjectURL(
+                    url
+                  );
+                },
+                1000
               );
 
               setBusy(null);
-              return;
-            }
-
-            const url =
-              URL.createObjectURL(
-                blob
-              );
-
-            const link =
-              document.createElement(
-                'a'
-              );
-
-            link.href =
-              url;
-
-            link.download =
-              'mon-cv.png';
-
-            document.body.appendChild(
-              link
-            );
-
-            link.click();
-
-            link.remove();
-
-            URL.revokeObjectURL(
-              url
-            );
-
-            setBusy(null);
-          },
-          'image/png'
-        );
-      } catch (error) {
-        console.error(
-          'Erreur génération PNG :',
-          error
-        );
-
-        if (
-          clone?.parentNode
-        ) {
-          clone.parentNode.removeChild(
-            clone
+            },
+            'image/png'
           );
+        } catch (error) {
+          console.error(
+            'Erreur génération PNG :',
+            error
+          );
+
+          if (
+            clone?.parentNode
+          ) {
+            clone.parentNode.removeChild(
+              clone
+            );
+          }
+
+          alert(
+            'La génération du PNG a échoué.'
+          );
+
+          setBusy(null);
         }
-
-        alert(
-          'La génération du PNG a échoué.'
-        );
-
-        setBusy(null);
-      }
-    }, []);
+      },
+      []
+    );
 
   /**
    * ---------------------------------------------------------
@@ -1574,20 +1767,28 @@ export default function App() {
    * ---------------------------------------------------------
    */
 
-  if (route === 'legal') {
+  if (
+    route === 'legal'
+  ) {
     return (
       <LegalPage
         type="legal"
-        onBack={goToLanding}
+        onBack={
+          goToLanding
+        }
       />
     );
   }
 
-  if (route === 'privacy') {
+  if (
+    route === 'privacy'
+  ) {
     return (
       <LegalPage
         type="privacy"
-        onBack={goToLanding}
+        onBack={
+          goToLanding
+        }
       />
     );
   }
@@ -1598,12 +1799,20 @@ export default function App() {
    * ---------------------------------------------------------
    */
 
-  if (route === 'landing') {
+  if (
+    route === 'landing'
+  ) {
     return (
       <LandingPage
-        onStart={openEditor}
-        onLegal={goToLegal}
-        onPrivacy={goToPrivacy}
+        onStart={
+          openEditor
+        }
+        onLegal={
+          goToLegal
+        }
+        onPrivacy={
+          goToPrivacy
+        }
       />
     );
   }
@@ -1622,7 +1831,6 @@ export default function App() {
       ====================================================== */}
 
       <header className="no-print shrink-0 bg-white border-b border-slate-200">
-
         <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
 
           {/* BRAND */}
@@ -1630,7 +1838,9 @@ export default function App() {
           <div className="flex items-center gap-2.5 min-w-0">
 
             <button
-              onClick={goToLanding}
+              onClick={
+                goToLanding
+              }
               className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0 hover:bg-slate-700 transition"
               title="Retour à l'accueil"
             >
@@ -1689,7 +1899,9 @@ export default function App() {
               title="Renommer le CV"
             >
               <span className="truncate">
-                {currentCVName}
+                {
+                  currentCVName
+                }
               </span>
 
               <Edit3 className="w-3 h-3 shrink-0" />
@@ -1707,7 +1919,9 @@ export default function App() {
                 <Check className="w-3 h-3" />
               )}
 
-              {saveLabel}
+              {
+                saveLabel
+              }
             </div>
 
             {/* TEMPLATE */}
@@ -1717,7 +1931,8 @@ export default function App() {
               <button
                 onClick={() =>
                   setTemplateOpen(
-                    (open) => !open
+                    (open) =>
+                      !open
                   )
                 }
                 className="
@@ -1749,7 +1964,11 @@ export default function App() {
                 </span>
 
                 <span className="hidden md:inline text-slate-400">
-                  {themes[template].name}
+                  {
+                    themes[
+                      template
+                    ].name
+                  }
                 </span>
 
                 <span
@@ -1784,26 +2003,19 @@ export default function App() {
                     top-full
                     mt-2
                     z-50
-
                     w-[620px]
                     max-w-[calc(100vw-1.5rem)]
-
                     rounded-2xl
                     border
                     border-slate-200
                     bg-white
                     shadow-2xl
-
                     overflow-hidden
-
                     right-0
-
                     max-h-[calc(100vh-5rem)]
                     flex
                     flex-col
-
                     sm:right-0
-
                     max-sm:fixed
                     max-sm:left-1/2
                     max-sm:right-auto
@@ -1856,52 +2068,63 @@ export default function App() {
                     <div className="
                       p-3
                       sm:p-4
-
                       grid
                       grid-cols-2
                       gap-2
                       sm:gap-3
-
                       overflow-y-auto
                       overscroll-contain
-
                       min-h-0
                     ">
 
                       {themeOrder.map(
-                        (id) => {
+                        (
+                          id
+                        ) => {
                           const isActive =
                             template ===
                             id;
 
-                          const descriptions: Record<
-                            TemplateId,
-                            string
-                          > = {
+                          const descriptions:
+                            Record<
+                              TemplateId,
+                              string
+                            > = {
                             modern:
                               'Moderne',
+
                             minimal:
                               'Épuré',
+
                             classic:
                               'Élégant',
+
                             corporate:
                               'Professionnel',
+
                             editorial:
                               'Créatif',
+
                             executive:
                               'Premium',
+
                             swiss:
                               'Structuré',
+
                             tech:
                               'Informatique',
                           };
 
                           return (
                             <button
-                              key={id}
+                              key={
+                                id
+                              }
                               type="button"
                               onClick={() =>
-                                handleTemplateChange(id)
+                                handleTemplateChange(
+                                  id
+                                )
                               }
                               className={`
                                 relative
@@ -1910,7 +2133,6 @@ export default function App() {
                                 border
                                 p-2.5
                                 transition-all
-
                                 ${
                                   isActive
                                     ? 'border-slate-900 bg-slate-50 shadow-sm'
@@ -1918,9 +2140,6 @@ export default function App() {
                                 }
                               `}
                             >
-                              {/* =================================================
-                                  CHECK
-                              ================================================== */}
 
                               {isActive && (
                                 <div
@@ -1929,29 +2148,20 @@ export default function App() {
                                     top-3
                                     right-3
                                     z-20
-
                                     w-5
                                     h-5
-
                                     rounded-full
-
                                     bg-slate-900
                                     text-white
-
                                     flex
                                     items-center
                                     justify-center
-
                                     shadow-sm
                                   "
                                 >
                                   <Check className="w-3 h-3" />
                                 </div>
                               )}
-
-                              {/* =================================================
-                                  VRAI THUMBNAIL
-                              ================================================== */}
 
                               <div
                                 className="
@@ -1965,15 +2175,15 @@ export default function App() {
                                 "
                               >
                                 <CVTemplateThumbnail
-                                  data={data}
-                                  template={id}
+                                  data={
+                                    data
+                                  }
+                                  template={
+                                    id
+                                  }
                                   className="w-full"
                                 />
                               </div>
-
-                              {/* =================================================
-                                  INFOS
-                              ================================================== */}
 
                               <div className="
                                 px-1
@@ -1986,7 +2196,11 @@ export default function App() {
                                   font-semibold
                                   text-slate-900
                                 ">
-                                  {themes[id].name}
+                                  {
+                                    themes[
+                                      id
+                                    ].name
+                                  }
                                 </div>
 
                                 <div className="
@@ -1994,9 +2208,14 @@ export default function App() {
                                   text-slate-400
                                   mt-0.5
                                 ">
-                                  {descriptions[id]}
+                                  {
+                                    descriptions[
+                                      id
+                                    ]
+                                  }
                                 </div>
                               </div>
+
                             </button>
                           );
                         }
@@ -2219,7 +2438,9 @@ export default function App() {
           <div className="p-5">
 
             <CVForm
-              data={data}
+              data={
+                data
+              }
               onChange={
                 handleDataChange
               }
@@ -2246,10 +2467,18 @@ export default function App() {
           `}
         >
           <CVPreview
-            ref={previewRef}
-            data={data}
-            template={template}
-            onChange={handleDataChange}
+            ref={
+              previewRef
+            }
+            data={
+              data
+            }
+            template={
+              template
+            }
+            onChange={
+              handleDataChange
+            }
             onSectionOrderChange={
               handleSectionOrderChange
             }
@@ -2385,7 +2614,9 @@ export default function App() {
                 <div className="space-y-2">
 
                   {library.map(
-                    (cv) => {
+                    (
+                      cv
+                    ) => {
                       const isCurrent =
                         cv.id ===
                         currentCVId;

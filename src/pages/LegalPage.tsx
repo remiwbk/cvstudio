@@ -175,16 +175,11 @@ export default function LegalPage({
 
                 <p className="mt-2">
                   Nom / raison sociale :{' '}
-                  <strong>[À COMPLÉTER]</strong>
-                  <br />
-                  Adresse :{' '}
-                  <strong>[À COMPLÉTER]</strong>
+                  <strong>Rémi DUPIRE</strong>
                   <br />
                   Email :{' '}
-                  <strong>[À COMPLÉTER]</strong>
+                  <strong>dupire.re@gmail.com</strong>
                   <br />
-                  Téléphone :{' '}
-                  <strong>[À COMPLÉTER]</strong>
                 </p>
               </div>
 
@@ -195,13 +190,13 @@ export default function LegalPage({
 
                 <p className="mt-2">
                   Hébergeur :{' '}
-                  <strong>[À COMPLÉTER]</strong>
+                  <strong>Vercel Inc.</strong>
                   <br />
                   Adresse :{' '}
-                  <strong>[À COMPLÉTER]</strong>
+                  <strong>340 S Lemon Ave #6133, Walnut, CA 91789, États-Unis</strong>
                   <br />
                   Site internet :{' '}
-                  <strong>[À COMPLÉTER]</strong>
+                  <strong>https://vercel.com</strong>
                 </p>
               </div>
 
@@ -237,7 +232,7 @@ export default function LegalPage({
                 </p>
 
                 <p className="mt-2 font-medium text-slate-900">
-                  [EMAIL DE CONTACT]
+                  dupire.re@gmail.com
                 </p>
               </div>
 
@@ -401,7 +396,7 @@ export default function LegalPage({
                 </p>
 
                 <p className="mt-2 font-medium text-slate-900">
-                  [EMAIL DE CONTACT]
+                  dupire.re@gmail.com
                 </p>
               </div>
 

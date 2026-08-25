@@ -44,6 +44,7 @@ const VALID_SECTION_IDS: CVSectionId[] = [
   'education',
   'projects',
   'interests',
+  'certifications',
 ];
 
 const VALID_SECTION_COLUMNS: CVSectionColumn[] = [
@@ -58,6 +59,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 const DEFAULT_SECTION_COLUMNS: Record<
@@ -67,10 +69,24 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  certifications: 'left',
 
   experiences: 'right',
   education: 'right',
   projects: 'right',
+};
+
+const DEFAULT_SECTION_TITLES: Record<
+  CVSectionId,
+  string
+> = {
+  summary: 'Profil',
+  experiences: 'Expériences',
+  education: 'Formation',
+  skills: 'Compétences',
+  projects: 'Projets',
+  interests: "Centres d'intérêt",
+  certifications: 'Certifications',
 };
 
 const defaultStyle: CVStyle = {
@@ -276,18 +292,15 @@ function normalizeSectionOrder(
         )
     );
 
-  /*
-   * On supprime les doublons.
-   */
   const unique =
     Array.from(
       new Set(valid)
     );
 
   /*
-   * On ajoute les sections absentes
-   * à la fin afin de garantir une liste
-   * complète et exploitable.
+   * On conserve l'ordre importé,
+   * puis on ajoute uniquement les
+   * sections absentes à la fin.
    */
   for (
     const sectionId of
@@ -326,14 +339,6 @@ function normalizeSectionColumns(
     >
   > = {};
 
-  /*
-   * Pas de sectionColumns :
-   * on considère qu'il s'agit d'un ancien CV.
-   *
-   * On ne stocke rien explicitement puisque
-   * les templates peuvent utiliser leur layout
-   * par défaut.
-   */
   if (!isObject(value)) {
     return result;
   }
@@ -354,6 +359,46 @@ function normalizeSectionColumns(
     ) {
       result[sectionId] =
         rawColumn as CVSectionColumn;
+    }
+  }
+
+  return result;
+}
+
+/* =========================================================
+   NORMALISATION SECTION TITLES
+========================================================= */
+
+function normalizeSectionTitles(
+  value: unknown
+): Record<
+  CVSectionId,
+  string
+> {
+  const result: Record<
+    CVSectionId,
+    string
+  > = {
+    ...DEFAULT_SECTION_TITLES,
+  };
+
+  if (!isObject(value)) {
+    return result;
+  }
+
+  for (
+    const sectionId of
+      VALID_SECTION_IDS
+  ) {
+    const title =
+      value[sectionId];
+
+    if (
+      typeof title ===
+        'string'
+    ) {
+      result[sectionId] =
+        title;
     }
   }
 
@@ -528,6 +573,53 @@ function normalizeProjects(
 }
 
 /* =========================================================
+   NORMALISATION CERTIFICATIONS
+========================================================= */
+
+function normalizeCertifications(
+  value: unknown
+) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(isObject)
+    .map(
+      (
+        certification,
+        index
+      ) => ({
+        id:
+          stringValue(
+            certification.id
+          ) ||
+          `certification_${index}`,
+
+        name:
+          stringValue(
+            certification.name
+          ),
+
+        organization:
+          stringValue(
+            certification.organization
+          ),
+
+        date:
+          stringValue(
+            certification.date
+          ),
+
+        url:
+          stringValue(
+            certification.url
+          ),
+      })
+    );
+}
+
+/* =========================================================
    NORMALISATION CV
 ========================================================= */
 
@@ -548,6 +640,11 @@ function normalizeCVData(
   const sectionColumns =
     normalizeSectionColumns(
       value.sectionColumns
+    );
+
+  const sectionTitles =
+    normalizeSectionTitles(
+      value.sectionTitles
     );
 
   const result: CVData = {
@@ -642,6 +739,11 @@ function normalizeCVData(
         value.projects
       ),
 
+    certifications:
+      normalizeCertifications(
+        value.certifications
+      ),
+
     interests:
       stringArray(
         value.interests
@@ -655,6 +757,8 @@ function normalizeCVData(
     sectionOrder,
 
     sectionColumns,
+
+    sectionTitles,
   };
 
   return result;
@@ -855,18 +959,27 @@ export function downloadCVGen(
 ): void {
   const payload = {
     /*
-     * Version 3 :
+     * Version 4 :
      *
-     * - sectionOrder
-     * - sectionColumns
-     * - birthDate
-     * - hasDrivingLicense
+     * Toutes les données du CV sont
+     * conservées dans data :
+     *
+     * - identité
+     * - coordonnées
+     * - photo
+     * - résumé
+     * - compétences
+     * - expériences
+     * - formation
+     * - projets
+     * - intérêts
+     * - certifications
      * - style
-     * - etc.
-     *
-     * sont déjà présents dans cv.data.
+     * - ordre des sections
+     * - colonnes
+     * - titres personnalisés
      */
-    version: 3,
+    version: 4,
 
     name:
       cv.name,
@@ -986,7 +1099,7 @@ export async function importCVGen(
    *   data
    * }
    *
-   * Compatibilité :
+   * Compatibilité avec les anciennes versions :
    * si data n'existe pas, on accepte
    * directement l'objet racine.
    */

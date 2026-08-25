@@ -864,78 +864,60 @@ export default function CVForm({
         | Project
         | Certification
     ) => {
-      if (
-        key ===
-        'experiences'
-      ) {
-        update(
-          'experiences',
-          [
-            ...data.experiences,
-            item as Experience,
-          ]
-        );
+      if (key === 'experiences') {
+        update('experiences', [
+          ...data.experiences,
+          item as Experience,
+        ]);
 
         return;
       }
 
-      if (
-        key === 'education'
-      ) {
-        update(
-          'education',
-          [
-            ...data.education,
-            item as Education,
-          ]
-        );
+      if (key === 'education') {
+        update('education', [
+          ...data.education,
+          item as Education,
+        ]);
 
         return;
       }
 
-      if (
-        key === 'projects'
-      ) {
-        update(
-          'projects',
-          [
-            ...data.projects,
-            item as Project,
-          ]
-        );
+      if (key === 'projects') {
+        update('projects', [
+          ...data.projects,
+          item as Project,
+        ]);
 
         return;
       }
+
+      /*
+      * =======================================================
+      * CERTIFICATIONS
+      * =======================================================
+      */
 
       const nextSectionOrder: CVSectionId[] =
         data.sectionOrder?.includes(
           'certifications'
         )
-          ? [
-              ...data.sectionOrder,
-            ]
+          ? [...data.sectionOrder]
           : [
-              ...(data.sectionOrder ??
-                []),
+              ...(data.sectionOrder ?? []),
               'certifications',
             ];
 
-      update(
-        'certifications',
-        [
-          ...data.certifications,
-          item as Certification,
-        ]
-      );
-
       onChange({
         ...data,
+        certifications: [
+          ...data.certifications,
+          item as Certification,
+        ],
         sectionOrder:
           nextSectionOrder,
         sectionTitles: {
           ...DEFAULT_SECTION_TITLES,
-          ...(data.sectionTitles ??
-            {}),
+          ...(data.sectionTitles ?? {}),
         },
       });
     },

@@ -3,9 +3,9 @@ import {
   Phone,
   MapPin,
   Globe,
-  Calendar,
   Linkedin,
   Github,
+  Calendar,
   Car,
 } from 'lucide-react';
 
@@ -18,11 +18,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
-import type {
-  CVData,
-  ThemeColors,
-  CVSectionId,
-  CVSectionColumn,
+import {
+  DEFAULT_SECTION_TITLES,
+  type CVData,
+  type ThemeColors,
+  type CVSectionId,
+  type CVSectionColumn,
 } from '@/types/types';
 
 import SortableSection from '@/components/SortableSection';
@@ -42,8 +43,6 @@ interface Props {
  * =========================================================
  * ORDRE PAR DÉFAUT
  * =========================================================
- *
- * On conserve exactement l'ordre global du CV.
  */
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
@@ -53,27 +52,12 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 /**
  * =========================================================
  * COLONNES PAR DÉFAUT
- * =========================================================
- *
- * Layout original du Modern :
- *
- * LEFT  = 1 colonne sur 3
- * RIGHT = 2 colonnes sur 3
- *
- * Gauche :
- *   Profil
- *   Compétences
- *   Centres d'intérêt
- *   Projets
- *
- * Droite :
- *   Expériences
- *   Formation
  * =========================================================
  */
 
@@ -85,6 +69,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   skills: 'left',
   interests: 'left',
   projects: 'left',
+  certifications: 'left',
 
   experiences: 'right',
   education: 'right',
@@ -104,11 +89,6 @@ type ModernColumnId =
  * =========================================================
  * COLONNE DROPPABLE
  * =========================================================
- *
- * Chaque colonne possède :
- *
- * 1. sa zone principale ;
- * 2. une vraie zone finale "bottom".
  */
 
 function ModernColumn({
@@ -128,16 +108,13 @@ function ModernColumn({
   });
 
   const bottomId =
-    id ===
-    'section-column-left'
+    id === 'section-column-left'
       ? 'section-column-bottom-left'
       : 'section-column-bottom-right';
 
   const {
-    setNodeRef:
-      setBottomNodeRef,
-    isOver:
-      isBottomOver,
+    setNodeRef: setBottomNodeRef,
+    isOver: isBottomOver,
   } = useDroppable({
     id: bottomId,
   });
@@ -162,48 +139,37 @@ function ModernColumn({
         ${className ?? ''}
       `}
     >
-      {/* ===================================================
-          CONTENU DE LA COLONNE
-      ==================================================== */}
-
       {children}
 
-      {/* ===================================================
-          ZONE D'INSERTION FINALE
-      ==================================================== */}
-
-      <div
-        ref={setBottomNodeRef}
-        className="
-          relative
-          w-full
-          h-4
-          mt-0
-        "
-      >
-        {isBottomOver && (
-          <div
-            className="
-              pointer-events-none
-              absolute
-              left-0
-              right-0
-              top-1/2
-              -translate-y-1/2
-
-              z-[100]
-
-              h-[3px]
-
-              rounded-full
-
-              bg-slate-900
-
-              shadow-sm
-            "
-          />
-        )}
-      </div>
+      {!className?.includes('hidden') && (
+        <div
+          ref={setBottomNodeRef}
+          className="
+            relative
+            w-full
+            h-4
+            mt-0
+          "
+        >
+          {isBottomOver && (
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-0
+                right-0
+                top-1/2
+                -translate-y-1/2
+                z-[100]
+                h-[3px]
+                rounded-full
+                bg-slate-900
+                shadow-sm
+              "
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -221,8 +187,9 @@ function calculateAge(
     return null;
   }
 
-  const birth =
-    new Date(birthDate);
+  const birth = new Date(
+    birthDate
+  );
 
   if (
     Number.isNaN(
@@ -232,8 +199,7 @@ function calculateAge(
     return null;
   }
 
-  const today =
-    new Date();
+  const today = new Date();
 
   let age =
     today.getFullYear() -
@@ -253,7 +219,9 @@ function calculateAge(
     age--;
   }
 
-  return age;
+  return age >= 0
+    ? age
+    : null;
 }
 
 /**
@@ -274,8 +242,8 @@ export default function ModernTemplate({
 
   const hasSkills =
     data.skills.some(
-      (c) =>
-        c.items.length > 0
+      (category) =>
+        category.items.length > 0
     );
 
   const age =
@@ -313,14 +281,6 @@ export default function ModernTemplate({
     );
   };
 
-  /**
-   * =========================================================
-   * ORDRE DANS CHAQUE COLONNE
-   * =========================================================
-   *
-   * On conserve l'ordre relatif de sectionOrder.
-   */
-
   const leftOrder =
     sectionOrder.filter(
       (sectionId) =>
@@ -336,6 +296,49 @@ export default function ModernTemplate({
           sectionId
         ) === 'right'
     );
+
+  /**
+   * =========================================================
+   * TITRE DE SECTION
+   * =========================================================
+   */
+
+  const getSectionTitle = (
+    sectionId: CVSectionId
+  ): string => {
+    return (
+      data.sectionTitles?.[
+        sectionId
+      ] ??
+      DEFAULT_SECTION_TITLES[
+        sectionId
+      ]
+    );
+  };
+
+  const SectionTitle = ({
+    sectionId,
+  }: {
+    sectionId: CVSectionId;
+  }) => (
+    <h2
+      style={{
+        color: colors.primary,
+        fontFamily: fonts.heading,
+        fontSize: fs(13),
+      }}
+      className="
+        font-bold
+        uppercase
+        tracking-widest
+        mb-3
+        pb-2
+        border-b-2
+      "
+    >
+      {getSectionTitle(sectionId)}
+    </h2>
+  );
 
   /**
    * =========================================================
@@ -365,39 +368,15 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  color:
-                    colors.primary,
-                  fontFamily:
-                    fonts.heading,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-widest
-                  mb-3
-                  pb-2
-                  border-b-2
-                "
-              >
-                Profil
-              </h2>
+              <SectionTitle sectionId="summary" />
 
               <p
                 style={{
-                  fontSize:
-                    fs(13),
-                  color:
-                    colors.muted,
-                  whiteSpace:
-                    'pre-line',
+                  fontSize: fs(13),
+                  color: colors.muted,
+                  whiteSpace: 'pre-line',
                 }}
-                className="
-                  leading-relaxed
-                "
+                className="leading-relaxed"
               >
                 {data.summary}
               </p>
@@ -423,64 +402,28 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  color:
-                    colors.primary,
-                  fontFamily:
-                    fonts.heading,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-widest
-                  mb-3
-                  pb-2
-                  border-b-2
-                "
-              >
-                Compétences
-              </h2>
+              <SectionTitle sectionId="skills" />
 
               <div className="space-y-3">
                 {data.skills.map(
-                  (cat) =>
-                    cat.items.length >
-                      0 ? (
-                      <div
-                        key={
-                          cat.id
-                        }
-                      >
+                  (category) =>
+                    category.items.length > 0 ? (
+                      <div key={category.id}>
                         <h3
                           style={{
-                            fontSize:
-                              fs(12),
-                            color:
-                              colors.secondary,
+                            fontSize: fs(12),
+                            color: colors.secondary,
                           }}
-                          className="
-                            font-semibold
-                            mb-1.5
-                          "
+                          className="font-semibold mb-1.5"
                         >
-                          {
-                            cat.name
-                          }
+                          {category.name}
                         </h3>
 
                         <div className="flex flex-wrap gap-1.5">
-                          {cat.items.map(
-                            (
-                              s,
-                              i
-                            ) => (
+                          {category.items.map(
+                            (skill, index) => (
                               <span
-                                key={
-                                  i
-                                }
+                                key={index}
                                 style={{
                                   background:
                                     colors.surface,
@@ -499,9 +442,7 @@ export default function ModernTemplate({
                                   border
                                 "
                               >
-                                {
-                                  s
-                                }
+                                {skill}
                               </span>
                             )
                           )}
@@ -522,8 +463,7 @@ export default function ModernTemplate({
 
       case 'interests':
         if (
-          data.interests.length ===
-          0
+          data.interests.length === 0
         ) {
           return null;
         }
@@ -535,35 +475,13 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  color:
-                    colors.primary,
-                  fontFamily:
-                    fonts.heading,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-widest
-                  mb-3
-                  pb-2
-                  border-b-2
-                "
-              >
-                Centres d'intérêt
-              </h2>
+              <SectionTitle sectionId="interests" />
 
               <div className="flex flex-wrap gap-1.5">
                 {data.interests.map(
-                  (
-                    it,
-                    i
-                  ) => (
+                  (interest, index) => (
                     <span
-                      key={i}
+                      key={index}
                       style={{
                         background:
                           colors.surface,
@@ -582,9 +500,7 @@ export default function ModernTemplate({
                         border
                       "
                     >
-                      {
-                        it
-                      }
+                      {interest}
                     </span>
                   )
                 )}
@@ -601,8 +517,7 @@ export default function ModernTemplate({
 
       case 'projects':
         if (
-          data.projects.length ===
-          0
+          data.projects.length === 0
         ) {
           return null;
         }
@@ -614,59 +529,32 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  color:
-                    colors.primary,
-                  fontFamily:
-                    fonts.heading,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-widest
-                  mb-3
-                  pb-2
-                  border-b-2
-                "
-              >
-                Projets
-              </h2>
+              <SectionTitle sectionId="projects" />
 
               <div className="space-y-3">
                 {data.projects.map(
-                  (p) => (
+                  (project) => (
                     <div
-                      key={
-                        p.id
-                      }
+                      key={project.id}
                     >
                       <h3
                         style={{
-                          fontSize:
-                            fs(13),
-                          color:
-                            colors.text,
+                          fontSize: fs(13),
+                          color: colors.text,
                         }}
-                        className="
-                          font-semibold
-                        "
+                        className="font-semibold"
                       >
-                        {
-                          p.name
-                        }
+                        {project.name}
                       </h3>
 
-                      {p.url && (
+                      {project.url && (
                         <a
                           href={
-                            p.url.startsWith(
+                            project.url.startsWith(
                               'http'
                             )
-                              ? p.url
-                              : `https://${p.url}`
+                              ? project.url
+                              : `https://${project.url}`
                           }
                           target="_blank"
                           rel="noopener noreferrer"
@@ -678,17 +566,13 @@ export default function ModernTemplate({
                             textDecoration:
                               'underline',
                           }}
-                          className="
-                            inline-block
-                          "
+                          className="inline-block"
                         >
-                          {
-                            p.url
-                          }
+                          {project.url}
                         </a>
                       )}
 
-                      {p.description && (
+                      {project.description && (
                         <p
                           style={{
                             fontSize:
@@ -703,9 +587,7 @@ export default function ModernTemplate({
                             leading-snug
                           "
                         >
-                          {
-                            p.description
-                          }
+                          {project.description}
                         </p>
                       )}
                     </div>
@@ -724,8 +606,7 @@ export default function ModernTemplate({
 
       case 'experiences':
         if (
-          data.experiences.length ===
-          0
+          data.experiences.length === 0
         ) {
           return null;
         }
@@ -737,34 +618,13 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  color:
-                    colors.primary,
-                  fontFamily:
-                    fonts.heading,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-widest
-                  mb-4
-                  pb-2
-                  border-b-2
-                "
-              >
-                Expériences
-              </h2>
+              <SectionTitle sectionId="experiences" />
 
               <div className="space-y-4">
                 {data.experiences.map(
                   (exp) => (
                     <div
-                      key={
-                        exp.id
-                      }
+                      key={exp.id}
                       className="
                         relative
                         pl-5
@@ -790,12 +650,14 @@ export default function ModernTemplate({
                         }}
                       />
 
-                      <div className="
-                        flex
-                        items-baseline
-                        justify-between
-                        gap-3
-                      ">
+                      <div
+                        className="
+                          flex
+                          items-baseline
+                          justify-between
+                          gap-3
+                        "
+                      >
                         <h3
                           style={{
                             fontSize:
@@ -803,13 +665,9 @@ export default function ModernTemplate({
                             color:
                               colors.text,
                           }}
-                          className="
-                            font-semibold
-                          "
+                          className="font-semibold"
                         >
-                          {
-                            exp.role
-                          }
+                          {exp.role}
                         </h3>
 
                         <span
@@ -827,9 +685,7 @@ export default function ModernTemplate({
                           "
                         >
                           <Calendar className="w-3 h-3" />
-                          {
-                            exp.period
-                          }
+                          {exp.period}
                         </span>
                       </div>
 
@@ -840,13 +696,9 @@ export default function ModernTemplate({
                           color:
                             colors.secondary,
                         }}
-                        className="
-                          font-medium
-                        "
+                        className="font-medium"
                       >
-                        {
-                          exp.company
-                        }
+                        {exp.company}
                       </p>
 
                       {exp.description && (
@@ -864,9 +716,7 @@ export default function ModernTemplate({
                             leading-relaxed
                           "
                         >
-                          {
-                            exp.description
-                          }
+                          {exp.description}
                         </p>
                       )}
                     </div>
@@ -885,8 +735,7 @@ export default function ModernTemplate({
 
       case 'education':
         if (
-          data.education.length ===
-          0
+          data.education.length === 0
         ) {
           return null;
         }
@@ -898,41 +747,22 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  color:
-                    colors.primary,
-                  fontFamily:
-                    fonts.heading,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-widest
-                  mb-4
-                  pb-2
-                  border-b-2
-                "
-              >
-                Formation
-              </h2>
+              <SectionTitle sectionId="education" />
 
               <div className="space-y-3">
                 {data.education.map(
-                  (ed) => (
+                  (education) => (
                     <div
-                      key={
-                        ed.id
-                      }
+                      key={education.id}
                     >
-                      <div className="
-                        flex
-                        items-baseline
-                        justify-between
-                        gap-3
-                      ">
+                      <div
+                        className="
+                          flex
+                          items-baseline
+                          justify-between
+                          gap-3
+                        "
+                      >
                         <h3
                           style={{
                             fontSize:
@@ -940,13 +770,9 @@ export default function ModernTemplate({
                             color:
                               colors.text,
                           }}
-                          className="
-                            font-semibold
-                          "
+                          className="font-semibold"
                         >
-                          {
-                            ed.degree
-                          }
+                          {education.degree}
                         </h3>
 
                         <span
@@ -956,13 +782,9 @@ export default function ModernTemplate({
                             color:
                               colors.muted,
                           }}
-                          className="
-                            shrink-0
-                          "
+                          className="shrink-0"
                         >
-                          {
-                            ed.period
-                          }
+                          {education.period}
                         </span>
                       </div>
 
@@ -973,16 +795,12 @@ export default function ModernTemplate({
                           color:
                             colors.secondary,
                         }}
-                        className="
-                          font-medium
-                        "
+                        className="font-medium"
                       >
-                        {
-                          ed.school
-                        }
+                        {education.school}
                       </p>
 
-                      {ed.description && (
+                      {education.description && (
                         <p
                           style={{
                             fontSize:
@@ -997,13 +815,120 @@ export default function ModernTemplate({
                             leading-relaxed
                           "
                         >
-                          {
-                            ed.description
-                          }
+                          {education.description}
                         </p>
                       )}
                     </div>
                   )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle sectionId="certifications" />
+
+              <div className="space-y-1.5">
+                {data.certifications.map(
+                  (certification) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                        style={{
+                          fontSize:
+                            fs(11),
+                          color:
+                            colors.muted,
+                        }}
+                        className="leading-relaxed"
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.text,
+                          }}
+                          className="font-semibold"
+                        >
+                          {
+                            certification.name
+                          }
+                        </span>
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+                            {
+                              certification.organization
+                            }
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+                            {
+                              certification.date
+                            }
+                          </>
+                        )}
+
+                        {certificationUrl && (
+                          <>
+                            {' — '}
+                            <a
+                              href={
+                                certificationUrl
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color:
+                                  colors.accent,
+                                textDecoration:
+                                  'underline',
+                              }}
+                            >
+                              Voir
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
                 )}
               </div>
             </section>
@@ -1031,10 +956,7 @@ export default function ModernTemplate({
         fontSize:
           fs(14),
       }}
-      className="
-        w-full
-        h-full
-      "
+      className="w-full h-full"
     >
       {/* =====================================================
           HEADER
@@ -1070,13 +992,11 @@ export default function ModernTemplate({
             style={{
               width: `${
                 96 *
-                (data.photoScale ??
-                  1)
+                (data.photoScale ?? 1)
               }px`,
               height: `${
                 96 *
-                (data.photoScale ??
-                  1)
+                (data.photoScale ?? 1)
               }px`,
             }}
           />
@@ -1086,7 +1006,7 @@ export default function ModernTemplate({
           className={
             data.photo
               ? 'flex-1 text-center'
-              : ''
+              : 'flex-1'
           }
         >
           <h1
@@ -1135,10 +1055,8 @@ export default function ModernTemplate({
             <a
               href={`mailto:${data.email}`}
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1148,11 +1066,7 @@ export default function ModernTemplate({
               "
             >
               <Mail className="w-4 h-4" />
-              <span>
-                {
-                  data.email
-                }
-              </span>
+              <span>{data.email}</span>
             </a>
           )}
 
@@ -1163,10 +1077,8 @@ export default function ModernTemplate({
                 ''
               )}`}
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1176,11 +1088,7 @@ export default function ModernTemplate({
               "
             >
               <Phone className="w-4 h-4" />
-              <span>
-                {
-                  data.phone
-                }
-              </span>
+              <span>{data.phone}</span>
             </a>
           )}
 
@@ -1194,11 +1102,7 @@ export default function ModernTemplate({
               "
             >
               <MapPin className="w-4 h-4" />
-              <span>
-                {
-                  data.location
-                }
-              </span>
+              <span>{data.location}</span>
             </span>
           )}
 
@@ -1212,11 +1116,7 @@ export default function ModernTemplate({
               "
             >
               <Calendar className="w-4 h-4" />
-              <span>
-                {
-                  age
-                } ans
-              </span>
+              <span>{age} ans</span>
             </span>
           )}
 
@@ -1230,9 +1130,7 @@ export default function ModernTemplate({
               "
             >
               <Car className="w-4 h-4" />
-              <span>
-                Permis B
-              </span>
+              <span>Permis B</span>
             </span>
           )}
 
@@ -1248,10 +1146,8 @@ export default function ModernTemplate({
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1261,11 +1157,7 @@ export default function ModernTemplate({
               "
             >
               <Globe className="w-4 h-4" />
-              <span>
-                {
-                  data.website
-                }
-              </span>
+              <span>{data.website}</span>
             </a>
           )}
 
@@ -1281,10 +1173,8 @@ export default function ModernTemplate({
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1294,11 +1184,7 @@ export default function ModernTemplate({
               "
             >
               <Linkedin className="w-4 h-4" />
-              <span>
-                {
-                  data.linkedin
-                }
-              </span>
+              <span>{data.linkedin}</span>
             </a>
           )}
 
@@ -1314,10 +1200,8 @@ export default function ModernTemplate({
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1327,11 +1211,7 @@ export default function ModernTemplate({
               "
             >
               <Github className="w-4 h-4" />
-              <span>
-                {
-                  data.github
-                }
-              </span>
+              <span>{data.github}</span>
             </a>
           )}
         </div>
@@ -1359,18 +1239,12 @@ export default function ModernTemplate({
           className="col-span-1"
         >
           <SortableContext
-            items={
-              leftOrder
-            }
+            items={leftOrder}
             strategy={
               verticalListSortingStrategy
             }
           >
-            <aside
-              className="
-                space-y-7
-              "
-            >
+            <aside className="space-y-7">
               {leftOrder.map(
                 (sectionId) =>
                   renderSection(
@@ -1390,18 +1264,12 @@ export default function ModernTemplate({
           className="col-span-2"
         >
           <SortableContext
-            items={
-              rightOrder
-            }
+            items={rightOrder}
             strategy={
               verticalListSortingStrategy
             }
           >
-            <main
-              className="
-                space-y-7
-              "
-            >
+            <main className="space-y-7">
               {rightOrder.map(
                 (sectionId) =>
                   renderSection(

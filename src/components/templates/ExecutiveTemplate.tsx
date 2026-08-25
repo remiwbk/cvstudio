@@ -5,7 +5,6 @@ import {
   Globe,
   Linkedin,
   Github,
-  Calendar,
   Car,
 } from 'lucide-react';
 
@@ -24,6 +23,10 @@ import type {
   ThemeColors,
   CVSectionId,
   CVSectionColumn,
+} from '@/types/types';
+
+import {
+  DEFAULT_SECTION_TITLES,
 } from '@/types/types';
 
 import SortableSection from '@/components/SortableSection';
@@ -52,24 +55,12 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 /**
  * =========================================================
  * COLONNES PAR DÉFAUT
- * =========================================================
- *
- * Design original Executive :
- *
- * GAUCHE :
- * - À propos
- * - Expertise
- * - Intérêts
- *
- * DROITE :
- * - Expérience professionnelle
- * - Formation
- * - Réalisations & projets
  * =========================================================
  */
 
@@ -80,6 +71,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  certifications: 'left',
 
   experiences: 'right',
   education: 'right',
@@ -120,9 +112,8 @@ function ExecutiveColumn({
     id,
   });
 
-  const {
-    active,
-  } = useDndContext();
+  const { active } =
+    useDndContext();
 
   const isDragging =
     Boolean(active);
@@ -160,17 +151,9 @@ function ExecutiveColumn({
         }
       `}
     >
-      <div
-        className="
-          relative
-        "
-      >
+      <div className="relative">
         {children}
       </div>
-
-      {/* =====================================================
-          INTERSECTION FINALE
-      ====================================================== */}
 
       {isDragging && (
         <div
@@ -263,6 +246,26 @@ function calculateAge(
 
 /**
  * =========================================================
+ * TITRE DE SECTION
+ * =========================================================
+ */
+
+function getSectionTitle(
+  data: CVData,
+  sectionId: CVSectionId
+): string {
+  return (
+    data.sectionTitles?.[
+      sectionId
+    ] ??
+    DEFAULT_SECTION_TITLES[
+      sectionId
+    ]
+  );
+}
+
+/**
+ * =========================================================
  * TEMPLATE
  * =========================================================
  */
@@ -337,10 +340,16 @@ export default function ExecutiveTemplate({
   const renderSection = (
     sectionId: CVSectionId
   ) => {
+    const sectionTitle =
+      getSectionTitle(
+        data,
+        sectionId
+      );
+
     switch (sectionId) {
       /**
        * =====================================================
-       * À PROPOS
+       * PROFIL
        * =====================================================
        */
 
@@ -356,24 +365,12 @@ export default function ExecutiveTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  fontFamily:
-                    fonts.heading,
-                  color:
-                    colors.primary,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-[0.16em]
-                  mb-3
-                "
-              >
-                À propos
-              </h2>
+              <SectionHeader
+                title={sectionTitle}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
 
               <p
                 style={{
@@ -396,7 +393,7 @@ export default function ExecutiveTemplate({
 
       /**
        * =====================================================
-       * EXPERTISE
+       * COMPÉTENCES
        * =====================================================
        */
 
@@ -412,24 +409,12 @@ export default function ExecutiveTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  fontFamily:
-                    fonts.heading,
-                  color:
-                    colors.primary,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-[0.16em]
-                  mb-3
-                "
-              >
-                Expertise
-              </h2>
+              <SectionHeader
+                title={sectionTitle}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
 
               <div className="space-y-4">
                 {data.skills.map(
@@ -502,24 +487,12 @@ export default function ExecutiveTemplate({
             enabled={!captureMode}
           >
             <section>
-              <h2
-                style={{
-                  fontFamily:
-                    fonts.heading,
-                  color:
-                    colors.primary,
-                  fontSize:
-                    fs(13),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-[0.16em]
-                  mb-3
-                "
-              >
-                Intérêts
-              </h2>
+              <SectionHeader
+                title={sectionTitle}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
 
               <p
                 style={{
@@ -536,6 +509,140 @@ export default function ExecutiveTemplate({
                   ' · '
                 )}
               </p>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionHeader
+                title={sectionTitle}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
+
+              <div
+                className="
+                  space-y-1
+                  leading-relaxed
+                "
+                style={{
+                  fontSize:
+                    fs(9.5),
+                }}
+              >
+                {data.certifications.map(
+                  (certification) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.accent,
+                            fontWeight:
+                              700,
+                          }}
+                        >
+                          {
+                            certification.name
+                          }
+                        </span>
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+
+                            <span
+                              style={{
+                                color:
+                                  colors.secondary,
+                              }}
+                            >
+                              {
+                                certification.organization
+                              }
+                            </span>
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+
+                            <span
+                              style={{
+                                color:
+                                  colors.muted,
+                              }}
+                            >
+                              {
+                                certification.date
+                              }
+                            </span>
+                          </>
+                        )}
+
+                        {certificationUrl && (
+                          <>
+                            {' — '}
+
+                            <a
+                              href={
+                                certificationUrl
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color:
+                                  colors.accent,
+                                textDecoration:
+                                  'underline',
+                              }}
+                            >
+                              Voir
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
             </section>
           </SortableSection>
         );
@@ -562,7 +669,7 @@ export default function ExecutiveTemplate({
           >
             <section>
               <SectionHeader
-                title="Expérience professionnelle"
+                title={sectionTitle}
                 colors={colors}
                 fonts={fonts}
                 size={fs(13)}
@@ -681,7 +788,7 @@ export default function ExecutiveTemplate({
           >
             <section>
               <SectionHeader
-                title="Formation"
+                title={sectionTitle}
                 colors={colors}
                 fonts={fonts}
                 size={fs(13)}
@@ -800,7 +907,7 @@ export default function ExecutiveTemplate({
           >
             <section>
               <SectionHeader
-                title="Réalisations & projets"
+                title={sectionTitle}
                 colors={colors}
                 fonts={fonts}
                 size={fs(13)}
@@ -850,9 +957,6 @@ export default function ExecutiveTemplate({
                               textDecoration:
                                 'underline',
                             }}
-                            className="
-                              inline-block
-                            "
                           >
                             {
                               project.url
@@ -1073,7 +1177,7 @@ export default function ExecutiveTemplate({
         )}
 
         {age !== null && (
-          <span className="flex gap-1.5 items-center">
+          <span>
             {age} ans
           </span>
         )}
@@ -1269,8 +1373,7 @@ function SectionHeader({
           fonts.heading,
         color:
           colors.primary,
-        fontSize:
-          size,
+        fontSize: size,
       }}
       className="
         font-bold

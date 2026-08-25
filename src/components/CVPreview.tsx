@@ -23,6 +23,10 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 
+import {
+  GripVertical,
+} from 'lucide-react';
+
 import type {
   CVData,
   TemplateId,
@@ -110,6 +114,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  certifications: 'right',
 
   experiences: 'right',
   education: 'right',
@@ -428,9 +433,6 @@ const CVPreview = forwardRef<
          * =====================================================
          * TEMPLATES À DEUX COLONNES
          * =====================================================
-         *
-         * X = colonne
-         * Y = section
          */
 
         const pointer =
@@ -555,10 +557,6 @@ const CVPreview = forwardRef<
               container.id
             );
 
-          /**
-           * On ignore les deux colonnes.
-           */
-
           if (
             id ===
               SECTION_COLUMN_IDS.left ||
@@ -568,10 +566,6 @@ const CVPreview = forwardRef<
             continue;
           }
 
-          /**
-           * On ignore les zones de fin.
-           */
-
           if (
             id ===
               SECTION_COLUMN_BOTTOM_IDS.left ||
@@ -580,10 +574,6 @@ const CVPreview = forwardRef<
           ) {
             continue;
           }
-
-          /**
-           * ID inconnu.
-           */
 
           if (
             !sectionOrder.includes(
@@ -595,11 +585,6 @@ const CVPreview = forwardRef<
 
           const sectionId =
             id as CVSectionId;
-
-          /**
-           * La section doit être dans
-           * la colonne sous le curseur.
-           */
 
           if (
             getSectionColumn(
@@ -669,9 +654,6 @@ const CVPreview = forwardRef<
          * -----------------------------------------------------
          * ENTRE DEUX SECTIONS
          * -----------------------------------------------------
-         *
-         * La première section située sous
-         * le curseur devient la cible.
          */
 
         for (
@@ -746,12 +728,6 @@ const CVPreview = forwardRef<
                 ];
               }
             }
-
-            /**
-             * Fallback :
-             * si la zone bottom n'est pas montée,
-             * la colonne reste la cible.
-             */
 
             return [
               {
@@ -938,8 +914,6 @@ const CVPreview = forwardRef<
          * -----------------------------------------------------
          * DROP DIRECTEMENT SUR UNE COLONNE
          * -----------------------------------------------------
-         *
-         * Cas de secours / colonne vide.
          */
 
         if (
@@ -1175,18 +1149,6 @@ const CVPreview = forwardRef<
        * =======================================================
        */
 
-      /**
-       * -------------------------------------------------------
-       * DROP TOUT EN BAS
-       * -------------------------------------------------------
-       *
-       * La zone "section-column-bottom" est créée
-       * par MinimalTemplate.
-       *
-       * Elle signifie :
-       * "placer cette section après toutes les autres".
-       */
-
       if (
         String(over.id) ===
         'section-column-bottom'
@@ -1278,6 +1240,7 @@ const CVPreview = forwardRef<
           newOrder,
       });
     };
+
     /**
      * =========================================================
      * FIT PREVIEW
@@ -1491,7 +1454,8 @@ const CVPreview = forwardRef<
             flex
             items-start
             justify-center
-            p-6
+            p-3
+            sm:p-6
             pt-20
             sm:pt-20
             bg-slate-200
@@ -1506,8 +1470,10 @@ const CVPreview = forwardRef<
               className="
                 absolute
                 z-[100]
+
                 top-3
                 right-3
+
                 sm:top-4
                 sm:right-4
 
@@ -1523,6 +1489,10 @@ const CVPreview = forwardRef<
                 p-1
               "
             >
+              {/* =================================================
+                  MODE RÉORGANISATION
+              ================================================== */}
+
               <button
                 type="button"
                 onClick={() =>
@@ -1534,11 +1504,22 @@ const CVPreview = forwardRef<
                 className={`
                   h-8
                   sm:h-9
-                  px-3
+
+                  px-2.5
+                  sm:px-3
+
                   rounded-lg
-                  text-xs
+
+                  text-[11px]
+                  sm:text-xs
+
                   font-semibold
+
                   transition
+
+                  flex
+                  items-center
+                  gap-1.5
 
                   ${
                     editMode
@@ -1546,13 +1527,32 @@ const CVPreview = forwardRef<
                       : 'text-slate-600 hover:bg-slate-100'
                   }
                 `}
+                title={
+                  editMode
+                    ? 'Quitter le mode réorganisation'
+                    : 'Activer le mode réorganisation'
+                }
               >
-                {editMode
-                  ? 'Terminer'
-                  : 'Modifier'}
+                <GripVertical
+                  className="
+                    w-3.5
+                    h-3.5
+                    shrink-0
+                  "
+                />
+
+                <span>
+                  {editMode
+                    ? 'Terminer'
+                    : 'Réorganiser'}
+                </span>
               </button>
 
               <div className="w-px h-6 bg-slate-200" />
+
+              {/* =================================================
+                  ZOOM -
+              ================================================== */}
 
               <button
                 type="button"
@@ -1566,19 +1566,26 @@ const CVPreview = forwardRef<
                 className="
                   w-8
                   h-8
+
                   sm:w-9
                   sm:h-9
+
                   rounded-lg
+
                   flex
                   items-center
                   justify-center
+
                   text-slate-700
                   text-lg
                   font-medium
+
                   hover:bg-slate-100
                   active:bg-slate-200
+
                   disabled:opacity-30
                   disabled:cursor-not-allowed
+
                   transition
                 "
                 title="Dézoomer"
@@ -1586,25 +1593,36 @@ const CVPreview = forwardRef<
                 −
               </button>
 
+              {/* =================================================
+                  ZOOM %
+              ================================================== */}
+
               <button
                 type="button"
                 onClick={
                   resetZoom
                 }
                 className="
-                  min-w-[54px]
+                  min-w-[48px]
                   sm:min-w-[62px]
+
                   h-8
                   sm:h-9
+
                   px-2
+
                   rounded-lg
+
                   text-[11px]
                   sm:text-xs
+
                   font-semibold
                   text-slate-600
+
                   hover:bg-slate-100
                   transition
                 "
+                title="Réinitialiser le zoom"
               >
                 {Math.round(
                   zoomScale *
@@ -1612,6 +1630,10 @@ const CVPreview = forwardRef<
                 )}
                 %
               </button>
+
+              {/* =================================================
+                  ZOOM +
+              ================================================== */}
 
               <button
                 type="button"
@@ -1625,19 +1647,26 @@ const CVPreview = forwardRef<
                 className="
                   w-8
                   h-8
+
                   sm:w-9
                   sm:h-9
+
                   rounded-lg
+
                   flex
                   items-center
                   justify-center
+
                   text-slate-700
                   text-lg
                   font-medium
+
                   hover:bg-slate-100
                   active:bg-slate-200
+
                   disabled:opacity-30
                   disabled:cursor-not-allowed
+
                   transition
                 "
                 title="Zoomer"
@@ -1646,6 +1675,67 @@ const CVPreview = forwardRef<
               </button>
             </div>
           )}
+
+          {/* =====================================================
+              INDICATEUR MODE RÉORGANISATION
+          ====================================================== */}
+
+          {!captureMode &&
+            editMode && (
+              <div
+                className="
+                  fixed
+
+                  bottom-4
+                  left-1/2
+                  -translate-x-1/2
+
+                  z-[100]
+
+                  flex
+                  items-center
+                  gap-2
+
+                  max-w-[calc(100vw-24px)]
+
+                  rounded-xl
+                  bg-slate-900
+                  text-white
+
+                  px-3
+                  sm:px-4
+
+                  py-2.5
+
+                  text-[11px]
+                  sm:text-xs
+
+                  font-medium
+
+                  shadow-xl
+
+                  pointer-events-none
+                "
+              >
+                <GripVertical
+                  className="
+                    w-4
+                    h-4
+                    shrink-0
+                  "
+                />
+
+                <span className="text-center">
+                  <span className="hidden sm:inline">
+                    Mode réorganisation activé — glissez les sections
+                  </span>
+
+                  <span className="sm:hidden">
+                    Glissez les sections pour les réorganiser
+                  </span>
+                </span>
+              </div>
+            )}
 
           {/* =====================================================
               PAGE
@@ -1736,42 +1826,6 @@ const CVPreview = forwardRef<
               </div>
             </div>
           </div>
-
-          {/* =====================================================
-              MESSAGE
-          ====================================================== */}
-
-          {!captureMode &&
-            editMode && (
-              <div
-                className="
-                  fixed
-                  bottom-5
-                  left-1/2
-                  -translate-x-1/2
-                  z-[100]
-
-                  rounded-xl
-                  bg-slate-900
-                  text-white
-
-                  px-4
-                  py-2.5
-
-                  text-xs
-                  font-medium
-
-                  shadow-xl
-
-                  pointer-events-none
-                "
-              >
-                Glissez une section
-                avec la poignée ⋮⋮
-                pour modifier son
-                ordre
-              </div>
-            )}
         </div>
       </DndContext>
     );

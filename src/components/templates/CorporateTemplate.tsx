@@ -26,6 +26,10 @@ import type {
   CVSectionColumn,
 } from '@/types/types';
 
+import {
+  DEFAULT_SECTION_TITLES,
+} from '@/types/types';
+
 import SortableSection from '@/components/SortableSection';
 
 interface Props {
@@ -52,7 +56,14 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
+
+/**
+ * =========================================================
+ * COLONNES PAR DÉFAUT
+ * =========================================================
+ */
 
 const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionId,
@@ -61,6 +72,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  certifications: 'left',
 
   experiences: 'right',
   education: 'right',
@@ -143,10 +155,6 @@ function CorporateColumn({
       <div className="relative">
         {children}
       </div>
-
-      {/* =================================================
-          INTERSECTION FINALE
-      ================================================= */}
 
       {isDragging && (
         <div
@@ -236,6 +244,26 @@ function calculateAge(
 
 /**
  * =========================================================
+ * TITRE DE SECTION
+ * =========================================================
+ */
+
+function getSectionTitle(
+  data: CVData,
+  sectionId: CVSectionId
+): string {
+  return (
+    data.sectionTitles?.[
+      sectionId
+    ] ??
+    DEFAULT_SECTION_TITLES[
+      sectionId
+    ]
+  );
+}
+
+/**
+ * =========================================================
  * TEMPLATE
  * =========================================================
  */
@@ -310,6 +338,12 @@ export default function CorporateTemplate({
   const renderSection = (
     sectionId: CVSectionId
   ) => {
+    const sectionTitle =
+      getSectionTitle(
+        data,
+        sectionId
+      );
+
     switch (sectionId) {
       /**
        * =====================================================
@@ -330,7 +364,7 @@ export default function CorporateTemplate({
           >
             <section>
               <Title
-                text="Profil"
+                text={sectionTitle}
                 fonts={fonts}
                 colors={colors}
                 size={fs(14)}
@@ -374,7 +408,7 @@ export default function CorporateTemplate({
           >
             <section>
               <Title
-                text="Compétences"
+                text={sectionTitle}
                 fonts={fonts}
                 colors={colors}
                 size={fs(14)}
@@ -472,7 +506,7 @@ export default function CorporateTemplate({
           >
             <section>
               <Title
-                text="Intérêts"
+                text={sectionTitle}
                 fonts={fonts}
                 colors={colors}
                 size={fs(14)}
@@ -523,7 +557,7 @@ export default function CorporateTemplate({
           >
             <section>
               <Title
-                text="Expériences professionnelles"
+                text={sectionTitle}
                 fonts={fonts}
                 colors={colors}
                 size={fs(14)}
@@ -676,7 +710,7 @@ export default function CorporateTemplate({
           >
             <section>
               <Title
-                text="Formation"
+                text={sectionTitle}
                 fonts={fonts}
                 colors={colors}
                 size={fs(14)}
@@ -769,6 +803,126 @@ export default function CorporateTemplate({
 
       /**
        * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <Title
+                text={sectionTitle}
+                fonts={fonts}
+                colors={colors}
+                size={fs(14)}
+              />
+
+              <div
+                style={{
+                  fontSize:
+                    fs(9.5),
+                  color:
+                    colors.muted,
+                }}
+                className="
+                  leading-relaxed
+                  space-y-0.5
+                "
+              >
+                {data.certifications.map(
+                  (certification) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                      >
+                        {certificationUrl ? (
+                          <a
+                            href={
+                              certificationUrl
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color:
+                                colors.secondary,
+                              fontWeight:
+                                700,
+                              textDecoration:
+                                'underline',
+                            }}
+                          >
+                            {
+                              certification.name
+                            }
+                          </a>
+                        ) : (
+                          <span
+                            style={{
+                              color:
+                                colors.secondary,
+                              fontWeight:
+                                700,
+                            }}
+                          >
+                            {
+                              certification.name
+                            }
+                          </span>
+                        )}
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+                            {
+                              certification.organization
+                            }
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+                            {
+                              certification.date
+                            }
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
        * PROJETS
        * =====================================================
        */
@@ -788,7 +942,7 @@ export default function CorporateTemplate({
           >
             <section>
               <Title
-                text="Projets"
+                text={sectionTitle}
                 fonts={fonts}
                 colors={colors}
                 size={fs(14)}
@@ -1208,6 +1362,12 @@ export default function CorporateTemplate({
     </div>
   );
 }
+
+/**
+ * =========================================================
+ * TITRE
+ * =========================================================
+ */
 
 function Title({
   text,

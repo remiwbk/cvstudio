@@ -29,18 +29,25 @@ import {
   ChevronDown,
   Linkedin,
   Github,
+  Pencil,
 } from 'lucide-react';
 
-import type {
-  CVData,
-  Experience,
-  Education,
-  Project,
-  SkillCategory,
-  CVStyle,
+import {
+  DEFAULT_SECTION_TITLES,
+  type CVData,
+  type CVSectionId,
+  type Experience,
+  type Education,
+  type Project,
+  type Certification,
+  type SkillCategory,
+  type CVStyle,
 } from '@/types/types';
 
-import { fontFamilies, colorPresets } from '@/themes';
+import {
+  fontFamilies,
+  colorPresets,
+} from '@/themes';
 
 interface Props {
   data: CVData;
@@ -48,16 +55,27 @@ interface Props {
 }
 
 type SortableRenderProps = {
-  setNodeRef: (node: HTMLElement | null) => void;
+  setNodeRef: (
+    node: HTMLElement | null
+  ) => void;
+
   style: React.CSSProperties;
+
   attributes: Record<string, any>;
-  listeners: Record<string, any> | undefined;
+
+  listeners:
+    | Record<string, any>
+    | undefined;
+
   isDragging: boolean;
 };
 
 interface SortableItemProps {
   id: string;
-  children: (props: SortableRenderProps) => React.ReactNode;
+
+  children: (
+    props: SortableRenderProps
+  ) => React.ReactNode;
 }
 
 function SortableItem({
@@ -76,9 +94,12 @@ function SortableItem({
   });
 
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
+    transform:
+      CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 50 : undefined,
+    zIndex: isDragging
+      ? 50
+      : undefined,
     position: 'relative',
   };
 
@@ -96,29 +117,9 @@ function SortableItem({
 }
 
 function uid() {
-  return Math.random().toString(36).slice(2, 9);
-}
-
-function calculateAge(birthDate: string): number | null {
-  if (!birthDate) return null;
-
-  const birth = new Date(birthDate);
-  const today = new Date();
-
-  let age =
-    today.getFullYear() -
-    birth.getFullYear();
-
-  const hasHadBirthday =
-    today.getMonth() > birth.getMonth() ||
-    (today.getMonth() === birth.getMonth() &&
-      today.getDate() >= birth.getDate());
-
-  if (!hasHadBirthday) {
-    age--;
-  }
-
-  return age;
+  return Math.random()
+    .toString(36)
+    .slice(2, 9);
 }
 
 const inputCls =
@@ -128,9 +129,9 @@ const labelCls =
   'block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide';
 
 /*
- * =========================
+ * =========================================================
  * TEXTAREA REDIMENSIONNABLE
- * =========================
+ * =========================================================
  */
 
 function ResizableTextarea({
@@ -140,10 +141,13 @@ function ResizableTextarea({
   minHeight = 60,
 }: {
   value: string;
+
   onChange: (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => void;
+
   placeholder?: string;
+
   minHeight?: number;
 }) {
   const [height, setHeight] =
@@ -165,8 +169,12 @@ function ResizableTextarea({
     e.stopPropagation();
 
     resizing.current = true;
-    startY.current = e.clientY;
-    startHeight.current = height;
+
+    startY.current =
+      e.clientY;
+
+    startHeight.current =
+      height;
 
     e.currentTarget.setPointerCapture(
       e.pointerId
@@ -176,15 +184,19 @@ function ResizableTextarea({
   const handlePointerMove = (
     e: React.PointerEvent<HTMLDivElement>
   ) => {
-    if (!resizing.current) return;
+    if (!resizing.current) {
+      return;
+    }
 
     const delta =
-      e.clientY - startY.current;
+      e.clientY -
+      startY.current;
 
     setHeight(
       Math.max(
         minHeight,
-        startHeight.current + delta
+        startHeight.current +
+          delta
       )
     );
   };
@@ -192,7 +204,8 @@ function ResizableTextarea({
   const handlePointerUp = (
     e: React.PointerEvent<HTMLDivElement>
   ) => {
-    resizing.current = false;
+    resizing.current =
+      false;
 
     if (
       e.currentTarget.hasPointerCapture(
@@ -230,10 +243,170 @@ function ResizableTextarea({
         onPointerCancel={
           handlePointerUp
         }
-        className="absolute bottom-1 right-1 w-5 h-5 cursor-ns-resize touch-none flex items-end justify-end p-0.5"
+        className="
+          absolute
+          bottom-1
+          right-1
+          w-5
+          h-5
+          cursor-ns-resize
+          touch-none
+          flex
+          items-end
+          justify-end
+          p-0.5
+        "
         aria-label="Redimensionner"
       >
         <div className="w-3 h-3 border-r-2 border-b-2 border-slate-300" />
+      </div>
+    </div>
+  );
+}
+
+/*
+ * =========================================================
+ * TITRE DE SECTION ÉDITABLE
+ * =========================================================
+ *
+ * Le titre est directement modifiable dans le CVForm.
+ *
+ * Il reste clairement visible sur desktop ET mobile.
+ * =========================================================
+ */
+
+function SectionEditorTitle({
+  sectionId,
+  action,
+  data,
+  updateSectionTitle,
+}: {
+  sectionId: CVSectionId;
+
+  action?: React.ReactNode;
+
+  data: CVData;
+
+  updateSectionTitle: (
+    sectionId: CVSectionId,
+    title: string
+  ) => void;
+}) {
+  const title =
+    data.sectionTitles?.[
+      sectionId
+    ] ??
+    DEFAULT_SECTION_TITLES[
+      sectionId
+    ];
+
+  const defaultTitle =
+    DEFAULT_SECTION_TITLES[
+      sectionId
+    ];
+
+  return (
+    <div
+      className="
+        rounded-lg
+        border
+        border-slate-200
+        bg-slate-50/70
+        px-3
+        py-2.5
+        sm:px-3
+        sm:py-2
+      "
+    >
+      <div
+        className="
+          flex
+          items-center
+          gap-2
+          min-w-0
+        "
+      >
+        {/* INDICATEUR */}
+        <span
+          className="
+            w-1
+            h-5
+            bg-slate-900
+            rounded-full
+            shrink-0
+          "
+        />
+
+        {/* ICÔNE */}
+        <Pencil
+          className="
+            w-3.5
+            h-3.5
+            text-slate-400
+            shrink-0
+          "
+        />
+
+        {/* TITRE EDITABLE */}
+        <input
+          className="
+            min-w-0
+            flex-1
+            bg-transparent
+            border-none
+            outline-none
+            p-0
+            text-sm
+            font-bold
+            text-slate-900
+            focus:ring-0
+          "
+          value={title}
+          onChange={(e) =>
+            updateSectionTitle(
+              sectionId,
+              e.target.value
+            )
+          }
+          onBlur={(e) => {
+            const value =
+              e.target.value.trim();
+
+            if (!value) {
+              updateSectionTitle(
+                sectionId,
+                defaultTitle
+              );
+            }
+          }}
+          aria-label={`Modifier le titre de la section ${defaultTitle}`}
+        />
+
+        {/* INDICATION MOBILE / DESKTOP */}
+        <span
+          className="
+            hidden
+            sm:inline
+            shrink-0
+            text-[10px]
+            font-medium
+            text-slate-400
+          "
+        >
+          Modifier
+        </span>
+
+        {/* ACTION */}
+        {action && (
+          <div
+            className="
+              shrink-0
+              ml-auto
+            "
+          >
+            {action}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -244,29 +417,41 @@ export default function CVForm({
   onChange,
 }: Props) {
   const [draggedId, setDraggedId] =
-    useState<string | null>(null);
+    useState<string | null>(
+      null
+    );
 
   /*
-   * =========================
+   * =========================================================
    * DND-KIT SENSORS
-   * =========================
+   * =========================================================
    */
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 180,
-        tolerance: 8,
-      },
-    })
-  );
+  const sensors =
+    useSensors(
+      useSensor(PointerSensor, {
+        activationConstraint: {
+          distance: 6,
+        },
+      }),
 
-  const update = <K extends keyof CVData>(
+      useSensor(TouchSensor, {
+        activationConstraint: {
+          delay: 180,
+          tolerance: 8,
+        },
+      })
+    );
+
+  /*
+   * =========================================================
+   * UPDATE
+   * =========================================================
+   */
+
+  const update = <
+    K extends keyof CVData
+  >(
     key: K,
     value: CVData[K]
   ) => {
@@ -277,7 +462,9 @@ export default function CVForm({
   };
 
   const updateStyle = (
-    patch: Partial<CVData['style']>
+    patch: Partial<
+      CVData['style']
+    >
   ) => {
     onChange({
       ...data,
@@ -289,9 +476,31 @@ export default function CVForm({
   };
 
   /*
-   * =========================
+   * =========================================================
+   * TITRES DES SECTIONS
+   * =========================================================
+   */
+
+  const updateSectionTitle = (
+    sectionId: CVSectionId,
+    title: string
+  ) => {
+    onChange({
+      ...data,
+      sectionTitles: {
+        ...DEFAULT_SECTION_TITLES,
+        ...(data.sectionTitles ??
+          {}),
+        [sectionId]:
+          title,
+      },
+    });
+  };
+
+  /*
+   * =========================================================
    * DRAG END
-   * =========================
+   * =========================================================
    */
 
   const handleSortEnd = (
@@ -301,6 +510,7 @@ export default function CVForm({
       | 'experiences'
       | 'education'
       | 'projects'
+      | 'certifications'
   ) => {
     const {
       active,
@@ -319,15 +529,20 @@ export default function CVForm({
     const overId =
       String(over.id);
 
-    if (activeId === overId) {
+    if (
+      activeId === overId
+    ) {
       return;
     }
 
-    if (section === 'skills') {
+    if (
+      section === 'skills'
+    ) {
       moveSkillCategory(
         activeId,
         overId
       );
+
       return;
     }
 
@@ -339,45 +554,52 @@ export default function CVForm({
   };
 
   /*
-   * =========================
+   * =========================================================
    * DRAG START
-   * =========================
+   * =========================================================
    */
 
   const handleDragStart = (
     event: any
   ) => {
     setDraggedId(
-      String(event.active.id)
+      String(
+        event.active.id
+      )
     );
   };
 
-  const handleDragCancel = () => {
-    setDraggedId(null);
-  };
+  const handleDragCancel =
+    () => {
+      setDraggedId(null);
+    };
 
   /*
-   * =========================
+   * =========================================================
    * MOVE ARRAY ITEM
-   * =========================
+   * =========================================================
    */
 
   const moveArrayItem = (
     key:
       | 'experiences'
       | 'education'
-      | 'projects',
+      | 'projects'
+      | 'certifications',
     draggedItemId: string,
     targetItemId: string
   ) => {
     if (
       !draggedItemId ||
-      draggedItemId === targetItemId
+      draggedItemId ===
+        targetItemId
     ) {
       return;
     }
 
-    if (key === 'experiences') {
+    if (
+      key === 'experiences'
+    ) {
       const items = [
         ...data.experiences,
       ];
@@ -415,10 +637,10 @@ export default function CVForm({
         movedItem
       );
 
-      onChange({
-        ...data,
-        experiences: items,
-      });
+      update(
+        'experiences',
+        items
+      );
 
       return;
     }
@@ -461,10 +683,10 @@ export default function CVForm({
         movedItem
       );
 
-      onChange({
-        ...data,
-        education: items,
-      });
+      update(
+        'education',
+        items
+      );
 
       return;
     }
@@ -507,17 +729,65 @@ export default function CVForm({
         movedItem
       );
 
-      onChange({
-        ...data,
-        projects: items,
-      });
+      update(
+        'projects',
+        items
+      );
+
+      return;
+    }
+
+    if (
+      key === 'certifications'
+    ) {
+      const items = [
+        ...data.certifications,
+      ];
+
+      const fromIndex =
+        items.findIndex(
+          (item) =>
+            item.id ===
+            draggedItemId
+        );
+
+      const targetIndex =
+        items.findIndex(
+          (item) =>
+            item.id ===
+            targetItemId
+        );
+
+      if (
+        fromIndex === -1 ||
+        targetIndex === -1
+      ) {
+        return;
+      }
+
+      const [movedItem] =
+        items.splice(
+          fromIndex,
+          1
+        );
+
+      items.splice(
+        targetIndex,
+        0,
+        movedItem
+      );
+
+      update(
+        'certifications',
+        items
+      );
     }
   };
 
   /*
-   * =========================
+   * =========================================================
    * MOVE SKILL CATEGORY
-   * =========================
+   * =========================================================
    */
 
   const moveSkillCategory = (
@@ -526,7 +796,8 @@ export default function CVForm({
   ) => {
     if (
       !draggedItemId ||
-      draggedItemId === targetItemId
+      draggedItemId ===
+        targetItemId
     ) {
       return;
     }
@@ -568,13 +839,16 @@ export default function CVForm({
       movedItem
     );
 
-    update('skills', items);
+    update(
+      'skills',
+      items
+    );
   };
 
   /*
-   * =========================
+   * =========================================================
    * ARRAY OPERATIONS
-   * =========================
+   * =========================================================
    */
 
   const arrayOps = {
@@ -582,65 +856,145 @@ export default function CVForm({
       key:
         | 'experiences'
         | 'education'
-        | 'projects',
+        | 'projects'
+        | 'certifications',
       item:
         | Experience
         | Education
         | Project
+        | Certification
     ) => {
-      if (key === 'experiences') {
-        update('experiences', [
-          ...data.experiences,
-          item as Experience,
-        ]);
+      if (
+        key ===
+        'experiences'
+      ) {
+        update(
+          'experiences',
+          [
+            ...data.experiences,
+            item as Experience,
+          ]
+        );
+
         return;
       }
 
-      if (key === 'education') {
-        update('education', [
-          ...data.education,
-          item as Education,
-        ]);
+      if (
+        key === 'education'
+      ) {
+        update(
+          'education',
+          [
+            ...data.education,
+            item as Education,
+          ]
+        );
+
         return;
       }
 
-      update('projects', [
-        ...data.projects,
-        item as Project,
-      ]);
+      if (
+        key === 'projects'
+      ) {
+        update(
+          'projects',
+          [
+            ...data.projects,
+            item as Project,
+          ]
+        );
+
+        return;
+      }
+
+      const nextSectionOrder: CVSectionId[] =
+        data.sectionOrder?.includes(
+          'certifications'
+        )
+          ? [
+              ...data.sectionOrder,
+            ]
+          : [
+              ...(data.sectionOrder ??
+                []),
+              'certifications',
+            ];
+
+      update(
+        'certifications',
+        [
+          ...data.certifications,
+          item as Certification,
+        ]
+      );
+
+      onChange({
+        ...data,
+        sectionOrder:
+          nextSectionOrder,
+        sectionTitles: {
+          ...DEFAULT_SECTION_TITLES,
+          ...(data.sectionTitles ??
+            {}),
+        },
+      });
     },
 
     remove: (
       key:
         | 'experiences'
         | 'education'
-        | 'projects',
+        | 'projects'
+        | 'certifications',
       id: string
     ) => {
-      if (key === 'experiences') {
+      if (
+        key === 'experiences'
+      ) {
         update(
           'experiences',
           data.experiences.filter(
-            (x) => x.id !== id
+            (x) =>
+              x.id !== id
           )
         );
+
         return;
       }
 
-      if (key === 'education') {
+      if (
+        key === 'education'
+      ) {
         update(
           'education',
           data.education.filter(
-            (x) => x.id !== id
+            (x) =>
+              x.id !== id
           )
         );
+
+        return;
+      }
+
+      if (
+        key === 'projects'
+      ) {
+        update(
+          'projects',
+          data.projects.filter(
+            (x) =>
+              x.id !== id
+          )
+        );
+
         return;
       }
 
       update(
-        'projects',
-        data.projects.filter(
-          (x) => x.id !== id
+        'certifications',
+        data.certifications.filter(
+          (x) =>
+            x.id !== id
         )
       );
     },
@@ -649,12 +1003,15 @@ export default function CVForm({
       key:
         | 'experiences'
         | 'education'
-        | 'projects',
+        | 'projects'
+        | 'certifications',
       id: string,
       field: string,
       value: string
     ) => {
-      if (key === 'experiences') {
+      if (
+        key === 'experiences'
+      ) {
         update(
           'experiences',
           data.experiences.map(
@@ -668,10 +1025,13 @@ export default function CVForm({
                 : x
           )
         );
+
         return;
       }
 
-      if (key === 'education') {
+      if (
+        key === 'education'
+      ) {
         update(
           'education',
           data.education.map(
@@ -685,12 +1045,33 @@ export default function CVForm({
                 : x
           )
         );
+
+        return;
+      }
+
+      if (
+        key === 'projects'
+      ) {
+        update(
+          'projects',
+          data.projects.map(
+            (x) =>
+              x.id === id
+                ? {
+                    ...x,
+                    [field]:
+                      value,
+                  }
+                : x
+          )
+        );
+
         return;
       }
 
       update(
-        'projects',
-        data.projects.map(
+        'certifications',
+        data.certifications.map(
           (x) =>
             x.id === id
               ? {
@@ -699,27 +1080,30 @@ export default function CVForm({
                     value,
                 }
               : x
-        )
+          )
       );
     },
   };
 
   /*
-   * =========================
+   * =========================================================
    * SKILLS OPERATIONS
-   * =========================
+   * =========================================================
    */
 
   const skillOps = {
     addCategory: () =>
-      update('skills', [
-        ...data.skills,
-        {
-          id: uid(),
-          name: 'Nouvelle catégorie',
-          items: [],
-        } as SkillCategory,
-      ]),
+      update(
+        'skills',
+        [
+          ...data.skills,
+          {
+            id: uid(),
+            name: 'Nouvelle catégorie',
+            items: [],
+          } as SkillCategory,
+        ]
+      ),
 
     removeCategory: (
       id: string
@@ -727,7 +1111,8 @@ export default function CVForm({
       update(
         'skills',
         data.skills.filter(
-          (c) => c.id !== id
+          (c) =>
+            c.id !== id
         )
       ),
 
@@ -752,9 +1137,12 @@ export default function CVForm({
       catId: string,
       item: string
     ) => {
-      const v = item.trim();
+      const value =
+        item.trim();
 
-      if (!v) return;
+      if (!value) {
+        return;
+      }
 
       update(
         'skills',
@@ -765,7 +1153,7 @@ export default function CVForm({
                   ...c,
                   items: [
                     ...c.items,
-                    v,
+                    value,
                   ],
                 }
               : c
@@ -797,9 +1185,10 @@ export default function CVForm({
 
   return (
     <div className="space-y-6">
-      {/* =========================
+
+      {/* =====================================================
           STYLE
-      ========================== */}
+      ====================================================== */}
 
       <section className="space-y-3">
         <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -812,6 +1201,7 @@ export default function CVForm({
             className={`${labelCls} flex items-center gap-1.5`}
           >
             <Type className="w-3.5 h-3.5" />
+
             Taille du texte
 
             <span className="ml-auto normal-case tracking-normal text-slate-400 font-medium">
@@ -852,29 +1242,29 @@ export default function CVForm({
 
           <div className="grid grid-cols-2 gap-2">
             {fontFamilies.map(
-              (f) => (
+              (font) => (
                 <button
-                  key={f.id}
+                  key={font.id}
                   type="button"
                   onClick={() =>
                     updateStyle({
                       fontFamily:
-                        f.id,
+                        font.id,
                     })
                   }
                   style={{
                     fontFamily:
-                      f.stack,
+                      font.stack,
                   }}
                   className={`rounded-lg border px-3 py-2 text-sm transition text-left ${
                     data.style
                       .fontFamily ===
-                    f.id
+                    font.id
                       ? 'border-slate-900 bg-slate-50 text-slate-900 ring-1 ring-slate-900'
                       : 'border-slate-200 text-slate-600 hover:border-slate-400'
                   }`}
                 >
-                  {f.label}
+                  {font.label}
                 </button>
               )
             )}
@@ -886,44 +1276,47 @@ export default function CVForm({
             className={`${labelCls} flex items-center gap-1.5`}
           >
             <Palette className="w-3.5 h-3.5" />
+
             Couleurs
           </label>
 
           <div className="grid grid-cols-6 gap-2 mb-3">
             {colorPresets.map(
-              (p) => (
+              (preset) => (
                 <button
-                  key={p.name}
+                  key={preset.name}
                   type="button"
                   onClick={() =>
                     updateStyle({
                       primary:
-                        p.primary,
+                        preset.primary,
                       secondary:
-                        p.secondary,
+                        preset.secondary,
                       accent:
-                        p.accent,
+                        preset.accent,
                       text:
-                        p.text,
+                        preset.text,
                       muted:
-                        p.muted,
+                        preset.muted,
                       surface:
-                        p.surface,
+                        preset.surface,
                       border:
-                        p.border,
+                        preset.border,
                     })
                   }
-                  title={p.name}
+                  title={
+                    preset.name
+                  }
                   className={`h-9 rounded-lg transition border-2 ${
                     data.style
                       .primary ===
-                    p.primary
+                    preset.primary
                       ? 'ring-2 ring-offset-1 ring-slate-900 border-white'
                       : 'border-white hover:scale-105'
                   }`}
                   style={{
                     background:
-                      p.primary,
+                      preset.primary,
                   }}
                 />
               )
@@ -964,7 +1357,10 @@ export default function CVForm({
               keyof CVStyle,
               string
             ][]).map(
-              ([key, label]) => (
+              ([
+                key,
+                label,
+              ]) => (
                 <div
                   key={key}
                   className="flex items-center gap-2"
@@ -1016,8 +1412,7 @@ export default function CVForm({
                       type="button"
                       onClick={() =>
                         updateStyle({
-                          [key]:
-                            '',
+                          [key]: '',
                         } as Partial<CVStyle>)
                       }
                       className="text-slate-300 hover:text-slate-600 shrink-0"
@@ -1051,9 +1446,9 @@ export default function CVForm({
         </div>
       </section>
 
-      {/* =========================
+      {/* =====================================================
           IDENTITÉ
-      ========================== */}
+      ====================================================== */}
 
       <section className="space-y-3">
         <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -1098,14 +1493,15 @@ export default function CVForm({
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(
-                      e
-                    ) => {
+                    onChange={(event) => {
                       const file =
-                        e.target.files?.[0];
+                        event
+                          .target
+                          .files?.[0];
 
-                      if (!file)
+                      if (!file) {
                         return;
+                      }
 
                       const reader =
                         new FileReader();
@@ -1172,32 +1568,22 @@ export default function CVForm({
               />
 
               <div className="flex justify-between mt-1 text-[10px] text-slate-400">
-                <span>
-                  Petite
-                </span>
-                <span>
-                  Grande
-                </span>
+                <span>Petite</span>
+                <span>Grande</span>
               </div>
             </div>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label
-              className={labelCls}
-            >
+            <label className={labelCls}>
               Nom complet
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.name
-              }
+              className={inputCls}
+              value={data.name}
               onChange={(e) =>
                 update(
                   'name',
@@ -1209,19 +1595,13 @@ export default function CVForm({
           </div>
 
           <div>
-            <label
-              className={labelCls}
-            >
+            <label className={labelCls}>
               Titre / Poste
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.title
-              }
+              className={inputCls}
+              value={data.title}
               onChange={(e) =>
                 update(
                   'title',
@@ -1233,19 +1613,13 @@ export default function CVForm({
           </div>
 
           <div>
-            <label
-              className={labelCls}
-            >
+            <label className={labelCls}>
               Email
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.email
-              }
+              className={inputCls}
+              value={data.email}
               onChange={(e) =>
                 update(
                   'email',
@@ -1257,19 +1631,13 @@ export default function CVForm({
           </div>
 
           <div>
-            <label
-              className={labelCls}
-            >
+            <label className={labelCls}>
               Téléphone
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.phone
-              }
+              className={inputCls}
+              value={data.phone}
               onChange={(e) =>
                 update(
                   'phone',
@@ -1281,19 +1649,13 @@ export default function CVForm({
           </div>
 
           <div>
-            <label
-              className={labelCls}
-            >
+            <label className={labelCls}>
               Localisation
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.location
-              }
+              className={inputCls}
+              value={data.location}
               onChange={(e) =>
                 update(
                   'location',
@@ -1305,19 +1667,13 @@ export default function CVForm({
           </div>
 
           <div>
-            <label
-              className={labelCls}
-            >
+            <label className={labelCls}>
               Site web
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.website
-              }
+              className={inputCls}
+              value={data.website}
               onChange={(e) =>
                 update(
                   'website',
@@ -1332,7 +1688,9 @@ export default function CVForm({
             <label
               className={`${labelCls} flex items-center justify-between`}
             >
-              <span>Date de naissance</span>
+              <span>
+                Date de naissance
+              </span>
 
               {data.birthDate && (
                 <button
@@ -1343,15 +1701,7 @@ export default function CVForm({
                       ''
                     )
                   }
-                  className="
-                    normal-case
-                    tracking-normal
-                    text-[10px]
-                    font-medium
-                    text-slate-400
-                    hover:text-slate-700
-                    transition
-                  "
+                  className="normal-case tracking-normal text-[10px] font-medium text-slate-400 hover:text-slate-700 transition"
                 >
                   Effacer
                 </button>
@@ -1361,7 +1711,10 @@ export default function CVForm({
             <input
               type="date"
               className={inputCls}
-              value={data.birthDate || ''}
+              value={
+                data.birthDate ||
+                ''
+              }
               onChange={(e) =>
                 update(
                   'birthDate',
@@ -1376,7 +1729,8 @@ export default function CVForm({
               <input
                 type="checkbox"
                 checked={
-                  data.hasDrivingLicense
+                  data.hasDrivingLicense ??
+                  false
                 }
                 onChange={(e) =>
                   update(
@@ -1402,12 +1756,8 @@ export default function CVForm({
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.linkedin
-              }
+              className={inputCls}
+              value={data.linkedin}
               onChange={(e) =>
                 update(
                   'linkedin',
@@ -1427,12 +1777,8 @@ export default function CVForm({
             </label>
 
             <input
-              className={
-                inputCls
-              }
-              value={
-                data.github
-              }
+              className={inputCls}
+              value={data.github}
               onChange={(e) =>
                 update(
                   'github',
@@ -1443,49 +1789,62 @@ export default function CVForm({
             />
           </div>
         </div>
-
-        <div>
-          <label
-            className={labelCls}
-          >
-            Résumé / Profil
-          </label>
-
-          <ResizableTextarea
-            value={data.summary}
-            onChange={(e) =>
-              update(
-                'summary',
-                e.target.value
-              )
-            }
-            placeholder="Présentez votre profil, vos compétences et vos objectifs..."
-          />
-        </div>
       </section>
 
-      {/* =========================
-          COMPÉTENCES
-      ========================== */}
+      {/* =====================================================
+          PROFIL
+      ====================================================== */}
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-1 h-4 bg-slate-900 rounded-full" />
-            Compétences
-          </h3>
+        <SectionEditorTitle
+          sectionId="summary"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+        />
 
-          <button
-            type="button"
-            onClick={
-              skillOps.addCategory
-            }
-            className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Catégorie
-          </button>
-        </div>
+        <ResizableTextarea
+          value={data.summary}
+          onChange={(e) =>
+            update(
+              'summary',
+              e.target.value
+            )
+          }
+          placeholder="Présentez votre profil, vos compétences et vos objectifs..."
+        />
+      </section>
+
+      {/* =====================================================
+          COMPÉTENCES
+      ====================================================== */}
+
+      <section className="space-y-3">
+        <SectionEditorTitle
+          sectionId="skills"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+          action={
+            <button
+              type="button"
+              onClick={
+                skillOps.addCategory
+              }
+              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                Catégorie
+              </span>
+              <span className="sm:hidden">
+                +
+              </span>
+            </button>
+          }
+        />
 
         <DndContext
           sensors={sensors}
@@ -1528,9 +1887,7 @@ export default function CVForm({
                       isDragging,
                     }) => (
                       <div
-                        ref={
-                          setNodeRef
-                        }
+                        ref={setNodeRef}
                         style={style}
                         className={`relative rounded-xl border border-slate-200 p-3 space-y-2.5 bg-slate-50/60 transition ${
                           isDragging
@@ -1560,17 +1917,11 @@ export default function CVForm({
 
                           <input
                             className={`${inputCls} font-semibold`}
-                            value={
-                              cat.name
-                            }
-                            onChange={(
-                              e
-                            ) =>
+                            value={cat.name}
+                            onChange={(e) =>
                               skillOps.renameCategory(
                                 cat.id,
-                                e
-                                  .target
-                                  .value
+                                e.target.value
                               )
                             }
                             placeholder="Nom de la catégorie"
@@ -1621,15 +1972,15 @@ export default function CVForm({
                         </div>
 
                         <form
-                          onSubmit={(
-                            e
-                          ) => {
+                          onSubmit={(e) => {
                             e.preventDefault();
 
                             const input =
-                              e.currentTarget.elements.namedItem(
-                                'item'
-                              ) as HTMLInputElement;
+                              e.currentTarget
+                                .elements
+                                .namedItem(
+                                  'item'
+                                ) as HTMLInputElement;
 
                             skillOps.addItem(
                               cat.id,
@@ -1643,9 +1994,7 @@ export default function CVForm({
                         >
                           <input
                             name="item"
-                            className={
-                              inputCls
-                            }
+                            className={inputCls}
                             placeholder="Ajouter un élément (ex: Linux)"
                           />
 
@@ -1676,37 +2025,45 @@ export default function CVForm({
         </DndContext>
       </section>
 
-      {/* =========================
+      {/* =====================================================
           EXPÉRIENCES
-      ========================== */}
+      ====================================================== */}
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-1 h-4 bg-slate-900 rounded-full" />
-            Expériences
-          </h3>
-
-          <button
-            type="button"
-            onClick={() =>
-              arrayOps.add(
-                'experiences',
-                {
-                  id: uid(),
-                  role: '',
-                  company: '',
-                  period: '',
-                  description: '',
-                } as Experience
-              )
-            }
-            className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Ajouter
-          </button>
-        </div>
+        <SectionEditorTitle
+          sectionId="experiences"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+          action={
+            <button
+              type="button"
+              onClick={() =>
+                arrayOps.add(
+                  'experiences',
+                  {
+                    id: uid(),
+                    role: '',
+                    company: '',
+                    period: '',
+                    description:
+                      '',
+                  } as Experience
+                )
+              }
+              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                Ajouter
+              </span>
+              <span className="sm:hidden">
+                +
+              </span>
+            </button>
+          }
+        />
 
         <DndContext
           sensors={sensors}
@@ -1749,9 +2106,7 @@ export default function CVForm({
                       isDragging,
                     }) => (
                       <div
-                        ref={
-                          setNodeRef
-                        }
+                        ref={setNodeRef}
                         style={style}
                         className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
                           isDragging
@@ -1777,46 +2132,30 @@ export default function CVForm({
                             />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-2 gap-2">
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input
-                              className={
-                                inputCls
-                              }
-                              value={
-                                exp.role
-                              }
-                              onChange={(
-                                e
-                              ) =>
+                              className={inputCls}
+                              value={exp.role}
+                              onChange={(e) =>
                                 arrayOps.patch(
                                   'experiences',
                                   exp.id,
                                   'role',
-                                  e
-                                    .target
-                                    .value
+                                  e.target.value
                                 )
                               }
                               placeholder="Poste"
                             />
 
                             <input
-                              className={
-                                inputCls
-                              }
-                              value={
-                                exp.company
-                              }
-                              onChange={(
-                                e
-                              ) =>
+                              className={inputCls}
+                              value={exp.company}
+                              onChange={(e) =>
                                 arrayOps.patch(
                                   'experiences',
                                   exp.id,
                                   'company',
-                                  e
-                                    .target
-                                    .value
+                                  e.target.value
                                 )
                               }
                               placeholder="Entreprise"
@@ -1839,12 +2178,8 @@ export default function CVForm({
                         </div>
 
                         <input
-                          className={
-                            inputCls
-                          }
-                          value={
-                            exp.period
-                          }
+                          className={inputCls}
+                          value={exp.period}
                           onChange={(e) =>
                             arrayOps.patch(
                               'experiences',
@@ -1880,37 +2215,45 @@ export default function CVForm({
         </DndContext>
       </section>
 
-      {/* =========================
+      {/* =====================================================
           FORMATION
-      ========================== */}
+      ====================================================== */}
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-1 h-4 bg-slate-900 rounded-full" />
-            Formation
-          </h3>
-
-          <button
-            type="button"
-            onClick={() =>
-              arrayOps.add(
-                'education',
-                {
-                  id: uid(),
-                  degree: '',
-                  school: '',
-                  period: '',
-                  description: '',
-                } as Education
-              )
-            }
-            className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Ajouter
-          </button>
-        </div>
+        <SectionEditorTitle
+          sectionId="education"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+          action={
+            <button
+              type="button"
+              onClick={() =>
+                arrayOps.add(
+                  'education',
+                  {
+                    id: uid(),
+                    degree: '',
+                    school: '',
+                    period: '',
+                    description:
+                      '',
+                  } as Education
+                )
+              }
+              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                Ajouter
+              </span>
+              <span className="sm:hidden">
+                +
+              </span>
+            </button>
+          }
+        />
 
         <DndContext
           sensors={sensors}
@@ -1953,9 +2296,7 @@ export default function CVForm({
                       isDragging,
                     }) => (
                       <div
-                        ref={
-                          setNodeRef
-                        }
+                        ref={setNodeRef}
                         style={style}
                         className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
                           isDragging
@@ -1981,46 +2322,30 @@ export default function CVForm({
                             />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-2 gap-2">
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input
-                              className={
-                                inputCls
-                              }
-                              value={
-                                ed.degree
-                              }
-                              onChange={(
-                                e
-                              ) =>
+                              className={inputCls}
+                              value={ed.degree}
+                              onChange={(e) =>
                                 arrayOps.patch(
                                   'education',
                                   ed.id,
                                   'degree',
-                                  e
-                                    .target
-                                    .value
+                                  e.target.value
                                 )
                               }
                               placeholder="Diplôme"
                             />
 
                             <input
-                              className={
-                                inputCls
-                              }
-                              value={
-                                ed.school
-                              }
-                              onChange={(
-                                e
-                              ) =>
+                              className={inputCls}
+                              value={ed.school}
+                              onChange={(e) =>
                                 arrayOps.patch(
                                   'education',
                                   ed.id,
                                   'school',
-                                  e
-                                    .target
-                                    .value
+                                  e.target.value
                                 )
                               }
                               placeholder="Établissement"
@@ -2043,12 +2368,8 @@ export default function CVForm({
                         </div>
 
                         <input
-                          className={
-                            inputCls
-                          }
-                          value={
-                            ed.period
-                          }
+                          className={inputCls}
+                          value={ed.period}
                           onChange={(e) =>
                             arrayOps.patch(
                               'education',
@@ -2084,36 +2405,261 @@ export default function CVForm({
         </DndContext>
       </section>
 
-      {/* =========================
-          PROJETS
-      ========================== */}
+      {/* =====================================================
+          CERTIFICATIONS
+      ====================================================== */}
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-1 h-4 bg-slate-900 rounded-full" />
-            Projets
-          </h3>
+        <SectionEditorTitle
+          sectionId="certifications"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+          action={
+            <button
+              type="button"
+              onClick={() =>
+                arrayOps.add(
+                  'certifications',
+                  {
+                    id: uid(),
+                    name: '',
+                    organization:
+                      '',
+                    date: '',
+                    url: '',
+                  } as Certification
+                )
+              }
+              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                Ajouter
+              </span>
+              <span className="sm:hidden">
+                +
+              </span>
+            </button>
+          }
+        />
 
-          <button
-            type="button"
-            onClick={() =>
-              arrayOps.add(
-                'projects',
-                {
-                  id: uid(),
-                  name: '',
-                  url: '',
-                  description: '',
-                } as Project
-              )
+        <DndContext
+          sensors={sensors}
+          collisionDetection={
+            closestCenter
+          }
+          onDragStart={
+            handleDragStart
+          }
+          onDragCancel={
+            handleDragCancel
+          }
+          onDragEnd={(event) =>
+            handleSortEnd(
+              event,
+              'certifications'
+            )
+          }
+        >
+          <SortableContext
+            items={data.certifications.map(
+              (certification) =>
+                certification.id
+            )}
+            strategy={
+              verticalListSortingStrategy
             }
-            className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1"
           >
-            <Plus className="w-3.5 h-3.5" />
-            Ajouter
-          </button>
-        </div>
+            <div className="space-y-3">
+              {data.certifications.map(
+                (
+                  certification
+                ) => (
+                  <SortableItem
+                    key={
+                      certification.id
+                    }
+                    id={
+                      certification.id
+                    }
+                  >
+                    {({
+                      setNodeRef,
+                      style,
+                      attributes,
+                      listeners,
+                      isDragging,
+                    }) => (
+                      <div
+                        ref={setNodeRef}
+                        style={style}
+                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
+                          isDragging
+                            ? 'opacity-60 shadow-xl scale-[1.01] z-50'
+                            : 'hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <button
+                            type="button"
+                            {...attributes}
+                            {...listeners}
+                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            title="Déplacer la certification"
+                            aria-label="Déplacer la certification"
+                          >
+                            <GripVertical
+                              className={`w-4 h-4 ${
+                                isDragging
+                                  ? 'text-slate-900'
+                                  : 'text-slate-300 hover:text-slate-600'
+                              }`}
+                            />
+                          </button>
+
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              className={inputCls}
+                              value={
+                                certification.name
+                              }
+                              onChange={(e) =>
+                                arrayOps.patch(
+                                  'certifications',
+                                  certification.id,
+                                  'name',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Nom de la certification"
+                            />
+
+                            <input
+                              className={inputCls}
+                              value={
+                                certification.organization
+                              }
+                              onChange={(e) =>
+                                arrayOps.patch(
+                                  'certifications',
+                                  certification.id,
+                                  'organization',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Organisme"
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              arrayOps.remove(
+                                'certifications',
+                                certification.id
+                              )
+                            }
+                            className="mt-2 text-slate-400 hover:text-red-500 transition"
+                            aria-label="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            className={inputCls}
+                            value={
+                              certification.date
+                            }
+                            onChange={(e) =>
+                              arrayOps.patch(
+                                'certifications',
+                                certification.id,
+                                'date',
+                                e.target.value
+                              )
+                            }
+                            placeholder="Date / année"
+                          />
+
+                          <input
+                            className={inputCls}
+                            value={
+                              certification.url
+                            }
+                            onChange={(e) =>
+                              arrayOps.patch(
+                                'certifications',
+                                certification.id,
+                                'url',
+                                e.target.value
+                              )
+                            }
+                            placeholder="URL"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </SortableItem>
+                )
+              )}
+
+              {data.certifications
+                .length ===
+                0 && (
+                <p className="text-xs text-slate-400 italic">
+                  Aucune certification.
+                  Cliquez sur «
+                  Ajouter » pour
+                  commencer.
+                </p>
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </section>
+
+      {/* =====================================================
+          PROJETS
+      ====================================================== */}
+
+      <section className="space-y-3">
+        <SectionEditorTitle
+          sectionId="projects"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+          action={
+            <button
+              type="button"
+              onClick={() =>
+                arrayOps.add(
+                  'projects',
+                  {
+                    id: uid(),
+                    name: '',
+                    url: '',
+                    description:
+                      '',
+                  } as Project
+                )
+              }
+              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                Ajouter
+              </span>
+              <span className="sm:hidden">
+                +
+              </span>
+            </button>
+          }
+        />
 
         <DndContext
           sensors={sensors}
@@ -2135,7 +2681,8 @@ export default function CVForm({
         >
           <SortableContext
             items={data.projects.map(
-              (p) => p.id
+              (project) =>
+                project.id
             )}
             strategy={
               verticalListSortingStrategy
@@ -2143,10 +2690,14 @@ export default function CVForm({
           >
             <div className="space-y-3">
               {data.projects.map(
-                (p) => (
+                (project) => (
                   <SortableItem
-                    key={p.id}
-                    id={p.id}
+                    key={
+                      project.id
+                    }
+                    id={
+                      project.id
+                    }
                   >
                     {({
                       setNodeRef,
@@ -2156,9 +2707,7 @@ export default function CVForm({
                       isDragging,
                     }) => (
                       <div
-                        ref={
-                          setNodeRef
-                        }
+                        ref={setNodeRef}
                         style={style}
                         className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
                           isDragging
@@ -2184,46 +2733,34 @@ export default function CVForm({
                             />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-2 gap-2">
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input
-                              className={
-                                inputCls
-                              }
+                              className={inputCls}
                               value={
-                                p.name
+                                project.name
                               }
-                              onChange={(
-                                e
-                              ) =>
+                              onChange={(e) =>
                                 arrayOps.patch(
                                   'projects',
-                                  p.id,
+                                  project.id,
                                   'name',
-                                  e
-                                    .target
-                                    .value
+                                  e.target.value
                                 )
                               }
                               placeholder="Nom du projet"
                             />
 
                             <input
-                              className={
-                                inputCls
-                              }
+                              className={inputCls}
                               value={
-                                p.url
+                                project.url
                               }
-                              onChange={(
-                                e
-                              ) =>
+                              onChange={(e) =>
                                 arrayOps.patch(
                                   'projects',
-                                  p.id,
+                                  project.id,
                                   'url',
-                                  e
-                                    .target
-                                    .value
+                                  e.target.value
                                 )
                               }
                               placeholder="URL"
@@ -2235,7 +2772,7 @@ export default function CVForm({
                             onClick={() =>
                               arrayOps.remove(
                                 'projects',
-                                p.id
+                                project.id
                               )
                             }
                             className="mt-2 text-slate-400 hover:text-red-500 transition"
@@ -2247,12 +2784,12 @@ export default function CVForm({
 
                         <ResizableTextarea
                           value={
-                            p.description
+                            project.description
                           }
                           onChange={(e) =>
                             arrayOps.patch(
                               'projects',
-                              p.id,
+                              project.id,
                               'description',
                               e.target.value
                             )
@@ -2269,24 +2806,30 @@ export default function CVForm({
         </DndContext>
       </section>
 
-      {/* =========================
+      {/* =====================================================
           CENTRES D'INTÉRÊT
-      ========================== */}
+      ====================================================== */}
 
       <section className="space-y-3">
-        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <span className="w-1 h-4 bg-slate-900 rounded-full" />
-          Centres d'intérêt
-        </h3>
+        <SectionEditorTitle
+          sectionId="interests"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+        />
 
         <div className="flex flex-wrap gap-2">
           {data.interests.map(
-            (it, i) => (
+            (
+              interest,
+              index
+            ) => (
               <span
-                key={i}
+                key={index}
                 className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 pl-3 pr-1.5 py-1 text-xs font-medium text-slate-700"
               >
-                {it}
+                {interest}
 
                 <button
                   type="button"
@@ -2296,9 +2839,10 @@ export default function CVForm({
                       data.interests.filter(
                         (
                           _,
-                          idx
+                          itemIndex
                         ) =>
-                          idx !== i
+                          itemIndex !==
+                          index
                       )
                     )
                   }
@@ -2317,24 +2861,26 @@ export default function CVForm({
             e.preventDefault();
 
             const input =
-              e.currentTarget.elements.namedItem(
-                'interest'
-              ) as HTMLInputElement;
+              e.currentTarget
+                .elements
+                .namedItem(
+                  'interest'
+                ) as HTMLInputElement;
 
-            const v =
+            const value =
               input.value.trim();
 
             if (
-              v &&
+              value &&
               !data.interests.includes(
-                v
+                value
               )
             ) {
               update(
                 'interests',
                 [
                   ...data.interests,
-                  v,
+                  value,
                 ]
               );
             }
@@ -2345,9 +2891,7 @@ export default function CVForm({
         >
           <input
             name="interest"
-            className={
-              inputCls
-            }
+            className={inputCls}
             placeholder="Ajouter (ex: Photographie)"
           />
 
@@ -2356,7 +2900,12 @@ export default function CVForm({
             className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition flex items-center gap-1"
           >
             <Plus className="w-4 h-4" />
-            Ajouter
+            <span className="hidden sm:inline">
+              Ajouter
+            </span>
+            <span className="sm:hidden">
+              +
+            </span>
           </button>
         </form>
       </section>

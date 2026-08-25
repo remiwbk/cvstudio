@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cv-generator.remidupire.com/sitemap.xml
+Sitemap: https://cvstudio.remidupire.com/sitemap.xml

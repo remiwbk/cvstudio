@@ -37,7 +37,9 @@ import {
 
 import {
   emptyCV,
+  DEFAULT_SECTION_TITLES,
   type CVData,
+  type CVSectionId,
   type TemplateId,
 } from '@/types/types';
 
@@ -92,6 +94,72 @@ function getRoute(): AppRoute {
   }
 
   return 'landing';
+}
+
+/**
+ * ---------------------------------------------------------
+ * NORMALISATION DES DONNÉES CV
+ * ---------------------------------------------------------
+ *
+ * Permet de charger les anciens CV créés avant l'ajout
+ * de nouveaux champs sans faire planter l'application.
+ */
+
+function normalizeCVData(
+  data: CVData
+): CVData {
+  const defaultSectionOrder: CVSectionId[] = [
+    'summary',
+    'experiences',
+    'education',
+    'skills',
+    'projects',
+    'interests',
+    'certifications',
+  ];
+
+  const sectionOrder: CVSectionId[] =
+    data.sectionOrder?.length
+      ? [...data.sectionOrder]
+      : [...defaultSectionOrder];
+
+  const certifications =
+    data.certifications ?? [];
+
+  /*
+   * Les anciens CV peuvent contenir
+   * des certifications sans avoir encore
+   * la section dans sectionOrder.
+   */
+  if (
+    certifications.length > 0 &&
+    !sectionOrder.includes(
+      'certifications'
+    )
+  ) {
+    sectionOrder.push(
+      'certifications'
+    );
+  }
+
+  return {
+    ...data,
+
+    certifications,
+
+    sectionOrder,
+
+    /*
+     * Compatibilité avec les anciens CV :
+     * on conserve leurs éventuels titres
+     * et on complète les nouveaux champs manquants
+     * avec les titres par défaut.
+     */
+    sectionTitles: {
+      ...DEFAULT_SECTION_TITLES,
+      ...(data.sectionTitles ?? {}),
+    },
+  };
 }
 
 export default function App() {
@@ -261,7 +329,9 @@ export default function App() {
           );
 
           setData(
-            latest.data
+            normalizeCVData(
+              latest.data
+            )
           );
 
           setTemplate(
@@ -278,7 +348,15 @@ export default function App() {
           const initialCV: SavedCV = {
             id: createCVId(),
             name: 'Mon CV',
-            data: emptyCV,
+            data: {
+              ...emptyCV,
+              sectionOrder: [
+                ...emptyCV.sectionOrder,
+              ],
+              sectionTitles: {
+                ...emptyCV.sectionTitles,
+              },
+            },
             template: 'modern',
             createdAt: now,
             updatedAt: now,
@@ -523,7 +601,15 @@ export default function App() {
       const newCV: SavedCV = {
         id: createCVId(),
         name: cleanName,
-        data: emptyCV,
+        data: {
+          ...emptyCV,
+          sectionOrder: [
+            ...emptyCV.sectionOrder,
+          ],
+          sectionTitles: {
+            ...DEFAULT_SECTION_TITLES,
+          },
+        },
         template: 'modern',
         createdAt: now,
         updatedAt: now,
@@ -542,9 +628,15 @@ export default function App() {
           newCV.name
         );
 
-        setData(
-          emptyCV
-        );
+        setData({
+          ...newCV.data,
+          sectionOrder: [
+            ...newCV.data.sectionOrder,
+          ],
+          sectionTitles: {
+            ...newCV.data.sectionTitles,
+          },
+        });
 
         setTemplate(
           'modern'
@@ -613,7 +705,9 @@ export default function App() {
         );
 
         setData(
-          cv.data
+          normalizeCVData(
+            cv.data
+          )
         );
 
         setTemplate(
@@ -951,7 +1045,9 @@ export default function App() {
           );
 
           setData(
-            importedCV.data
+            normalizeCVData(
+              importedCV.data
+            )
           );
 
           setTemplate(

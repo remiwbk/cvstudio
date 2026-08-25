@@ -19,11 +19,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
-import type {
-  CVData,
-  ThemeColors,
-  CVSectionId,
-  CVSectionColumn,
+import {
+  DEFAULT_SECTION_TITLES,
+  type CVData,
+  type ThemeColors,
+  type CVSectionId,
+  type CVSectionColumn,
 } from '@/types/types';
 
 import SortableSection from '@/components/SortableSection';
@@ -52,24 +53,12 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 /**
  * =========================================================
  * COLONNES PAR DÉFAUT
- * =========================================================
- *
- * Design original du Tech :
- *
- * GAUCHE :
- * - Profil
- * - Stack technique
- * - Intérêts
- *
- * DROITE :
- * - Expérience
- * - Formation
- * - Projets
  * =========================================================
  */
 
@@ -80,6 +69,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  certifications: 'left',
 
   experiences: 'right',
   education: 'right',
@@ -99,15 +89,6 @@ type TechColumnId =
 /**
  * =========================================================
  * COLONNE DROPPABLE
- * =========================================================
- *
- * Une colonne possède :
- *
- * 1. une zone globale pour permettre le changement
- *    de colonne ;
- *
- * 2. une petite zone "bottom" juste après son contenu
- *    pour permettre le drop en toute fin de colonne.
  * =========================================================
  */
 
@@ -181,21 +162,15 @@ function TechColumn({
           <div
             className="
               pointer-events-none
-
               absolute
               left-0
               right-0
               top-1/2
               -translate-y-1/2
-
               z-[100]
-
               h-[3px]
-
               rounded-full
-
               bg-slate-900
-
               shadow-sm
             "
           />
@@ -271,8 +246,8 @@ export default function TechTemplate({
 
   const hasSkills =
     data.skills.some(
-      (c) =>
-        c.items.length > 0
+      (category) =>
+        category.items.length > 0
     );
 
   const age =
@@ -284,39 +259,31 @@ export default function TechTemplate({
    * =========================================================
    * ORDRE DES SECTIONS
    * =========================================================
-   *
-   * IMPORTANT :
-   *
-   * On conserve exactement l'ordre
-   * global par défaut.
-   *
-   * Avec cet ordre :
-   *
-   * summary
-   * experiences
-   * education
-   * skills
-   * projects
-   * interests
-   *
-   * et les colonnes par défaut :
-   *
-   * LEFT :
-   * summary
-   * skills
-   * interests
-   *
-   * RIGHT :
-   * experiences
-   * education
-   * projects
-   * =========================================================
    */
 
   const sectionOrder: CVSectionId[] =
     data.sectionOrder?.length
       ? data.sectionOrder
       : DEFAULT_SECTION_ORDER;
+
+  /**
+   * =========================================================
+   * TITRES PERSONNALISÉS
+   * =========================================================
+   */
+
+  const getSectionTitle = (
+    sectionId: CVSectionId
+  ): string => {
+    return (
+      data.sectionTitles?.[
+        sectionId
+      ] ??
+      DEFAULT_SECTION_TITLES[
+        sectionId
+      ]
+    );
+  };
 
   /**
    * =========================================================
@@ -340,9 +307,6 @@ export default function TechTemplate({
   /**
    * =========================================================
    * ORDRE DANS CHAQUE COLONNE
-   * =========================================================
-   *
-   * On conserve l'ordre relatif de sectionOrder.
    * =========================================================
    */
 
@@ -391,7 +355,9 @@ export default function TechTemplate({
           >
             <section>
               <Heading
-                title="Profil"
+                title={getSectionTitle(
+                  'summary'
+                )}
                 colors={colors}
                 fonts={fonts}
                 size={fs(14)}
@@ -418,7 +384,7 @@ export default function TechTemplate({
 
       /**
        * =====================================================
-       * SKILLS
+       * COMPÉTENCES
        * =====================================================
        */
 
@@ -435,7 +401,9 @@ export default function TechTemplate({
           >
             <section>
               <Heading
-                title="Stack technique"
+                title={getSectionTitle(
+                  'skills'
+                )}
                 colors={colors}
                 fonts={fonts}
                 size={fs(14)}
@@ -534,7 +502,9 @@ export default function TechTemplate({
           >
             <section>
               <Heading
-                title="Intérêts"
+                title={getSectionTitle(
+                  'interests'
+                )}
                 colors={colors}
                 fonts={fonts}
                 size={fs(14)}
@@ -563,7 +533,142 @@ export default function TechTemplate({
 
       /**
        * =====================================================
-       * EXPÉRIENCE
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <Heading
+                title={getSectionTitle(
+                  'certifications'
+                )}
+                colors={colors}
+                fonts={fonts}
+                size={fs(14)}
+              />
+
+              <div
+                style={{
+                  fontSize:
+                    fs(9.5),
+                  color:
+                    colors.muted,
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.certifications.map(
+                  (
+                    certification,
+                    index
+                  ) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                        className="
+                          leading-relaxed
+                        "
+                        style={{
+                          marginBottom:
+                            index <
+                            data.certifications
+                              .length -
+                              1
+                              ? fs(3)
+                              : undefined,
+                        }}
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.secondary,
+                            fontWeight:
+                              700,
+                          }}
+                        >
+                          {
+                            certification.name
+                          }
+                        </span>
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+                            {
+                              certification.organization
+                            }
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+                            {
+                              certification.date
+                            }
+                          </>
+                        )}
+
+                        {certificationUrl && (
+                          <>
+                            {' — '}
+                            <a
+                              href={
+                                certificationUrl
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color:
+                                  colors.accent,
+                                textDecoration:
+                                  'underline',
+                              }}
+                            >
+                              Voir
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * EXPÉRIENCES
        * =====================================================
        */
 
@@ -583,7 +688,9 @@ export default function TechTemplate({
           >
             <section>
               <Heading
-                title="Expérience"
+                title={getSectionTitle(
+                  'experiences'
+                )}
                 colors={colors}
                 fonts={fonts}
                 size={fs(14)}
@@ -707,7 +814,9 @@ export default function TechTemplate({
           >
             <section>
               <Heading
-                title="Formation"
+                title={getSectionTitle(
+                  'education'
+                )}
                 colors={colors}
                 fonts={fonts}
                 size={fs(14)}
@@ -826,7 +935,9 @@ export default function TechTemplate({
           >
             <section>
               <Heading
-                title="Projets"
+                title={getSectionTitle(
+                  'projects'
+                )}
                 colors={colors}
                 fonts={fonts}
                 size={fs(14)}
@@ -1247,16 +1358,14 @@ export default function TechTemplate({
         "
       >
         {/* ===================================================
-            LEFT — 0.62fr
+            LEFT
         ==================================================== */}
 
         <TechColumn
           id="section-column-left"
         >
           <SortableContext
-            items={
-              leftOrder
-            }
+            items={leftOrder}
             strategy={
               verticalListSortingStrategy
             }
@@ -1278,16 +1387,14 @@ export default function TechTemplate({
         </TechColumn>
 
         {/* ===================================================
-            RIGHT — 1.38fr
+            RIGHT
         ==================================================== */}
 
         <TechColumn
           id="section-column-right"
         >
           <SortableContext
-            items={
-              rightOrder
-            }
+            items={rightOrder}
             strategy={
               verticalListSortingStrategy
             }

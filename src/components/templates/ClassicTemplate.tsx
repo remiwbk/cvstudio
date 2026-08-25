@@ -18,6 +18,10 @@ import type {
   CVSectionId,
 } from '@/types/types';
 
+import {
+  DEFAULT_SECTION_TITLES,
+} from '@/types/types';
+
 import SortableSection from '@/components/SortableSection';
 
 interface Props {
@@ -44,6 +48,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 /**
@@ -94,6 +99,26 @@ function calculateAge(
   return age >= 0
     ? age
     : null;
+}
+
+/**
+ * =========================================================
+ * TITRE DE SECTION
+ * =========================================================
+ */
+
+function getSectionTitle(
+  data: CVData,
+  sectionId: CVSectionId
+): string {
+  return (
+    data.sectionTitles?.[
+      sectionId
+    ] ??
+    DEFAULT_SECTION_TITLES[
+      sectionId
+    ]
+  );
 }
 
 /**
@@ -202,7 +227,14 @@ export default function ClassicTemplate({
   const renderSection = (
     sectionId: CVSectionId
   ) => {
+    const sectionTitle =
+      getSectionTitle(
+        data,
+        sectionId
+      );
+
     switch (sectionId) {
+
       /**
        * =====================================================
        * PROFIL
@@ -244,7 +276,7 @@ export default function ClassicTemplate({
                   mb-2
                 "
               >
-                Profil
+                {sectionTitle}
               </h2>
 
               <p
@@ -311,7 +343,7 @@ export default function ClassicTemplate({
                   mb-3
                 "
               >
-                Expériences Professionnelles
+                {sectionTitle}
               </h2>
 
               <div className="space-y-4">
@@ -369,9 +401,7 @@ export default function ClassicTemplate({
                             text-justify
                           "
                         >
-                          {
-                            exp.description
-                          }
+                          {exp.description}
                         </p>
                       )}
                     </div>
@@ -426,7 +456,7 @@ export default function ClassicTemplate({
                   mb-3
                 "
               >
-                Formation
+                {sectionTitle}
               </h2>
 
               <div className="space-y-3">
@@ -494,9 +524,7 @@ export default function ClassicTemplate({
                             leading-relaxed
                           "
                         >
-                          {
-                            ed.description
-                          }
+                          {ed.description}
                         </p>
                       )}
                     </div>
@@ -548,7 +576,7 @@ export default function ClassicTemplate({
                   mb-2
                 "
               >
-                Compétences
+                {sectionTitle}
               </h2>
 
               <div className="space-y-2">
@@ -646,7 +674,7 @@ export default function ClassicTemplate({
                   mb-3
                 "
               >
-                Projets
+                {sectionTitle}
               </h2>
 
               <div className="space-y-2">
@@ -715,9 +743,7 @@ export default function ClassicTemplate({
                             leading-relaxed
                           "
                         >
-                          {
-                            p.description
-                          }
+                          {p.description}
                         </p>
                       )}
                     </div>
@@ -772,7 +798,7 @@ export default function ClassicTemplate({
                   mb-2
                 "
               >
-                Centres d'intérêt
+                {sectionTitle}
               </h2>
 
               <p
@@ -790,6 +816,161 @@ export default function ClassicTemplate({
                   ' • '
                 )}
               </p>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section
+              className="
+                relative
+                rounded-sm
+                transition
+                hover:bg-slate-50/50
+              "
+            >
+              <h2
+                style={{
+                  fontFamily:
+                    fonts.heading,
+                  color:
+                    colors.primary,
+                  fontSize:
+                    fs(17),
+                }}
+                className="
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  mb-3
+                "
+              >
+                {sectionTitle}
+              </h2>
+
+              <div
+                className="
+                  space-y-1
+                  leading-relaxed
+                "
+                style={{
+                  fontSize:
+                    fs(13),
+                }}
+              >
+                {data.certifications.map(
+                  (
+                    certification
+                  ) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.secondary,
+                            fontWeight:
+                              700,
+                          }}
+                        >
+                          {
+                            certification.name
+                          }
+                        </span>
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+
+                            <span
+                              style={{
+                                color:
+                                  colors.text,
+                              }}
+                            >
+                              {
+                                certification.organization
+                              }
+                            </span>
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+
+                            <span
+                              style={{
+                                color:
+                                  colors.muted,
+                              }}
+                            >
+                              {
+                                certification.date
+                              }
+                            </span>
+                          </>
+                        )}
+
+                        {certificationUrl && (
+                          <>
+                            {' — '}
+
+                            <a
+                              href={
+                                certificationUrl
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color:
+                                  colors.accent,
+                                textDecoration:
+                                  'underline',
+                              }}
+                            >
+                              Voir
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
             </section>
           </SortableSection>
         );
@@ -1078,10 +1259,6 @@ export default function ClassicTemplate({
               sectionId
             )
         )}
-
-        {/* ===================================================
-            ZONE DE FIN
-        ==================================================== */}
 
         {!captureMode && (
           <ClassicBottomDropZone />

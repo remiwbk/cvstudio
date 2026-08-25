@@ -3,9 +3,9 @@ import {
   Phone,
   MapPin,
   Globe,
+  Calendar,
   Linkedin,
   Github,
-  Calendar,
   Car,
 } from 'lucide-react';
 
@@ -18,11 +18,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
-import type {
-  CVData,
-  ThemeColors,
-  CVSectionId,
-  CVSectionColumn,
+import {
+  DEFAULT_SECTION_TITLES,
+  type CVData,
+  type ThemeColors,
+  type CVSectionId,
+  type CVSectionColumn,
 } from '@/types/types';
 
 import SortableSection from '@/components/SortableSection';
@@ -51,25 +52,12 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 /**
  * =========================================================
  * ORDRE VISUEL ORIGINAL DU SWISS
- * =========================================================
- *
- * Ceci correspond exactement au template original
- * avant ajout du drag & drop.
- *
- * GAUCHE :
- *   Profil
- *   Compétences
- *   Intérêts
- *
- * DROITE :
- *   Expériences
- *   Formation
- *   Projets
  * =========================================================
  */
 
@@ -80,6 +68,7 @@ const DEFAULT_SWISS_LAYOUT_ORDER: CVSectionId[] = [
   'experiences',
   'education',
   'projects',
+  'certifications',
 ];
 
 /**
@@ -95,6 +84,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  certifications: 'left',
 
   experiences: 'right',
   education: 'right',
@@ -114,15 +104,6 @@ type SwissColumnId =
 /**
  * =========================================================
  * COLONNE DROPPABLE
- * =========================================================
- *
- * Chaque colonne possède :
- *
- * 1. une zone principale permettant le changement
- *    de colonne ;
- *
- * 2. une zone "bottom" placée juste après le contenu
- *    permettant de déposer une section tout en bas.
  * =========================================================
  */
 
@@ -197,21 +178,14 @@ function SwissColumn({
             className="
               pointer-events-none
               absolute
-
               left-0
               right-0
-
               top-1/2
               -translate-y-1/2
-
               z-[100]
-
               h-[3px]
-
               rounded-full
-
               bg-slate-900
-
               shadow-sm
             "
           />
@@ -287,9 +261,15 @@ export default function SwissTemplate({
 
   const hasSkills =
     data.skills.some(
-      (c) =>
-        c.items.length > 0
+      (category) =>
+        category.items.length > 0
     );
+
+  /**
+   * =========================================================
+   * ÂGE
+   * =========================================================
+   */
 
   const age =
     calculateAge(
@@ -299,14 +279,6 @@ export default function SwissTemplate({
   /**
    * =========================================================
    * ORDRE
-   * =========================================================
-   *
-   * Tant que le CV utilise encore exactement
-   * l'ordre global par défaut, on restitue le
-   * layout historique du Swiss.
-   *
-   * Dès qu'un ordre a été modifié par le DnD,
-   * sectionOrder devient la source de vérité.
    * =========================================================
    */
 
@@ -371,23 +343,6 @@ export default function SwissTemplate({
    * =========================================================
    * NUMÉROTATION
    * =========================================================
-   *
-   * La numérotation suit la position réelle
-   * dans le layout.
-   *
-   * Gauche puis droite.
-   *
-   * Exemple par défaut :
-   *
-   * 01 Profil
-   * 02 Compétences
-   * 03 Intérêts
-   * 04 Expériences
-   * 05 Formation
-   * 06 Projets
-   *
-   * Elle se recalcule automatiquement.
-   * =========================================================
    */
 
   const visibleSectionOrder = [
@@ -410,6 +365,25 @@ export default function SwissTemplate({
     return String(
       index + 1
     ).padStart(2, '0');
+  };
+
+  /**
+   * =========================================================
+   * TITRES PERSONNALISÉS
+   * =========================================================
+   */
+
+  const getSectionTitle = (
+    sectionId: CVSectionId
+  ): string => {
+    return (
+      data.sectionTitles?.[
+        sectionId
+      ] ??
+      DEFAULT_SECTION_TITLES[
+        sectionId
+      ]
+    );
   };
 
   /**
@@ -449,9 +423,15 @@ export default function SwissTemplate({
                 number={
                   sectionNumber
                 }
-                title="Profil"
-                colors={colors}
-                fonts={fonts}
+                title={getSectionTitle(
+                  'summary'
+                )}
+                colors={
+                  colors
+                }
+                fonts={
+                  fonts
+                }
                 size={fs(13)}
               />
 
@@ -496,9 +476,15 @@ export default function SwissTemplate({
                 number={
                   sectionNumber
                 }
-                title="Compétences"
-                colors={colors}
-                fonts={fonts}
+                title={getSectionTitle(
+                  'skills'
+                )}
+                colors={
+                  colors
+                }
+                fonts={
+                  fonts
+                }
                 size={fs(13)}
               />
 
@@ -577,9 +563,15 @@ export default function SwissTemplate({
                 number={
                   sectionNumber
                 }
-                title="Intérêts"
-                colors={colors}
-                fonts={fonts}
+                title={getSectionTitle(
+                  'interests'
+                )}
+                colors={
+                  colors
+                }
+                fonts={
+                  fonts
+                }
                 size={fs(13)}
               />
 
@@ -629,9 +621,15 @@ export default function SwissTemplate({
                 number={
                   sectionNumber
                 }
-                title="Expériences"
-                colors={colors}
-                fonts={fonts}
+                title={getSectionTitle(
+                  'experiences'
+                )}
+                colors={
+                  colors
+                }
+                fonts={
+                  fonts
+                }
                 size={fs(13)}
               />
 
@@ -753,9 +751,15 @@ export default function SwissTemplate({
                 number={
                   sectionNumber
                 }
-                title="Formation"
-                colors={colors}
-                fonts={fonts}
+                title={getSectionTitle(
+                  'education'
+                )}
+                colors={
+                  colors
+                }
+                fonts={
+                  fonts
+                }
                 size={fs(13)}
               />
 
@@ -874,9 +878,15 @@ export default function SwissTemplate({
                 number={
                   sectionNumber
                 }
-                title="Projets"
-                colors={colors}
-                fonts={fonts}
+                title={getSectionTitle(
+                  'projects'
+                )}
+                colors={
+                  colors
+                }
+                fonts={
+                  fonts
+                }
                 size={fs(13)}
               />
 
@@ -955,6 +965,142 @@ export default function SwissTemplate({
                       )}
                     </article>
                   )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <NumberTitle
+                number={
+                  sectionNumber
+                }
+                title={getSectionTitle(
+                  'certifications'
+                )}
+                colors={
+                  colors
+                }
+                fonts={
+                  fonts
+                }
+                size={fs(13)}
+              />
+
+              <div
+                style={{
+                  fontSize:
+                    fs(9.5),
+                  color:
+                    colors.muted,
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.certifications.map(
+                  (certification, index) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                        className={
+                          index <
+                          data
+                            .certifications
+                            .length -
+                            1
+                            ? 'mb-1'
+                            : ''
+                        }
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.secondary,
+                            fontWeight:
+                              700,
+                          }}
+                        >
+                          {
+                            certification.name
+                          }
+                        </span>
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+                            {
+                              certification.organization
+                            }
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+                            {
+                              certification.date
+                            }
+                          </>
+                        )}
+
+                        {certificationUrl && (
+                          <>
+                            {' — '}
+                            <a
+                              href={
+                                certificationUrl
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color:
+                                  colors.accent,
+                                textDecoration:
+                                  'underline',
+                              }}
+                            >
+                              Voir
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
                 )}
               </div>
             </section>
@@ -1294,16 +1440,16 @@ export default function SwissTemplate({
           id="section-column-left"
         >
           <SortableContext
-            items={
-              leftOrder
-            }
+            items={leftOrder}
             strategy={
               verticalListSortingStrategy
             }
           >
-            <aside className="
-              space-y-7
-            ">
+            <aside
+              className="
+                space-y-7
+              "
+            >
               {leftOrder.map(
                 (sectionId) =>
                   renderSection(
@@ -1322,16 +1468,16 @@ export default function SwissTemplate({
           id="section-column-right"
         >
           <SortableContext
-            items={
-              rightOrder
-            }
+            items={rightOrder}
             strategy={
               verticalListSortingStrategy
             }
           >
-            <main className="
-              space-y-7
-            ">
+            <main
+              className="
+                space-y-7
+              "
+            >
               {rightOrder.map(
                 (sectionId) =>
                   renderSection(

@@ -18,10 +18,11 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
-import type {
-  CVData,
-  ThemeColors,
-  CVSectionId,
+import {
+  DEFAULT_SECTION_TITLES,
+  type CVData,
+  type ThemeColors,
+  type CVSectionId,
 } from '@/types/types';
 
 import SortableSection from '@/components/SortableSection';
@@ -50,6 +51,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
 
 /**
@@ -87,22 +89,15 @@ function MinimalBottomDropZone() {
         <div
           className="
             pointer-events-none
-
             absolute
             left-0
             right-0
-
             top-1/2
             -translate-y-1/2
-
             z-[100]
-
             h-[3px]
-
             rounded-full
-
             bg-slate-900
-
             shadow-sm
           "
         />
@@ -194,16 +189,6 @@ export default function MinimalTemplate({
    * =========================================================
    * ORDRE DES SECTIONS
    * =========================================================
-   *
-   * L'ordre par défaut reste exactement :
-   *
-   * Profil
-   * Expériences
-   * Formation
-   * Compétences
-   * Projets
-   * Centres d'intérêt
-   * =========================================================
    */
 
   const sectionOrder: CVSectionId[] =
@@ -217,10 +202,23 @@ export default function MinimalTemplate({
    * =========================================================
    */
 
+  const getSectionTitle = (
+    sectionId: CVSectionId
+  ): string => {
+    return (
+      data.sectionTitles?.[
+        sectionId
+      ] ??
+      DEFAULT_SECTION_TITLES[
+        sectionId
+      ]
+    );
+  };
+
   const SectionTitle = ({
-    children,
+    sectionId,
   }: {
-    children: React.ReactNode;
+    sectionId: CVSectionId;
   }) => (
     <h2
       style={{
@@ -238,7 +236,9 @@ export default function MinimalTemplate({
         mb-3
       "
     >
-      {children}
+      {getSectionTitle(
+        sectionId
+      )}
     </h2>
   );
 
@@ -270,9 +270,9 @@ export default function MinimalTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle>
-                Profil
-              </SectionTitle>
+              <SectionTitle
+                sectionId="summary"
+              />
 
               <p
                 style={{
@@ -314,9 +314,9 @@ export default function MinimalTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle>
-                Expériences
-              </SectionTitle>
+              <SectionTitle
+                sectionId="experiences"
+              />
 
               <div className="space-y-5">
                 {data.experiences.map(
@@ -426,9 +426,9 @@ export default function MinimalTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle>
-                Formation
-              </SectionTitle>
+              <SectionTitle
+                sectionId="education"
+              />
 
               <div className="space-y-3">
                 {data.education.map(
@@ -535,9 +535,9 @@ export default function MinimalTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle>
-                Compétences
-              </SectionTitle>
+              <SectionTitle
+                sectionId="skills"
+              />
 
               <div className="space-y-2">
                 {data.skills.map(
@@ -641,9 +641,9 @@ export default function MinimalTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle>
-                Projets
-              </SectionTitle>
+              <SectionTitle
+                sectionId="projects"
+              />
 
               <div className="space-y-3">
                 {data.projects.map(
@@ -758,9 +758,9 @@ export default function MinimalTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle>
-                Centres d'intérêt
-              </SectionTitle>
+              <SectionTitle
+                sectionId="interests"
+              />
 
               <div
                 style={{
@@ -802,6 +802,127 @@ export default function MinimalTemplate({
                       )}
                     </span>
                   )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle
+                sectionId="certifications"
+              />
+
+              <div
+                className="
+                  space-y-1.5
+                "
+              >
+                {data.certifications.map(
+                  (certification) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                        style={{
+                          fontSize:
+                            fs(12.5),
+                          color:
+                            colors.muted,
+                        }}
+                        className="
+                          leading-relaxed
+                        "
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.text,
+                            fontWeight:
+                              600,
+                          }}
+                        >
+                          {
+                            certification.name
+                          }
+                        </span>
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+
+                            {
+                              certification.organization
+                            }
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+
+                            {
+                              certification.date
+                            }
+                          </>
+                        )}
+
+                        {certificationUrl && (
+                          <>
+                            {' — '}
+
+                            <a
+                              href={
+                                certificationUrl
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color:
+                                  colors.accent,
+                                textDecoration:
+                                  'underline',
+                              }}
+                            >
+                              Voir
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
                 )}
               </div>
             </section>
@@ -908,9 +1029,7 @@ export default function MinimalTemplate({
                       'underline',
                   }}
                 >
-                  {
-                    data.email
-                  }
+                  {data.email}
                 </a>
               </span>
             )}
@@ -928,9 +1047,7 @@ export default function MinimalTemplate({
                       'underline',
                   }}
                 >
-                  {
-                    data.phone
-                  }
+                  {data.phone}
                 </a>
               </span>
             )}
@@ -939,9 +1056,7 @@ export default function MinimalTemplate({
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-3 h-3" />
 
-                {
-                  data.location
-                }
+                {data.location}
               </span>
             )}
 
@@ -949,9 +1064,7 @@ export default function MinimalTemplate({
               <span className="flex items-center gap-1.5">
                 <CalendarDays className="w-3 h-3" />
 
-                {
-                  age
-                } ans
+                {age} ans
               </span>
             )}
 
@@ -984,9 +1097,7 @@ export default function MinimalTemplate({
                       'underline',
                   }}
                 >
-                  {
-                    data.website
-                  }
+                  {data.website}
                 </a>
               </span>
             )}
@@ -1012,9 +1123,7 @@ export default function MinimalTemplate({
                       'underline',
                   }}
                 >
-                  {
-                    data.linkedin
-                  }
+                  {data.linkedin}
                 </a>
               </span>
             )}
@@ -1040,9 +1149,7 @@ export default function MinimalTemplate({
                       'underline',
                   }}
                 >
-                  {
-                    data.github
-                  }
+                  {data.github}
                 </a>
               </span>
             )}

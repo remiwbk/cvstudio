@@ -26,6 +26,10 @@ import type {
   CVSectionColumn,
 } from '@/types/types';
 
+import {
+  DEFAULT_SECTION_TITLES,
+} from '@/types/types';
+
 import SortableSection from '@/components/SortableSection';
 
 interface Props {
@@ -39,6 +43,12 @@ interface Props {
   captureMode?: boolean;
 }
 
+/**
+ * =========================================================
+ * ORDRE PAR DÉFAUT
+ * =========================================================
+ */
+
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
   'experiences',
@@ -46,7 +56,14 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'certifications',
 ];
+
+/**
+ * =========================================================
+ * COLONNES PAR DÉFAUT
+ * =========================================================
+ */
 
 const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionId,
@@ -55,6 +72,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  certifications: 'left',
 
   experiences: 'right',
   education: 'right',
@@ -95,9 +113,8 @@ function EditorialColumn({
     id,
   });
 
-  const {
-    active,
-  } = useDndContext();
+  const { active } =
+    useDndContext();
 
   const isDragging =
     Boolean(active);
@@ -138,14 +155,6 @@ function EditorialColumn({
         {children}
       </div>
 
-      {/* =================================================
-          INTERSECTION FINALE
-      =================================================
-      
-          Cette zone permet de déposer une section
-          tout en bas de cette colonne.
-      */}
-
       {isDragging && (
         <div
           ref={setBottomNodeRef}
@@ -160,21 +169,15 @@ function EditorialColumn({
             <div
               className="
                 pointer-events-none
-
                 absolute
                 left-0
                 right-0
                 top-1/2
                 -translate-y-1/2
-
                 z-[100]
-
                 h-[3px]
-
                 rounded-full
-
                 bg-slate-900
-
                 shadow-sm
               "
             />
@@ -184,6 +187,12 @@ function EditorialColumn({
     </div>
   );
 }
+
+/**
+ * =========================================================
+ * AGE
+ * =========================================================
+ */
 
 function calculateAge(
   birthDate?: string
@@ -228,6 +237,32 @@ function calculateAge(
     ? age
     : null;
 }
+
+/**
+ * =========================================================
+ * TITRE DE SECTION
+ * =========================================================
+ */
+
+function getSectionTitle(
+  data: CVData,
+  sectionId: CVSectionId
+): string {
+  return (
+    data.sectionTitles?.[
+      sectionId
+    ] ??
+    DEFAULT_SECTION_TITLES[
+      sectionId
+    ]
+  );
+}
+
+/**
+ * =========================================================
+ * TEMPLATE
+ * =========================================================
+ */
 
 export default function EditorialTemplate({
   data,
@@ -360,6 +395,12 @@ export default function EditorialTemplate({
   const renderSection = (
     sectionId: CVSectionId
   ) => {
+    const sectionTitle =
+      getSectionTitle(
+        data,
+        sectionId
+      );
+
     switch (sectionId) {
       /**
        * =====================================================
@@ -384,7 +425,7 @@ export default function EditorialTemplate({
                 colors={colors}
                 fontSize={fs(13)}
               >
-                Profil
+                {sectionTitle}
               </SectionTitle>
 
               <p
@@ -429,7 +470,7 @@ export default function EditorialTemplate({
                 colors={colors}
                 fontSize={fs(13)}
               >
-                Compétences
+                {sectionTitle}
               </SectionTitle>
 
               <div className="space-y-3">
@@ -510,7 +551,7 @@ export default function EditorialTemplate({
                 colors={colors}
                 fontSize={fs(13)}
               >
-                Centres d'intérêt
+                {sectionTitle}
               </SectionTitle>
 
               <p
@@ -560,7 +601,7 @@ export default function EditorialTemplate({
                 colors={colors}
                 fontSize={fs(13)}
               >
-                Expériences
+                {sectionTitle}
               </SectionTitle>
 
               <div className="space-y-5">
@@ -681,7 +722,7 @@ export default function EditorialTemplate({
                 colors={colors}
                 fontSize={fs(13)}
               >
-                Formation
+                {sectionTitle}
               </SectionTitle>
 
               <div className="space-y-4">
@@ -801,7 +842,7 @@ export default function EditorialTemplate({
                 colors={colors}
                 fontSize={fs(13)}
               >
-                Projets
+                {sectionTitle}
               </SectionTitle>
 
               <div className="space-y-3">
@@ -880,6 +921,127 @@ export default function EditorialTemplate({
                       )}
                     </article>
                   )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle
+                fonts={fonts}
+                colors={colors}
+                fontSize={fs(13)}
+              >
+                {sectionTitle}
+              </SectionTitle>
+
+              <div
+                style={{
+                  fontSize:
+                    fs(10.5),
+                  color:
+                    colors.muted,
+                }}
+                className="
+                  leading-relaxed
+                  space-y-0.5
+                "
+              >
+                {data.certifications.map(
+                  (certification) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                      >
+                        {certificationUrl ? (
+                          <a
+                            href={
+                              certificationUrl
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color:
+                                colors.primary,
+                              textDecoration:
+                                'underline',
+                              fontWeight:
+                                700,
+                            }}
+                          >
+                            {
+                              certification.name
+                            }
+                          </a>
+                        ) : (
+                          <span
+                            style={{
+                              color:
+                                colors.primary,
+                              fontWeight:
+                                700,
+                            }}
+                          >
+                            {
+                              certification.name
+                            }
+                          </span>
+                        )}
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+                            {
+                              certification.organization
+                            }
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+                            {
+                              certification.date
+                            }
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
                 )}
               </div>
             </section>
@@ -1049,9 +1211,7 @@ export default function EditorialTemplate({
                   gap-1.5
                 "
               >
-                <span aria-hidden="true">
-                  🎂
-                </span>
+                <CalendarDays className="w-3 h-3" />
 
                 {age} ans
               </span>
@@ -1167,6 +1327,12 @@ export default function EditorialTemplate({
     </div>
   );
 }
+
+/**
+ * =========================================================
+ * TITRE DE SECTION
+ * =========================================================
+ */
 
 function SectionTitle({
   children,

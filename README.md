@@ -1,4 +1,4 @@
-# CVgen 🚀
+# CVStudio 🚀
 
 **[🌐 Voir la démo en ligne](https://cvstudio.remidupire.com/)**
 
@@ -26,8 +26,8 @@
 
 1. **Clone le dépôt** :
   ```bash
-   git clone https://github.com/ton-username/CVgen.git
-   cd CVgen
+   git clone https://github.com/ton-username/cvstudio.git
+   cd cvstudio
   ```
 2. **Installe les dépendances** :
   ```bash
@@ -82,4 +82,4 @@
 
 ## 📜 Licence
 
-MIT © [Remiwbk](https://github.com/ton-username)
+MIT © [Remiwbk](https://github.com/remiwbk)

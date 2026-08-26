@@ -10,6 +10,8 @@ import {
   Car,
 } from 'lucide-react';
 
+import type { ReactNode } from 'react';
+
 import {
   useDroppable,
 } from '@dnd-kit/core';
@@ -51,6 +53,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'experiences',
   'education',
   'skills',
+  'languages',
   'projects',
   'interests',
   'certifications',
@@ -68,6 +71,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
 > = {
   summary: 'left',
   skills: 'left',
+  languages: 'left',
   interests: 'left',
   certifications: 'left',
 
@@ -95,30 +99,31 @@ type TechColumnId =
 function TechColumn({
   id,
   children,
+  captureMode,
 }: {
   id: TechColumnId;
-  children: React.ReactNode;
+  children: ReactNode;
+  captureMode: boolean;
 }) {
   const {
     setNodeRef,
     isOver,
   } = useDroppable({
     id,
+    disabled: captureMode,
   });
 
   const bottomId =
-    id ===
-    'section-column-left'
+    id === 'section-column-left'
       ? 'section-column-bottom-left'
       : 'section-column-bottom-right';
 
   const {
-    setNodeRef:
-      setBottomNodeRef,
-    isOver:
-      isBottomOver,
+    setNodeRef: setBottomNodeRef,
+    isOver: isBottomOver,
   } = useDroppable({
     id: bottomId,
+    disabled: captureMode,
   });
 
   return (
@@ -133,49 +138,43 @@ function TechColumn({
         transition
 
         ${
-          isOver
+          isOver && !captureMode
             ? 'bg-slate-50/40'
             : ''
         }
       `}
     >
-      {/* ===================================================
-          CONTENU DE LA COLONNE
-      ==================================================== */}
-
       {children}
 
-      {/* ===================================================
-          ZONE DE DROP FINALE
-      ==================================================== */}
-
-      <div
-        ref={setBottomNodeRef}
-        className="
-          relative
-          w-full
-          h-4
-          mt-0
-        "
-      >
-        {isBottomOver && (
-          <div
-            className="
-              pointer-events-none
-              absolute
-              left-0
-              right-0
-              top-1/2
-              -translate-y-1/2
-              z-[100]
-              h-[3px]
-              rounded-full
-              bg-slate-900
-              shadow-sm
-            "
-          />
-        )}
-      </div>
+      {!captureMode && (
+        <div
+          ref={setBottomNodeRef}
+          className="
+            relative
+            w-full
+            h-4
+            mt-0
+          "
+        >
+          {isBottomOver && (
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-0
+                right-0
+                top-1/2
+                -translate-y-1/2
+                z-[100]
+                h-[3px]
+                rounded-full
+                bg-slate-900
+                shadow-sm
+              "
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -193,8 +192,7 @@ function calculateAge(
     return null;
   }
 
-  const birth =
-    new Date(birthDate);
+  const birth = new Date(birthDate);
 
   if (
     Number.isNaN(
@@ -204,8 +202,7 @@ function calculateAge(
     return null;
   }
 
-  const today =
-    new Date();
+  const today = new Date();
 
   let age =
     today.getFullYear() -
@@ -225,12 +222,12 @@ function calculateAge(
     age--;
   }
 
-  return age;
+  return age >= 0 ? age : null;
 }
 
 /**
  * =========================================================
- * TEMPLATE
+ * TEMPLATE TECH
  * =========================================================
  */
 
@@ -244,11 +241,36 @@ export default function TechTemplate({
   const fs = (n: number) =>
     `${n * fontScale}px`;
 
+  /**
+   * =========================================================
+   * COMPÉTENCES
+   * =========================================================
+   */
+
   const hasSkills =
     data.skills.some(
       (category) =>
         category.items.length > 0
     );
+
+  /**
+   * =========================================================
+   * LANGUES
+   * =========================================================
+   *
+   * On considère une langue présente si le tableau existe
+   * et contient au moins une entrée.
+   * =========================================================
+   */
+
+  const hasLanguages =
+    !!data.languages?.length;
+
+  /**
+   * =========================================================
+   * ÂGE
+   * =========================================================
+   */
 
   const age =
     calculateAge(
@@ -365,10 +387,8 @@ export default function TechTemplate({
 
               <p
                 style={{
-                  fontSize:
-                    fs(10.5),
-                  color:
-                    colors.muted,
+                  fontSize: fs(10.5),
+                  color: colors.muted,
                   whiteSpace:
                     'pre-line',
                 }}
@@ -413,7 +433,7 @@ export default function TechTemplate({
                 {data.skills.map(
                   (category) =>
                     category.items.length >
-                      0 ? (
+                    0 ? (
                       <div
                         key={
                           category.id
@@ -465,15 +485,89 @@ export default function TechTemplate({
                                   border
                                 "
                               >
-                                {
-                                  skill
-                                }
+                                {skill}
                               </span>
                             )
                           )}
                         </div>
                       </div>
                     ) : null
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * LANGUES
+       * =====================================================
+       */
+
+      case 'languages':
+        if (!hasLanguages) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="languages"
+            id="languages"
+            enabled={!captureMode}
+          >
+            <section>
+              <Heading
+                title={getSectionTitle(
+                  'languages'
+                )}
+                colors={colors}
+                fonts={fonts}
+                size={fs(14)}
+              />
+
+              <div className="space-y-2">
+                {data.languages?.map(
+                  (language) => (
+                    <div
+                      key={
+                        language.id
+                      }
+                      className="
+                        flex
+                        justify-between
+                        gap-3
+                      "
+                    >
+                      <span
+                        style={{
+                          color:
+                            colors.secondary,
+                          fontSize:
+                            fs(10),
+                        }}
+                        className="
+                          font-semibold
+                        "
+                      >
+                        {
+                          language.name
+                        }
+                      </span>
+
+                      <span
+                        style={{
+                          color:
+                            colors.muted,
+                          fontSize:
+                            fs(9.5),
+                        }}
+                      >
+                        {
+                          language.level
+                        }
+                      </span>
+                    </div>
+                  )
                 )}
               </div>
             </section>
@@ -512,10 +606,8 @@ export default function TechTemplate({
 
               <p
                 style={{
-                  fontSize:
-                    fs(10),
-                  color:
-                    colors.muted,
+                  fontSize: fs(10),
+                  color: colors.muted,
                   whiteSpace:
                     'pre-line',
                 }}
@@ -562,10 +654,8 @@ export default function TechTemplate({
 
               <div
                 style={{
-                  fontSize:
-                    fs(9.5),
-                  color:
-                    colors.muted,
+                  fontSize: fs(9.5),
+                  color: colors.muted,
                 }}
                 className="
                   leading-relaxed
@@ -599,7 +689,8 @@ export default function TechTemplate({
                         style={{
                           marginBottom:
                             index <
-                            data.certifications
+                            data
+                              .certifications
                               .length -
                               1
                               ? fs(3)
@@ -700,9 +791,7 @@ export default function TechTemplate({
                 {data.experiences.map(
                   (exp) => (
                     <article
-                      key={
-                        exp.id
-                      }
+                      key={exp.id}
                     >
                       <div
                         className="
@@ -725,9 +814,7 @@ export default function TechTemplate({
                               font-bold
                             "
                           >
-                            {
-                              exp.role
-                            }
+                            {exp.role}
                           </h3>
 
                           <p
@@ -758,9 +845,7 @@ export default function TechTemplate({
                             shrink-0
                           "
                         >
-                          {
-                            exp.period
-                          }
+                          {exp.period}
                         </span>
                       </div>
 
@@ -826,9 +911,7 @@ export default function TechTemplate({
                 {data.education.map(
                   (ed) => (
                     <article
-                      key={
-                        ed.id
-                      }
+                      key={ed.id}
                     >
                       <div
                         className="
@@ -849,9 +932,7 @@ export default function TechTemplate({
                               font-bold
                             "
                           >
-                            {
-                              ed.degree
-                            }
+                            {ed.degree}
                           </h3>
 
                           <p
@@ -862,9 +943,7 @@ export default function TechTemplate({
                                 fs(10),
                             }}
                           >
-                            {
-                              ed.school
-                            }
+                            {ed.school}
                           </p>
                         </div>
 
@@ -879,9 +958,7 @@ export default function TechTemplate({
                             shrink-0
                           "
                         >
-                          {
-                            ed.period
-                          }
+                          {ed.period}
                         </span>
                       </div>
 
@@ -1189,7 +1266,10 @@ export default function TechTemplate({
 
         {data.phone && (
           <a
-            href={`tel:${data.phone}`}
+            href={`tel:${data.phone.replace(
+              /\s/g,
+              ''
+            )}`}
             className="
               flex
               gap-1.5
@@ -1346,7 +1426,7 @@ export default function TechTemplate({
       </div>
 
       {/* =====================================================
-          CONTENT
+          CONTENT MULTI-COLONNES
       ====================================================== */}
 
       <div
@@ -1355,14 +1435,16 @@ export default function TechTemplate({
           grid-cols-[0.62fr_1.38fr]
           gap-8
           mt-6
+          items-start
         "
       >
         {/* ===================================================
-            LEFT
+            COLONNE GAUCHE
         ==================================================== */}
 
         <TechColumn
           id="section-column-left"
+          captureMode={captureMode}
         >
           <SortableContext
             items={leftOrder}
@@ -1387,11 +1469,12 @@ export default function TechTemplate({
         </TechColumn>
 
         {/* ===================================================
-            RIGHT
+            COLONNE DROITE
         ==================================================== */}
 
         <TechColumn
           id="section-column-right"
+          captureMode={captureMode}
         >
           <SortableContext
             items={rightOrder}

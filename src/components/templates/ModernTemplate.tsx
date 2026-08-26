@@ -51,6 +51,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'education',
   'skills',
   'projects',
+  'languages',
   'interests',
   'certifications',
 ];
@@ -70,6 +71,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   interests: 'left',
   projects: 'left',
   certifications: 'left',
+  languages: 'left',
 
   experiences: 'right',
   education: 'right',
@@ -368,15 +370,20 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle sectionId="summary" />
+              <SectionTitle
+                sectionId="summary"
+              />
 
               <p
                 style={{
                   fontSize: fs(13),
                   color: colors.muted,
-                  whiteSpace: 'pre-line',
+                  whiteSpace:
+                    'pre-line',
                 }}
-                className="leading-relaxed"
+                className="
+                  leading-relaxed
+                "
               >
                 {data.summary}
               </p>
@@ -402,28 +409,51 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle sectionId="skills" />
+              <SectionTitle
+                sectionId="skills"
+              />
 
               <div className="space-y-3">
                 {data.skills.map(
                   (category) =>
-                    category.items.length > 0 ? (
-                      <div key={category.id}>
+                    category.items.length >
+                      0 ? (
+                      <div
+                        key={
+                          category.id
+                        }
+                      >
                         <h3
                           style={{
-                            fontSize: fs(12),
-                            color: colors.secondary,
+                            fontSize:
+                              fs(12),
+                            color:
+                              colors.secondary,
                           }}
-                          className="font-semibold mb-1.5"
+                          className="
+                            font-semibold
+                            mb-1.5
+                          "
                         >
-                          {category.name}
+                          {
+                            category.name
+                          }
                         </h3>
 
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="
+                          flex
+                          flex-wrap
+                          gap-1.5
+                        ">
                           {category.items.map(
-                            (skill, index) => (
+                            (
+                              skill,
+                              index
+                            ) => (
                               <span
-                                key={index}
+                                key={
+                                  index
+                                }
                                 style={{
                                   background:
                                     colors.surface,
@@ -442,7 +472,9 @@ export default function ModernTemplate({
                                   border
                                 "
                               >
-                                {skill}
+                                {
+                                  skill
+                                }
                               </span>
                             )
                           )}
@@ -463,7 +495,8 @@ export default function ModernTemplate({
 
       case 'interests':
         if (
-          data.interests.length === 0
+          data.interests.length ===
+          0
         ) {
           return null;
         }
@@ -475,11 +508,20 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle sectionId="interests" />
+              <SectionTitle
+                sectionId="interests"
+              />
 
-              <div className="flex flex-wrap gap-1.5">
+              <div className="
+                flex
+                flex-wrap
+                gap-1.5
+              ">
                 {data.interests.map(
-                  (interest, index) => (
+                  (
+                    interest,
+                    index
+                  ) => (
                     <span
                       key={index}
                       style={{
@@ -500,7 +542,9 @@ export default function ModernTemplate({
                         border
                       "
                     >
-                      {interest}
+                      {
+                        interest
+                      }
                     </span>
                   )
                 )}
@@ -517,7 +561,8 @@ export default function ModernTemplate({
 
       case 'projects':
         if (
-          data.projects.length === 0
+          data.projects.length ===
+          0
         ) {
           return null;
         }
@@ -529,22 +574,34 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle sectionId="projects" />
+              <SectionTitle
+                sectionId="projects"
+              />
 
-              <div className="space-y-3">
+              <div className="
+                space-y-3
+              ">
                 {data.projects.map(
                   (project) => (
                     <div
-                      key={project.id}
+                      key={
+                        project.id
+                      }
                     >
                       <h3
                         style={{
-                          fontSize: fs(13),
-                          color: colors.text,
+                          fontSize:
+                            fs(13),
+                          color:
+                            colors.text,
                         }}
-                        className="font-semibold"
+                        className="
+                          font-semibold
+                        "
                       >
-                        {project.name}
+                        {
+                          project.name
+                        }
                       </h3>
 
                       {project.url && (
@@ -566,9 +623,13 @@ export default function ModernTemplate({
                             textDecoration:
                               'underline',
                           }}
-                          className="inline-block"
+                          className="
+                            inline-block
+                          "
                         >
-                          {project.url}
+                          {
+                            project.url
+                          }
                         </a>
                       )}
 
@@ -587,7 +648,9 @@ export default function ModernTemplate({
                             leading-snug
                           "
                         >
-                          {project.description}
+                          {
+                            project.description
+                          }
                         </p>
                       )}
                     </div>
@@ -606,7 +669,8 @@ export default function ModernTemplate({
 
       case 'experiences':
         if (
-          data.experiences.length === 0
+          data.experiences.length ===
+          0
         ) {
           return null;
         }
@@ -618,13 +682,19 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle sectionId="experiences" />
+              <SectionTitle
+                sectionId="experiences"
+              />
 
-              <div className="space-y-4">
+              <div className="
+                space-y-4
+              ">
                 {data.experiences.map(
                   (exp) => (
                     <div
-                      key={exp.id}
+                      key={
+                        exp.id
+                      }
                       className="
                         relative
                         pl-5
@@ -650,14 +720,12 @@ export default function ModernTemplate({
                         }}
                       />
 
-                      <div
-                        className="
-                          flex
-                          items-baseline
-                          justify-between
-                          gap-3
-                        "
-                      >
+                      <div className="
+                        flex
+                        items-baseline
+                        justify-between
+                        gap-3
+                      ">
                         <h3
                           style={{
                             fontSize:
@@ -665,9 +733,13 @@ export default function ModernTemplate({
                             color:
                               colors.text,
                           }}
-                          className="font-semibold"
+                          className="
+                            font-semibold
+                          "
                         >
-                          {exp.role}
+                          {
+                            exp.role
+                          }
                         </h3>
 
                         <span
@@ -685,7 +757,9 @@ export default function ModernTemplate({
                           "
                         >
                           <Calendar className="w-3 h-3" />
-                          {exp.period}
+                          {
+                            exp.period
+                          }
                         </span>
                       </div>
 
@@ -696,9 +770,13 @@ export default function ModernTemplate({
                           color:
                             colors.secondary,
                         }}
-                        className="font-medium"
+                        className="
+                          font-medium
+                        "
                       >
-                        {exp.company}
+                        {
+                          exp.company
+                        }
                       </p>
 
                       {exp.description && (
@@ -716,7 +794,9 @@ export default function ModernTemplate({
                             leading-relaxed
                           "
                         >
-                          {exp.description}
+                          {
+                            exp.description
+                          }
                         </p>
                       )}
                     </div>
@@ -735,7 +815,8 @@ export default function ModernTemplate({
 
       case 'education':
         if (
-          data.education.length === 0
+          data.education.length ===
+          0
         ) {
           return null;
         }
@@ -747,22 +828,26 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle sectionId="education" />
+              <SectionTitle
+                sectionId="education"
+              />
 
-              <div className="space-y-3">
+              <div className="
+                space-y-3
+              ">
                 {data.education.map(
                   (education) => (
                     <div
-                      key={education.id}
+                      key={
+                        education.id
+                      }
                     >
-                      <div
-                        className="
-                          flex
-                          items-baseline
-                          justify-between
-                          gap-3
-                        "
-                      >
+                      <div className="
+                        flex
+                        items-baseline
+                        justify-between
+                        gap-3
+                      ">
                         <h3
                           style={{
                             fontSize:
@@ -770,9 +855,13 @@ export default function ModernTemplate({
                             color:
                               colors.text,
                           }}
-                          className="font-semibold"
+                          className="
+                            font-semibold
+                          "
                         >
-                          {education.degree}
+                          {
+                            education.degree
+                          }
                         </h3>
 
                         <span
@@ -782,9 +871,13 @@ export default function ModernTemplate({
                             color:
                               colors.muted,
                           }}
-                          className="shrink-0"
+                          className="
+                            shrink-0
+                          "
                         >
-                          {education.period}
+                          {
+                            education.period
+                          }
                         </span>
                       </div>
 
@@ -795,9 +888,13 @@ export default function ModernTemplate({
                           color:
                             colors.secondary,
                         }}
-                        className="font-medium"
+                        className="
+                          font-medium
+                        "
                       >
-                        {education.school}
+                        {
+                          education.school
+                        }
                       </p>
 
                       {education.description && (
@@ -815,9 +912,90 @@ export default function ModernTemplate({
                             leading-relaxed
                           "
                         >
-                          {education.description}
+                          {
+                            education.description
+                          }
                         </p>
                       )}
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * LANGUES
+       * =====================================================
+       */
+
+      case 'languages':
+        if (
+          !data.languages?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="languages"
+            id="languages"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle
+                sectionId="languages"
+              />
+
+              <div className="
+                space-y-2
+              ">
+                {data.languages.map(
+                  (language) => (
+                    <div
+                      key={
+                        language.id
+                      }
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                        gap-3
+                      "
+                    >
+                      <span
+                        style={{
+                          fontSize:
+                            fs(12),
+                          color:
+                            colors.text,
+                        }}
+                        className="
+                          font-semibold
+                        "
+                      >
+                        {
+                          language.name
+                        }
+                      </span>
+
+                      <span
+                        style={{
+                          fontSize:
+                            fs(11),
+                          color:
+                            colors.muted,
+                        }}
+                        className="
+                          text-right
+                        "
+                      >
+                        {
+                          language.level
+                        }
+                      </span>
                     </div>
                   )
                 )}
@@ -846,9 +1024,13 @@ export default function ModernTemplate({
             enabled={!captureMode}
           >
             <section>
-              <SectionTitle sectionId="certifications" />
+              <SectionTitle
+                sectionId="certifications"
+              />
 
-              <div className="space-y-1.5">
+              <div className="
+                space-y-1.5
+              ">
                 {data.certifications.map(
                   (certification) => {
                     const certificationUrl =
@@ -874,14 +1056,18 @@ export default function ModernTemplate({
                           color:
                             colors.muted,
                         }}
-                        className="leading-relaxed"
+                        className="
+                          leading-relaxed
+                        "
                       >
                         <span
                           style={{
                             color:
                               colors.text,
                           }}
-                          className="font-semibold"
+                          className="
+                            font-semibold
+                          "
                         >
                           {
                             certification.name
@@ -891,6 +1077,7 @@ export default function ModernTemplate({
                         {certification.organization && (
                           <>
                             {' — '}
+
                             {
                               certification.organization
                             }
@@ -900,6 +1087,7 @@ export default function ModernTemplate({
                         {certification.date && (
                           <>
                             {' — '}
+
                             {
                               certification.date
                             }
@@ -909,6 +1097,7 @@ export default function ModernTemplate({
                         {certificationUrl && (
                           <>
                             {' — '}
+
                             <a
                               href={
                                 certificationUrl
@@ -956,7 +1145,10 @@ export default function ModernTemplate({
         fontSize:
           fs(14),
       }}
-      className="w-full h-full"
+      className="
+        w-full
+        h-full
+      "
     >
       {/* =====================================================
           HEADER
@@ -972,7 +1164,8 @@ export default function ModernTemplate({
           gap-6
         "
         style={{
-          background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+          background:
+            `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
           color: '#fff',
         }}
       >
@@ -992,11 +1185,13 @@ export default function ModernTemplate({
             style={{
               width: `${
                 96 *
-                (data.photoScale ?? 1)
+                (data.photoScale ??
+                  1)
               }px`,
               height: `${
                 96 *
-                (data.photoScale ?? 1)
+                (data.photoScale ??
+                  1)
               }px`,
             }}
           />
@@ -1056,7 +1251,8 @@ export default function ModernTemplate({
               href={`mailto:${data.email}`}
               style={{
                 color: 'inherit',
-                textDecoration: 'none',
+                textDecoration:
+                  'none',
               }}
               className="
                 flex
@@ -1066,7 +1262,9 @@ export default function ModernTemplate({
               "
             >
               <Mail className="w-4 h-4" />
-              <span>{data.email}</span>
+              <span>
+                {data.email}
+              </span>
             </a>
           )}
 
@@ -1078,7 +1276,8 @@ export default function ModernTemplate({
               )}`}
               style={{
                 color: 'inherit',
-                textDecoration: 'none',
+                textDecoration:
+                  'none',
               }}
               className="
                 flex
@@ -1088,7 +1287,9 @@ export default function ModernTemplate({
               "
             >
               <Phone className="w-4 h-4" />
-              <span>{data.phone}</span>
+              <span>
+                {data.phone}
+              </span>
             </a>
           )}
 
@@ -1102,7 +1303,9 @@ export default function ModernTemplate({
               "
             >
               <MapPin className="w-4 h-4" />
-              <span>{data.location}</span>
+              <span>
+                {data.location}
+              </span>
             </span>
           )}
 
@@ -1116,7 +1319,9 @@ export default function ModernTemplate({
               "
             >
               <Calendar className="w-4 h-4" />
-              <span>{age} ans</span>
+              <span>
+                {age} ans
+              </span>
             </span>
           )}
 
@@ -1130,7 +1335,9 @@ export default function ModernTemplate({
               "
             >
               <Car className="w-4 h-4" />
-              <span>Permis B</span>
+              <span>
+                Permis B
+              </span>
             </span>
           )}
 
@@ -1147,7 +1354,8 @@ export default function ModernTemplate({
               rel="noopener noreferrer"
               style={{
                 color: 'inherit',
-                textDecoration: 'none',
+                textDecoration:
+                  'none',
               }}
               className="
                 flex
@@ -1157,7 +1365,9 @@ export default function ModernTemplate({
               "
             >
               <Globe className="w-4 h-4" />
-              <span>{data.website}</span>
+              <span>
+                {data.website}
+              </span>
             </a>
           )}
 
@@ -1174,7 +1384,8 @@ export default function ModernTemplate({
               rel="noopener noreferrer"
               style={{
                 color: 'inherit',
-                textDecoration: 'none',
+                textDecoration:
+                  'none',
               }}
               className="
                 flex
@@ -1184,7 +1395,9 @@ export default function ModernTemplate({
               "
             >
               <Linkedin className="w-4 h-4" />
-              <span>{data.linkedin}</span>
+              <span>
+                {data.linkedin}
+              </span>
             </a>
           )}
 
@@ -1201,7 +1414,8 @@ export default function ModernTemplate({
               rel="noopener noreferrer"
               style={{
                 color: 'inherit',
-                textDecoration: 'none',
+                textDecoration:
+                  'none',
               }}
               className="
                 flex
@@ -1211,7 +1425,9 @@ export default function ModernTemplate({
               "
             >
               <Github className="w-4 h-4" />
-              <span>{data.github}</span>
+              <span>
+                {data.github}
+              </span>
             </a>
           )}
         </div>
@@ -1244,7 +1460,9 @@ export default function ModernTemplate({
               verticalListSortingStrategy
             }
           >
-            <aside className="space-y-7">
+            <aside className="
+              space-y-7
+            ">
               {leftOrder.map(
                 (sectionId) =>
                   renderSection(
@@ -1269,7 +1487,9 @@ export default function ModernTemplate({
               verticalListSortingStrategy
             }
           >
-            <main className="space-y-7">
+            <main className="
+              space-y-7
+            ">
               {rightOrder.map(
                 (sectionId) =>
                   renderSection(

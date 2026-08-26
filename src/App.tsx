@@ -107,33 +107,35 @@ function getRoute(): AppRoute {
 function normalizeCVData(
   data: CVData
 ): CVData {
-  const defaultSectionOrder: CVSectionId[] =
-    [
-      'summary',
-      'experiences',
-      'education',
-      'skills',
-      'projects',
-      'interests',
-      'certifications',
-    ];
+  const defaultSectionOrder: CVSectionId[] = [
+    'summary',
+    'experiences',
+    'education',
+    'skills',
+    'projects',
+    'interests',
+    'certifications',
+    'languages',
+  ];
 
-  const sectionOrder:
-    CVSectionId[] =
+  const sectionOrder: CVSectionId[] =
     data.sectionOrder?.length
-      ? [
-          ...data.sectionOrder,
-        ]
-      : [
-          ...defaultSectionOrder,
-        ];
+      ? [...data.sectionOrder]
+      : [...defaultSectionOrder];
 
   const certifications =
     data.certifications ?? [];
 
+  const languages =
+    data.languages ?? [];
+
+  /*
+   * Les anciens CV peuvent contenir
+   * des certifications sans avoir encore
+   * la section dans sectionOrder.
+   */
   if (
-    certifications.length >
-      0 &&
+    certifications.length > 0 &&
     !sectionOrder.includes(
       'certifications'
     )
@@ -143,10 +145,27 @@ function normalizeCVData(
     );
   }
 
+  /*
+   * Les anciens CV peuvent aussi
+   * ne pas avoir languages.
+   */
+  if (
+    languages.length > 0 &&
+    !sectionOrder.includes(
+      'languages'
+    )
+  ) {
+    sectionOrder.push(
+      'languages'
+    );
+  }
+
   return {
     ...data,
 
     certifications,
+
+    languages,
 
     sectionOrder,
 

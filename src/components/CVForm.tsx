@@ -40,6 +40,7 @@ import {
   type Education,
   type Project,
   type Certification,
+  type Language,
   type SkillCategory,
   type CVStyle,
 } from '@/types/types';
@@ -511,6 +512,7 @@ export default function CVForm({
       | 'education'
       | 'projects'
       | 'certifications'
+      | 'languages'
   ) => {
     const {
       active,
@@ -585,7 +587,8 @@ export default function CVForm({
       | 'experiences'
       | 'education'
       | 'projects'
-      | 'certifications',
+      | 'certifications'
+      | 'languages',
     draggedItemId: string,
     targetItemId: string
   ) => {
@@ -782,6 +785,51 @@ export default function CVForm({
         items
       );
     }
+    if (
+      key === 'languages'
+    ) {
+      const items = [
+        ...data.languages,
+      ];
+
+      const fromIndex =
+        items.findIndex(
+          (item) =>
+            item.id ===
+            draggedItemId
+        );
+
+      const targetIndex =
+        items.findIndex(
+          (item) =>
+            item.id ===
+            targetItemId
+        );
+
+      if (
+        fromIndex === -1 ||
+        targetIndex === -1
+      ) {
+        return;
+      }
+
+      const [movedItem] =
+        items.splice(
+          fromIndex,
+          1
+        );
+
+      items.splice(
+        targetIndex,
+        0,
+        movedItem
+      );
+
+      update(
+        'languages',
+        items
+      );
+    }
   };
 
   /*
@@ -857,12 +905,14 @@ export default function CVForm({
         | 'experiences'
         | 'education'
         | 'projects'
-        | 'certifications',
+        | 'certifications'
+        | 'languages',
       item:
         | Experience
         | Education
         | Project
         | Certification
+        | Language
     ) => {
       if (key === 'experiences') {
         update('experiences', [
@@ -887,6 +937,34 @@ export default function CVForm({
           ...data.projects,
           item as Project,
         ]);
+
+        return;
+      }
+
+      if (key === 'languages') {
+        const nextSectionOrder: CVSectionId[] =
+          data.sectionOrder?.includes(
+            'languages'
+          )
+            ? [...data.sectionOrder]
+            : [
+                ...(data.sectionOrder ?? []),
+                'languages',
+              ];
+
+        onChange({
+          ...data,
+          languages: [
+            ...data.languages,
+            item as Language,
+          ],
+          sectionOrder:
+            nextSectionOrder,
+          sectionTitles: {
+            ...DEFAULT_SECTION_TITLES,
+            ...(data.sectionTitles ?? {}),
+          },
+        });
 
         return;
       }
@@ -927,7 +1005,8 @@ export default function CVForm({
         | 'experiences'
         | 'education'
         | 'projects'
-        | 'certifications',
+        | 'certifications'
+        | 'languages',
       id: string
     ) => {
       if (
@@ -972,6 +1051,18 @@ export default function CVForm({
         return;
       }
 
+      if (key === 'languages') {
+        update(
+          'languages',
+          data.languages.filter(
+            (x) =>
+              x.id !== id
+          )
+        );
+
+        return;
+      }
+
       update(
         'certifications',
         data.certifications.filter(
@@ -986,7 +1077,8 @@ export default function CVForm({
         | 'experiences'
         | 'education'
         | 'projects'
-        | 'certifications',
+        | 'certifications'
+        | 'languages',
       id: string,
       field: string,
       value: string
@@ -1037,6 +1129,24 @@ export default function CVForm({
         update(
           'projects',
           data.projects.map(
+            (x) =>
+              x.id === id
+                ? {
+                    ...x,
+                    [field]:
+                      value,
+                  }
+                : x
+          )
+        );
+
+        return;
+      }
+
+      if (key === 'languages') {
+        update(
+          'languages',
+          data.languages.map(
             (x) =>
               x.id === id
                 ? {
@@ -2594,6 +2704,183 @@ export default function CVForm({
                 0 && (
                 <p className="text-xs text-slate-400 italic">
                   Aucune certification.
+                  Cliquez sur «
+                  Ajouter » pour
+                  commencer.
+                </p>
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </section>
+
+      {/* =====================================================
+          LANGUES
+      ====================================================== */}
+
+      <section className="space-y-3">
+        <SectionEditorTitle
+          sectionId="languages"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+          action={
+            <button
+              type="button"
+              onClick={() =>
+                arrayOps.add(
+                  'languages',
+                  {
+                    id: uid(),
+                    name: '',
+                    level: '',
+                  } as Language
+                )
+              }
+              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                Ajouter
+              </span>
+              <span className="sm:hidden">
+                +
+              </span>
+            </button>
+          }
+        />
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={
+            closestCenter
+          }
+          onDragStart={
+            handleDragStart
+          }
+          onDragCancel={
+            handleDragCancel
+          }
+          onDragEnd={(event) =>
+            handleSortEnd(
+              event,
+              'languages'
+            )
+          }
+        >
+          <SortableContext
+            items={data.languages.map(
+              (language) =>
+                language.id
+            )}
+            strategy={
+              verticalListSortingStrategy
+            }
+          >
+            <div className="space-y-3">
+              {data.languages.map(
+                (language) => (
+                  <SortableItem
+                    key={
+                      language.id
+                    }
+                    id={
+                      language.id
+                    }
+                  >
+                    {({
+                      setNodeRef,
+                      style,
+                      attributes,
+                      listeners,
+                      isDragging,
+                    }) => (
+                      <div
+                        ref={setNodeRef}
+                        style={style}
+                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
+                          isDragging
+                            ? 'opacity-60 shadow-xl scale-[1.01] z-50'
+                            : 'hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <button
+                            type="button"
+                            {...attributes}
+                            {...listeners}
+                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            title="Déplacer la langue"
+                            aria-label="Déplacer la langue"
+                          >
+                            <GripVertical
+                              className={`w-4 h-4 ${
+                                isDragging
+                                  ? 'text-slate-900'
+                                  : 'text-slate-300 hover:text-slate-600'
+                              }`}
+                            />
+                          </button>
+
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              className={inputCls}
+                              value={
+                                language.name
+                              }
+                              onChange={(e) =>
+                                arrayOps.patch(
+                                  'languages',
+                                  language.id,
+                                  'name',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Langue (ex: Français)"
+                            />
+
+                            <input
+                              className={inputCls}
+                              value={
+                                language.level
+                              }
+                              onChange={(e) =>
+                                arrayOps.patch(
+                                  'languages',
+                                  language.id,
+                                  'level',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Niveau (ex: Courant, B2, C1...)"
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              arrayOps.remove(
+                                'languages',
+                                language.id
+                              )
+                            }
+                            className="mt-2 text-slate-400 hover:text-red-500 transition"
+                            aria-label="Supprimer la langue"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </SortableItem>
+                )
+              )}
+
+              {data.languages.length ===
+                0 && (
+                <p className="text-xs text-slate-400 italic">
+                  Aucune langue.
                   Cliquez sur «
                   Ajouter » pour
                   commencer.

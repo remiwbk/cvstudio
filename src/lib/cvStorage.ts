@@ -45,6 +45,7 @@ const VALID_SECTION_IDS: CVSectionId[] = [
   'projects',
   'interests',
   'certifications',
+  'languages',
 ];
 
 const VALID_SECTION_COLUMNS: CVSectionColumn[] = [
@@ -59,6 +60,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'skills',
   'projects',
   'interests',
+  'languages',
   'certifications',
 ];
 
@@ -69,6 +71,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
   summary: 'left',
   skills: 'left',
   interests: 'left',
+  languages: 'left',
   certifications: 'left',
 
   experiences: 'right',
@@ -87,6 +90,7 @@ const DEFAULT_SECTION_TITLES: Record<
   projects: 'Projets',
   interests: "Centres d'intérêt",
   certifications: 'Certifications',
+  languages: 'Langues',
 };
 
 const defaultStyle: CVStyle = {
@@ -620,6 +624,43 @@ function normalizeCertifications(
 }
 
 /* =========================================================
+   NORMALISATION LANGUES
+========================================================= */
+
+function normalizeLanguages(
+  value: unknown
+) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(isObject)
+    .map(
+      (
+        language,
+        index
+      ) => ({
+        id:
+          stringValue(
+            language.id
+          ) ||
+          `language_${index}`,
+
+        name:
+          stringValue(
+            language.name
+          ),
+
+        level:
+          stringValue(
+            language.level
+          ),
+      })
+    );
+}
+
+/* =========================================================
    NORMALISATION CV
 ========================================================= */
 
@@ -742,6 +783,11 @@ function normalizeCVData(
     certifications:
       normalizeCertifications(
         value.certifications
+      ),
+
+    languages:
+      normalizeLanguages(
+        value.languages
       ),
 
     interests:
@@ -959,7 +1005,7 @@ export function downloadCVGen(
 ): void {
   const payload = {
     /*
-     * Version 4 :
+     * Version 5 :
      *
      * Toutes les données du CV sont
      * conservées dans data :
@@ -974,12 +1020,13 @@ export function downloadCVGen(
      * - projets
      * - intérêts
      * - certifications
+     * - languages
      * - style
      * - ordre des sections
      * - colonnes
      * - titres personnalisés
      */
-    version: 4,
+    version: 5,
 
     name:
       cv.name,

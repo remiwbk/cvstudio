@@ -50,21 +50,20 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'education',
   'skills',
   'projects',
+  'languages',
   'interests',
   'certifications',
 ];
 
 /**
  * =========================================================
- * COLONNE / ZONE FINALE
+ * ZONE DE DROP FINALE
  * =========================================================
  *
  * Minimal est un template mono-colonne.
  *
- * On conserve exactement son layout original.
- *
- * La seule modification est l'ajout d'une vraie
- * zone droppable à la toute fin des sections.
+ * Cette zone permet de déposer une section après
+ * la dernière section existante.
  * =========================================================
  */
 
@@ -179,6 +178,9 @@ export default function MinimalTemplate({
       (c) =>
         c.items.length > 0
     );
+
+  const hasLanguages =
+    data.languages?.length > 0;
 
   const age =
     calculateAge(
@@ -728,6 +730,81 @@ export default function MinimalTemplate({
                             }
                           </p>
                         )}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * LANGUES
+       * =====================================================
+       */
+
+      case 'languages':
+        if (!hasLanguages) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="languages"
+            id="languages"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle
+                sectionId="languages"
+              />
+
+              <div className="space-y-2">
+                {data.languages.map(
+                  (language) => (
+                    <div
+                      key={
+                        language.id
+                      }
+                      className="
+                        grid
+                        grid-cols-4
+                        gap-4
+                      "
+                    >
+                      <div
+                        style={{
+                          fontSize:
+                            fs(13),
+                          color:
+                            colors.text,
+                        }}
+                        className="
+                          col-span-1
+                          font-medium
+                        "
+                      >
+                        {
+                          language.name
+                        }
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize:
+                            fs(13),
+                          color:
+                            colors.muted,
+                        }}
+                        className="
+                          col-span-3
+                        "
+                      >
+                        {
+                          language.level
+                        }
                       </div>
                     </div>
                   )

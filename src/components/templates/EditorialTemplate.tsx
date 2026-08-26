@@ -54,6 +54,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'experiences',
   'education',
   'skills',
+  'languages',
   'projects',
   'interests',
   'certifications',
@@ -71,6 +72,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
 > = {
   summary: 'left',
   skills: 'left',
+  languages: 'left',
   interests: 'left',
   certifications: 'left',
 
@@ -281,6 +283,13 @@ export default function EditorialTemplate({
       (c) =>
         c.items.length > 0
     );
+
+  const hasLanguages =
+    data.languages?.some(
+      (language) =>
+        language.name.trim() ||
+        language.level.trim()
+    ) ?? false;
 
   const age =
     calculateAge(
@@ -520,6 +529,96 @@ export default function EditorialTemplate({
                       </div>
                     ) : null
                 )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * LANGUES
+       * =====================================================
+       */
+
+      case 'languages':
+        if (!hasLanguages) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="languages"
+            id="languages"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle
+                fonts={fonts}
+                colors={colors}
+                fontSize={fs(13)}
+              >
+                {sectionTitle}
+              </SectionTitle>
+
+              <div className="space-y-2">
+                {data.languages
+                  .filter(
+                    (language) =>
+                      language.name.trim() ||
+                      language.level.trim()
+                  )
+                  .map(
+                    (
+                      language
+                    ) => (
+                      <div
+                        key={
+                          language.id
+                        }
+                        className="
+                          flex
+                          items-center
+                          justify-between
+                          gap-4
+                        "
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.primary,
+                            fontSize:
+                              fs(10.5),
+                          }}
+                          className="
+                            font-semibold
+                          "
+                        >
+                          {
+                            language.name
+                          }
+                        </span>
+
+                        {language.level && (
+                          <span
+                            style={{
+                              color:
+                                colors.muted,
+                              fontSize:
+                                fs(10),
+                            }}
+                            className="
+                              shrink-0
+                              text-right
+                            "
+                          >
+                            {
+                              language.level
+                            }
+                          </span>
+                        )}
+                      </div>
+                    )
+                  )}
               </div>
             </section>
           </SortableSection>
@@ -1221,8 +1320,8 @@ export default function EditorialTemplate({
               <span
                 className="
                   flex
-                  gap-1.5
                   items-center
+                  gap-1.5
                 "
               >
                 <Car className="w-3 h-3" />

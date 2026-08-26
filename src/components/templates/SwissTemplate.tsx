@@ -9,6 +9,8 @@ import {
   Car,
 } from 'lucide-react';
 
+import type { ReactNode } from 'react';
+
 import {
   useDroppable,
 } from '@dnd-kit/core';
@@ -50,6 +52,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'experiences',
   'education',
   'skills',
+  'languages',
   'projects',
   'interests',
   'certifications',
@@ -64,6 +67,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
 const DEFAULT_SWISS_LAYOUT_ORDER: CVSectionId[] = [
   'summary',
   'skills',
+  'languages',
   'interests',
   'experiences',
   'education',
@@ -83,6 +87,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
 > = {
   summary: 'left',
   skills: 'left',
+  languages: 'left',
   interests: 'left',
   certifications: 'left',
 
@@ -93,7 +98,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
 
 /**
  * =========================================================
- * TYPES
+ * TYPES DES COLONNES
  * =========================================================
  */
 
@@ -103,37 +108,38 @@ type SwissColumnId =
 
 /**
  * =========================================================
- * COLONNE DROPPABLE
+ * ZONE DROPPABLE D'UNE COLONNE
  * =========================================================
  */
 
 function SwissColumn({
   id,
   children,
+  captureMode,
 }: {
   id: SwissColumnId;
-  children: React.ReactNode;
+  children: ReactNode;
+  captureMode: boolean;
 }) {
   const {
     setNodeRef,
     isOver,
   } = useDroppable({
     id,
+    disabled: captureMode,
   });
 
   const bottomId =
-    id ===
-    'section-column-left'
+    id === 'section-column-left'
       ? 'section-column-bottom-left'
       : 'section-column-bottom-right';
 
   const {
-    setNodeRef:
-      setBottomNodeRef,
-    isOver:
-      isBottomOver,
+    setNodeRef: setBottomNodeRef,
+    isOver: isBottomOver,
   } = useDroppable({
     id: bottomId,
+    disabled: captureMode,
   });
 
   return (
@@ -146,51 +152,44 @@ function SwissColumn({
         w-full
         rounded-sm
         transition
-
         ${
-          isOver
+          isOver && !captureMode
             ? 'bg-slate-50/40'
             : ''
         }
       `}
     >
-      {/* ===================================================
-          CONTENU
-      ==================================================== */}
-
       {children}
 
-      {/* ===================================================
-          ZONE FINALE
-      ==================================================== */}
-
-      <div
-        ref={setBottomNodeRef}
-        className="
-          relative
-          w-full
-          h-4
-          mt-0
-        "
-      >
-        {isBottomOver && (
-          <div
-            className="
-              pointer-events-none
-              absolute
-              left-0
-              right-0
-              top-1/2
-              -translate-y-1/2
-              z-[100]
-              h-[3px]
-              rounded-full
-              bg-slate-900
-              shadow-sm
-            "
-          />
-        )}
-      </div>
+      {!captureMode && (
+        <div
+          ref={setBottomNodeRef}
+          className="
+            relative
+            w-full
+            h-4
+            mt-0
+          "
+        >
+          {isBottomOver && (
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-0
+                right-0
+                top-1/2
+                -translate-y-1/2
+                z-[100]
+                h-[3px]
+                rounded-full
+                bg-slate-900
+                shadow-sm
+              "
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -208,19 +207,13 @@ function calculateAge(
     return null;
   }
 
-  const birth =
-    new Date(birthDate);
+  const birth = new Date(birthDate);
 
-  if (
-    Number.isNaN(
-      birth.getTime()
-    )
-  ) {
+  if (Number.isNaN(birth.getTime())) {
     return null;
   }
 
-  const today =
-    new Date();
+  const today = new Date();
 
   let age =
     today.getFullYear() -
@@ -240,12 +233,12 @@ function calculateAge(
     age--;
   }
 
-  return age;
+  return age >= 0 ? age : null;
 }
 
 /**
  * =========================================================
- * TEMPLATE
+ * TEMPLATE SWISS
  * =========================================================
  */
 
@@ -259,11 +252,35 @@ export default function SwissTemplate({
   const fs = (n: number) =>
     `${n * fontScale}px`;
 
+  /**
+   * =========================================================
+   * COMPÉTENCES
+   * =========================================================
+   */
+
   const hasSkills =
     data.skills.some(
       (category) =>
         category.items.length > 0
     );
+
+  /**
+   * =========================================================
+   * LANGUES
+   * =========================================================
+   *
+   * On vérifie ici la structure utilisée par le type CVData.
+   *
+   * Si data.languages n'existe pas dans ton type, il faudra
+   * également l'ajouter dans types.ts.
+   * =========================================================
+   */
+
+  const hasLanguages =
+    data.languages?.some(
+      (language) =>
+        Boolean(language.name)
+    ) ?? false;
 
   /**
    * =========================================================
@@ -278,7 +295,7 @@ export default function SwissTemplate({
 
   /**
    * =========================================================
-   * ORDRE
+   * ORDRE DES SECTIONS
    * =========================================================
    */
 
@@ -287,7 +304,7 @@ export default function SwissTemplate({
       DEFAULT_SECTION_ORDER.length &&
     DEFAULT_SECTION_ORDER.every(
       (sectionId, index) =>
-        data.sectionOrder[index] ===
+        data.sectionOrder?.[index] ===
         sectionId
     );
 
@@ -308,12 +325,8 @@ export default function SwissTemplate({
     sectionId: CVSectionId
   ): CVSectionColumn => {
     return (
-      data.sectionColumns?.[
-        sectionId
-      ] ??
-      DEFAULT_SECTION_COLUMNS[
-        sectionId
-      ]
+      data.sectionColumns?.[sectionId] ??
+      DEFAULT_SECTION_COLUMNS[sectionId]
     );
   };
 
@@ -377,12 +390,8 @@ export default function SwissTemplate({
     sectionId: CVSectionId
   ): string => {
     return (
-      data.sectionTitles?.[
-        sectionId
-      ] ??
-      DEFAULT_SECTION_TITLES[
-        sectionId
-      ]
+      data.sectionTitles?.[sectionId] ??
+      DEFAULT_SECTION_TITLES[sectionId]
     );
   };
 
@@ -420,33 +429,22 @@ export default function SwissTemplate({
           >
             <section>
               <NumberTitle
-                number={
-                  sectionNumber
-                }
+                number={sectionNumber}
                 title={getSectionTitle(
                   'summary'
                 )}
-                colors={
-                  colors
-                }
-                fonts={
-                  fonts
-                }
+                colors={colors}
+                fonts={fonts}
                 size={fs(13)}
               />
 
               <p
                 style={{
-                  fontSize:
-                    fs(10.5),
-                  color:
-                    colors.muted,
-                  whiteSpace:
-                    'pre-line',
+                  fontSize: fs(10.5),
+                  color: colors.muted,
+                  whiteSpace: 'pre-line',
                 }}
-                className="
-                  leading-relaxed
-                "
+                className="leading-relaxed"
               >
                 {data.summary}
               </p>
@@ -473,51 +471,36 @@ export default function SwissTemplate({
           >
             <section>
               <NumberTitle
-                number={
-                  sectionNumber
-                }
+                number={sectionNumber}
                 title={getSectionTitle(
                   'skills'
                 )}
-                colors={
-                  colors
-                }
-                fonts={
-                  fonts
-                }
+                colors={colors}
+                fonts={fonts}
                 size={fs(13)}
               />
 
               <div className="space-y-3">
                 {data.skills.map(
                   (category) =>
-                    category.items.length >
-                      0 ? (
+                    category.items.length > 0 ? (
                       <div
-                        key={
-                          category.id
-                        }
+                        key={category.id}
                       >
                         <h3
                           style={{
-                            fontSize:
-                              fs(10),
+                            fontSize: fs(10),
                             color:
                               colors.secondary,
                           }}
-                          className="
-                            font-bold
-                          "
+                          className="font-bold"
                         >
-                          {
-                            category.name
-                          }
+                          {category.name}
                         </h3>
 
                         <p
                           style={{
-                            fontSize:
-                              fs(9.5),
+                            fontSize: fs(9.5),
                             color:
                               colors.muted,
                           }}
@@ -540,14 +523,83 @@ export default function SwissTemplate({
 
       /**
        * =====================================================
+       * LANGUES
+       * =====================================================
+       */
+
+      case 'languages':
+        if (!hasLanguages) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="languages"
+            id="languages"
+            enabled={!captureMode}
+          >
+            <section>
+              <NumberTitle
+                number={sectionNumber}
+                title={getSectionTitle(
+                  'languages'
+                )}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
+
+              <div className="space-y-2">
+                {data.languages.map(
+                  (language) => (
+                    <div
+                      key={language.id}
+                      className="
+                        flex
+                        items-baseline
+                        justify-between
+                        gap-3
+                      "
+                    >
+                      <span
+                        style={{
+                          fontSize: fs(10),
+                          color:
+                            colors.secondary,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {language.name}
+                      </span>
+
+                      {language.level && (
+                        <span
+                          style={{
+                            fontSize: fs(9.5),
+                            color:
+                              colors.muted,
+                          }}
+                        >
+                          {language.level}
+                        </span>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
        * INTÉRÊTS
        * =====================================================
        */
 
       case 'interests':
         if (
-          data.interests.length ===
-          0
+          data.interests.length === 0
         ) {
           return null;
         }
@@ -560,33 +612,22 @@ export default function SwissTemplate({
           >
             <section>
               <NumberTitle
-                number={
-                  sectionNumber
-                }
+                number={sectionNumber}
                 title={getSectionTitle(
                   'interests'
                 )}
-                colors={
-                  colors
-                }
-                fonts={
-                  fonts
-                }
+                colors={colors}
+                fonts={fonts}
                 size={fs(13)}
               />
 
               <p
                 style={{
-                  fontSize:
-                    fs(10),
-                  color:
-                    colors.muted,
-                  whiteSpace:
-                    'pre-line',
+                  fontSize: fs(10),
+                  color: colors.muted,
+                  whiteSpace: 'pre-line',
                 }}
-                className="
-                  leading-relaxed
-                "
+                className="leading-relaxed"
               >
                 {data.interests.join(
                   ' · '
@@ -604,8 +645,7 @@ export default function SwissTemplate({
 
       case 'experiences':
         if (
-          data.experiences.length ===
-          0
+          data.experiences.length === 0
         ) {
           return null;
         }
@@ -618,18 +658,12 @@ export default function SwissTemplate({
           >
             <section>
               <NumberTitle
-                number={
-                  sectionNumber
-                }
+                number={sectionNumber}
                 title={getSectionTitle(
                   'experiences'
                 )}
-                colors={
-                  colors
-                }
-                fonts={
-                  fonts
-                }
+                colors={colors}
+                fonts={fonts}
                 size={fs(13)}
               />
 
@@ -637,9 +671,7 @@ export default function SwissTemplate({
                 {data.experiences.map(
                   (exp) => (
                     <article
-                      key={
-                        exp.id
-                      }
+                      key={exp.id}
                     >
                       <div
                         className="
@@ -658,13 +690,9 @@ export default function SwissTemplate({
                               fontSize:
                                 fs(11),
                             }}
-                            className="
-                              font-bold
-                            "
+                            className="font-bold"
                           >
-                            {
-                              exp.role
-                            }
+                            {exp.role}
                           </h3>
 
                           <p
@@ -674,13 +702,9 @@ export default function SwissTemplate({
                               fontSize:
                                 fs(10.5),
                             }}
-                            className="
-                              font-medium
-                            "
+                            className="font-medium"
                           >
-                            {
-                              exp.company
-                            }
+                            {exp.company}
                           </p>
                         </div>
 
@@ -692,9 +716,7 @@ export default function SwissTemplate({
                               fs(9.5),
                           }}
                         >
-                          {
-                            exp.period
-                          }
+                          {exp.period}
                         </span>
                       </div>
 
@@ -713,9 +735,7 @@ export default function SwissTemplate({
                             mt-2
                           "
                         >
-                          {
-                            exp.description
-                          }
+                          {exp.description}
                         </p>
                       )}
                     </article>
@@ -734,8 +754,7 @@ export default function SwissTemplate({
 
       case 'education':
         if (
-          data.education.length ===
-          0
+          data.education.length === 0
         ) {
           return null;
         }
@@ -748,18 +767,12 @@ export default function SwissTemplate({
           >
             <section>
               <NumberTitle
-                number={
-                  sectionNumber
-                }
+                number={sectionNumber}
                 title={getSectionTitle(
                   'education'
                 )}
-                colors={
-                  colors
-                }
-                fonts={
-                  fonts
-                }
+                colors={colors}
+                fonts={fonts}
                 size={fs(13)}
               />
 
@@ -767,9 +780,7 @@ export default function SwissTemplate({
                 {data.education.map(
                   (ed) => (
                     <article
-                      key={
-                        ed.id
-                      }
+                      key={ed.id}
                     >
                       <div
                         className="
@@ -788,13 +799,9 @@ export default function SwissTemplate({
                               fontSize:
                                 fs(11),
                             }}
-                            className="
-                              font-bold
-                            "
+                            className="font-bold"
                           >
-                            {
-                              ed.degree
-                            }
+                            {ed.degree}
                           </h3>
 
                           <p
@@ -805,9 +812,7 @@ export default function SwissTemplate({
                                 fs(10),
                             }}
                           >
-                            {
-                              ed.school
-                            }
+                            {ed.school}
                           </p>
                         </div>
 
@@ -819,9 +824,7 @@ export default function SwissTemplate({
                               fs(9.5),
                           }}
                         >
-                          {
-                            ed.period
-                          }
+                          {ed.period}
                         </span>
                       </div>
 
@@ -840,9 +843,7 @@ export default function SwissTemplate({
                             mt-1.5
                           "
                         >
-                          {
-                            ed.description
-                          }
+                          {ed.description}
                         </p>
                       )}
                     </article>
@@ -861,8 +862,7 @@ export default function SwissTemplate({
 
       case 'projects':
         if (
-          data.projects.length ===
-          0
+          data.projects.length === 0
         ) {
           return null;
         }
@@ -875,18 +875,12 @@ export default function SwissTemplate({
           >
             <section>
               <NumberTitle
-                number={
-                  sectionNumber
-                }
+                number={sectionNumber}
                 title={getSectionTitle(
                   'projects'
                 )}
-                colors={
-                  colors
-                }
-                fonts={
-                  fonts
-                }
+                colors={colors}
+                fonts={fonts}
                 size={fs(13)}
               />
 
@@ -894,9 +888,7 @@ export default function SwissTemplate({
                 {data.projects.map(
                   (project) => (
                     <article
-                      key={
-                        project.id
-                      }
+                      key={project.id}
                     >
                       <h3
                         style={{
@@ -905,13 +897,9 @@ export default function SwissTemplate({
                           color:
                             colors.secondary,
                         }}
-                        className="
-                          font-bold
-                        "
+                        className="font-bold"
                       >
-                        {
-                          project.name
-                        }
+                        {project.name}
                       </h3>
 
                       {project.url && (
@@ -933,13 +921,9 @@ export default function SwissTemplate({
                             textDecoration:
                               'underline',
                           }}
-                          className="
-                            inline-block
-                          "
+                          className="inline-block"
                         >
-                          {
-                            project.url
-                          }
+                          {project.url}
                         </a>
                       )}
 
@@ -958,9 +942,7 @@ export default function SwissTemplate({
                             mt-1
                           "
                         >
-                          {
-                            project.description
-                          }
+                          {project.description}
                         </p>
                       )}
                     </article>
@@ -992,34 +974,27 @@ export default function SwissTemplate({
           >
             <section>
               <NumberTitle
-                number={
-                  sectionNumber
-                }
+                number={sectionNumber}
                 title={getSectionTitle(
                   'certifications'
                 )}
-                colors={
-                  colors
-                }
-                fonts={
-                  fonts
-                }
+                colors={colors}
+                fonts={fonts}
                 size={fs(13)}
               />
 
               <div
                 style={{
-                  fontSize:
-                    fs(9.5),
-                  color:
-                    colors.muted,
+                  fontSize: fs(9.5),
+                  color: colors.muted,
                 }}
-                className="
-                  leading-relaxed
-                "
+                className="leading-relaxed"
               >
                 {data.certifications.map(
-                  (certification, index) => {
+                  (
+                    certification,
+                    index
+                  ) => {
                     const certificationUrl =
                       certification.url
                         ? certification.url.startsWith(
@@ -1039,8 +1014,7 @@ export default function SwissTemplate({
                         }
                         className={
                           index <
-                          data
-                            .certifications
+                          data.certifications
                             .length -
                             1
                             ? 'mb-1'
@@ -1051,8 +1025,7 @@ export default function SwissTemplate({
                           style={{
                             color:
                               colors.secondary,
-                            fontWeight:
-                              700,
+                            fontWeight: 700,
                           }}
                         >
                           {
@@ -1121,12 +1094,9 @@ export default function SwissTemplate({
   return (
     <div
       style={{
-        fontFamily:
-          fonts.body,
-        color:
-          colors.text,
-        fontSize:
-          fs(14),
+        fontFamily: fonts.body,
+        color: colors.text,
+        fontSize: fs(14),
       }}
       className="
         w-full
@@ -1160,13 +1130,11 @@ export default function SwissTemplate({
             style={{
               width: `${
                 96 *
-                (data.photoScale ??
-                  1)
+                (data.photoScale ?? 1)
               }px`,
               height: `${
                 96 *
-                (data.photoScale ??
-                  1)
+                (data.photoScale ?? 1)
               }px`,
             }}
           />
@@ -1233,10 +1201,8 @@ export default function SwissTemplate({
             <a
               href={`mailto:${data.email}`}
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1257,10 +1223,8 @@ export default function SwissTemplate({
                 ''
               )}`}
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1328,10 +1292,8 @@ export default function SwissTemplate({
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1357,10 +1319,8 @@ export default function SwissTemplate({
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1386,10 +1346,8 @@ export default function SwissTemplate({
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color:
-                  'inherit',
-                textDecoration:
-                  'none',
+                color: 'inherit',
+                textDecoration: 'none',
               }}
               className="
                 flex
@@ -1421,7 +1379,7 @@ export default function SwissTemplate({
       />
 
       {/* =====================================================
-          CONTENT
+          CONTENT MULTI-COLONNES
       ====================================================== */}
 
       <div
@@ -1430,14 +1388,16 @@ export default function SwissTemplate({
           grid-cols-[0.38fr_0.62fr]
           gap-10
           mt-7
+          items-start
         "
       >
         {/* ===================================================
-            LEFT
+            COLONNE GAUCHE
         ==================================================== */}
 
         <SwissColumn
           id="section-column-left"
+          captureMode={captureMode}
         >
           <SortableContext
             items={leftOrder}
@@ -1461,11 +1421,12 @@ export default function SwissTemplate({
         </SwissColumn>
 
         {/* ===================================================
-            RIGHT
+            COLONNE DROITE
         ==================================================== */}
 
         <SwissColumn
           id="section-column-right"
+          captureMode={captureMode}
         >
           <SortableContext
             items={rightOrder}
@@ -1525,26 +1486,20 @@ function NumberTitle({
     >
       <span
         style={{
-          color:
-            colors.accent,
-          fontSize:
-            fsNumber(size),
+          color: colors.accent,
+          fontSize: fsNumber(size),
         }}
-        className="
-          font-bold
-        "
+        className="font-bold"
       >
         {number}
       </span>
 
       <h2
         style={{
-          color:
-            colors.primary,
+          color: colors.primary,
           fontFamily:
             fonts.heading,
-          fontSize:
-            size,
+          fontSize: size,
         }}
         className="
           font-bold
@@ -1559,19 +1514,18 @@ function NumberTitle({
 }
 
 /**
- * Les numéros restent légèrement
- * plus petits que les titres.
+ * =========================================================
+ * TAILLE DES NUMÉROS
+ * =========================================================
  */
 
 function fsNumber(
   size: string
-) {
+): string {
   const value =
     parseFloat(size);
 
-  if (
-    Number.isNaN(value)
-  ) {
+  if (Number.isNaN(value)) {
     return size;
   }
 

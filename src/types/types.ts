@@ -45,11 +45,16 @@ export interface SkillCategory {
   items: string[];
 }
 
-export interface CVStyle {
-  fontScale: number; // 0.8 – 1.3, base font-size multiplier
-  fontFamily: string; // font stack id
+export interface Language {
+  id: string;
+  name: string;
+  level: string;
+}
 
-  // Empty string = use theme default
+export interface CVStyle {
+  fontScale: number;
+  fontFamily: string;
+
   primary: string;
   secondary: string;
   accent: string;
@@ -66,7 +71,8 @@ export type CVSectionId =
   | 'education'
   | 'projects'
   | 'interests'
-  | 'certifications';
+  | 'certifications'
+  | 'languages';
 
 export type CVSectionColumn =
   | 'left'
@@ -96,6 +102,7 @@ export interface CVData {
   projects: Project[];
   interests: string[];
   certifications: Certification[];
+  languages: Language[];
 
   style: CVStyle;
 
@@ -148,6 +155,7 @@ export const DEFAULT_SECTION_TITLES: CVSectionTitles = {
   projects: 'Projets',
   interests: "Centres d'intérêt",
   certifications: 'Certifications',
+  languages: 'Langues',
 };
 
 /**
@@ -199,6 +207,7 @@ export const emptyCV: CVData = {
     'experiences',
     'education',
     'projects',
+    'languages',
     'certifications',
     'interests',
   ],
@@ -294,6 +303,19 @@ export const emptyCV: CVData = {
   ],
 
   certifications: [],
+
+  languages: [
+    {
+      id: 'l1',
+      name: 'Français',
+      level: 'Langue maternelle',
+    },
+    {
+      id: 'l2',
+      name: 'Anglais',
+      level: 'Professionnel',
+    },
+  ],
 
   style: {
     ...defaultStyle,

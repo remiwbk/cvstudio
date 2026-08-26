@@ -53,6 +53,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'experiences',
   'education',
   'skills',
+  'languages',
   'projects',
   'interests',
   'certifications',
@@ -70,6 +71,7 @@ const DEFAULT_SECTION_COLUMNS: Record<
 > = {
   summary: 'left',
   skills: 'left',
+  languages: 'left',
   interests: 'left',
   certifications: 'left',
 
@@ -286,6 +288,13 @@ export default function ExecutiveTemplate({
         c.items.length > 0
     );
 
+  const hasLanguages =
+    data.languages?.some(
+      (language) =>
+        language.name.trim() ||
+        language.level.trim()
+    ) ?? false;
+
   const age =
     calculateAge(
       data.birthDate
@@ -461,6 +470,93 @@ export default function ExecutiveTemplate({
                       </div>
                     ) : null
                 )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * LANGUES
+       * =====================================================
+       */
+
+      case 'languages':
+        if (!hasLanguages) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="languages"
+            id="languages"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionHeader
+                title={sectionTitle}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
+
+              <div className="space-y-2">
+                {data.languages
+                  .filter(
+                    (language) =>
+                      language.name.trim() ||
+                      language.level.trim()
+                  )
+                  .map(
+                    (language) => (
+                      <div
+                        key={
+                          language.id
+                        }
+                        className="
+                          flex
+                          items-center
+                          justify-between
+                          gap-4
+                        "
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.primary,
+                            fontSize:
+                              fs(10),
+                          }}
+                          className="
+                            font-semibold
+                          "
+                        >
+                          {
+                            language.name
+                          }
+                        </span>
+
+                        {language.level && (
+                          <span
+                            style={{
+                              color:
+                                colors.muted,
+                              fontSize:
+                                fs(9.5),
+                            }}
+                            className="
+                              shrink-0
+                              text-right
+                            "
+                          >
+                            {
+                              language.level
+                            }
+                          </span>
+                        )}
+                      </div>
+                    )
+                  )}
               </div>
             </section>
           </SortableSection>

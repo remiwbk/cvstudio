@@ -43,12 +43,14 @@ interface Props {
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
-  'skills',
   'projects',
   'interests',
   'certifications',
+  'languages',
 ];
 
 /**
@@ -64,8 +66,7 @@ function calculateAge(
     return null;
   }
 
-  const birth =
-    new Date(birthDate);
+  const birth = new Date(birthDate);
 
   if (
     Number.isNaN(
@@ -75,8 +76,7 @@ function calculateAge(
     return null;
   }
 
-  const today =
-    new Date();
+  const today = new Date();
 
   let age =
     today.getFullYear() -
@@ -112,12 +112,8 @@ function getSectionTitle(
   sectionId: CVSectionId
 ): string {
   return (
-    data.sectionTitles?.[
-      sectionId
-    ] ??
-    DEFAULT_SECTION_TITLES[
-      sectionId
-    ]
+    data.sectionTitles?.[sectionId] ??
+    DEFAULT_SECTION_TITLES[sectionId]
   );
 }
 
@@ -127,20 +123,22 @@ function getSectionTitle(
  * =========================================================
  */
 
-function ClassicBottomDropZone() {
+function ClassicBottomDropZone({
+  captureMode,
+}: {
+  captureMode: boolean;
+}) {
   const {
     setNodeRef,
     isOver,
   } = useDroppable({
     id: 'section-column-bottom',
+    disabled: captureMode,
   });
 
-  const {
-    active,
-  } = useDndContext();
+  const { active } = useDndContext();
 
-  const isDragging =
-    Boolean(active);
+  const isDragging = Boolean(active);
 
   return (
     <div
@@ -153,25 +151,20 @@ function ClassicBottomDropZone() {
       "
     >
       {isDragging &&
-        isOver && (
+        isOver &&
+        !captureMode && (
           <div
             className="
               pointer-events-none
-
               absolute
               left-0
               right-0
               top-1/2
               -translate-y-1/2
-
               z-[100]
-
               h-[3px]
-
               rounded-full
-
               bg-slate-900
-
               shadow-sm
             "
           />
@@ -182,7 +175,7 @@ function ClassicBottomDropZone() {
 
 /**
  * =========================================================
- * TEMPLATE
+ * TEMPLATE CLASSIC
  * =========================================================
  */
 
@@ -196,11 +189,32 @@ export default function ClassicTemplate({
   const fs = (n: number) =>
     `${n * fontScale}px`;
 
-  const hasSkills =
-    data.skills.some(
+  /**
+   * =========================================================
+   * COMPÉTENCES TECHNIQUES
+   * =========================================================
+   */
+
+  const hasTechnicalSkills =
+    data.technicalSkills.some(
       (category) =>
         category.items.length > 0
     );
+
+  /**
+   * =========================================================
+   * COMPÉTENCES GÉNÉRALES
+   * =========================================================
+   */
+
+  const hasSoftSkills =
+    data.softSkills.length > 0;
+
+  /**
+   * =========================================================
+   * ÂGE
+   * =========================================================
+   */
 
   const age =
     calculateAge(
@@ -301,14 +315,172 @@ export default function ClassicTemplate({
 
       /**
        * =====================================================
-       * EXPERIENCES
+       * COMPÉTENCES TECHNIQUES
+       * =====================================================
+       */
+
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="technicalSkills"
+            id="technicalSkills"
+            enabled={!captureMode}
+          >
+            <section
+              className="
+                relative
+                rounded-sm
+                transition
+                hover:bg-slate-50/50
+              "
+            >
+              <h2
+                style={{
+                  fontFamily:
+                    fonts.heading,
+                  color:
+                    colors.primary,
+                  fontSize:
+                    fs(17),
+                }}
+                className="
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  mb-2
+                "
+              >
+                {sectionTitle}
+              </h2>
+
+              <div className="space-y-2">
+                {data.technicalSkills.map(
+                  (category) =>
+                    category.items.length >
+                      0 && (
+                      <div
+                        key={
+                          category.id
+                        }
+                        className="
+                          flex
+                          gap-2
+                        "
+                      >
+                        <span
+                          style={{
+                            fontSize:
+                              fs(13),
+                            color:
+                              colors.secondary,
+                          }}
+                          className="
+                            font-bold
+                            italic
+                            shrink-0
+                          "
+                        >
+                          {category.name} :
+                        </span>
+
+                        <span
+                          style={{
+                            fontSize:
+                              fs(13),
+                            color:
+                              colors.text,
+                          }}
+                          className="
+                            leading-relaxed
+                          "
+                        >
+                          {category.items.join(
+                            ' • '
+                          )}
+                        </span>
+                      </div>
+                    )
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * COMPÉTENCES GÉNÉRALES
+       * =====================================================
+       */
+
+      case 'softSkills':
+        if (!hasSoftSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="softSkills"
+            id="softSkills"
+            enabled={!captureMode}
+          >
+            <section
+              className="
+                relative
+                rounded-sm
+                transition
+                hover:bg-slate-50/50
+              "
+            >
+              <h2
+                style={{
+                  fontFamily:
+                    fonts.heading,
+                  color:
+                    colors.primary,
+                  fontSize:
+                    fs(17),
+                }}
+                className="
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  mb-2
+                "
+              >
+                {sectionTitle}
+              </h2>
+
+              <p
+                style={{
+                  fontSize: fs(13),
+                  color: colors.text,
+                  whiteSpace: 'pre-line',
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.softSkills.join(
+                  ' • '
+                )}
+              </p>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * EXPÉRIENCES
        * =====================================================
        */
 
       case 'experiences':
         if (
-          data.experiences.length ===
-          0
+          data.experiences.length === 0
         ) {
           return null;
         }
@@ -352,7 +524,14 @@ export default function ClassicTemplate({
                     <div
                       key={exp.id}
                     >
-                      <div className="flex items-baseline justify-between gap-3">
+                      <div
+                        className="
+                          flex
+                          items-baseline
+                          justify-between
+                          gap-3
+                        "
+                      >
                         <h3
                           style={{
                             fontFamily:
@@ -392,6 +571,8 @@ export default function ClassicTemplate({
                           style={{
                             fontSize:
                               fs(13),
+                            color:
+                              colors.text,
                             whiteSpace:
                               'pre-line',
                           }}
@@ -420,8 +601,7 @@ export default function ClassicTemplate({
 
       case 'education':
         if (
-          data.education.length ===
-          0
+          data.education.length === 0
         ) {
           return null;
         }
@@ -465,7 +645,14 @@ export default function ClassicTemplate({
                     <div
                       key={ed.id}
                     >
-                      <div className="flex items-baseline justify-between gap-3">
+                      <div
+                        className="
+                          flex
+                          items-baseline
+                          justify-between
+                          gap-3
+                        "
+                      >
                         <h3
                           style={{
                             fontFamily:
@@ -503,6 +690,8 @@ export default function ClassicTemplate({
                         style={{
                           fontSize:
                             fs(13),
+                          color:
+                            colors.text,
                         }}
                         className="
                           font-medium
@@ -516,6 +705,8 @@ export default function ClassicTemplate({
                           style={{
                             fontSize:
                               fs(13),
+                            color:
+                              colors.text,
                             whiteSpace:
                               'pre-line',
                           }}
@@ -537,109 +728,13 @@ export default function ClassicTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
-       * =====================================================
-       */
-
-      case 'skills':
-        if (!hasSkills) {
-          return null;
-        }
-
-        return (
-          <SortableSection
-            key="skills"
-            id="skills"
-            enabled={!captureMode}
-          >
-            <section
-              className="
-                relative
-                rounded-sm
-                transition
-                hover:bg-slate-50/50
-              "
-            >
-              <h2
-                style={{
-                  fontFamily:
-                    fonts.heading,
-                  color:
-                    colors.primary,
-                  fontSize:
-                    fs(17),
-                }}
-                className="
-                  font-bold
-                  uppercase
-                  tracking-wider
-                  mb-2
-                "
-              >
-                {sectionTitle}
-              </h2>
-
-              <div className="space-y-2">
-                {data.skills.map(
-                  (cat) =>
-                    cat.items.length >
-                      0 && (
-                      <div
-                        key={
-                          cat.id
-                        }
-                        className="
-                          flex
-                          gap-2
-                        "
-                      >
-                        <span
-                          style={{
-                            fontSize:
-                              fs(13),
-                            color:
-                              colors.secondary,
-                          }}
-                          className="
-                            font-bold
-                            italic
-                            shrink-0
-                          "
-                        >
-                          {cat.name} :
-                        </span>
-
-                        <span
-                          style={{
-                            fontSize:
-                              fs(13),
-                          }}
-                          className="
-                            leading-relaxed
-                          "
-                        >
-                          {cat.items.join(
-                            ' • '
-                          )}
-                        </span>
-                      </div>
-                    )
-                )}
-              </div>
-            </section>
-          </SortableSection>
-        );
-
-      /**
-       * =====================================================
        * PROJETS
        * =====================================================
        */
 
       case 'projects':
         if (
-          data.projects.length ===
-          0
+          data.projects.length === 0
         ) {
           return null;
         }
@@ -736,6 +831,8 @@ export default function ClassicTemplate({
                           style={{
                             fontSize:
                               fs(13),
+                            color:
+                              colors.text,
                             whiteSpace:
                               'pre-line',
                           }}
@@ -762,8 +859,7 @@ export default function ClassicTemplate({
 
       case 'interests':
         if (
-          data.interests.length ===
-          0
+          data.interests.length === 0
         ) {
           return null;
         }
@@ -805,6 +901,8 @@ export default function ClassicTemplate({
                 style={{
                   fontSize:
                     fs(13),
+                  color:
+                    colors.text,
                   whiteSpace:
                     'pre-line',
                 }}
@@ -877,9 +975,7 @@ export default function ClassicTemplate({
                 }}
               >
                 {data.certifications.map(
-                  (
-                    certification
-                  ) => {
+                  (certification) => {
                     const certificationUrl =
                       certification.url
                         ? certification.url.startsWith(
@@ -969,6 +1065,98 @@ export default function ClassicTemplate({
                       </div>
                     );
                   }
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * LANGUES
+       * =====================================================
+       */
+
+      case 'languages':
+        if (
+          !data.languages?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="languages"
+            id="languages"
+            enabled={!captureMode}
+          >
+            <section
+              className="
+                relative
+                rounded-sm
+                transition
+                hover:bg-slate-50/50
+              "
+            >
+              <h2
+                style={{
+                  fontFamily:
+                    fonts.heading,
+                  color:
+                    colors.primary,
+                  fontSize:
+                    fs(17),
+                }}
+                className="
+                  font-bold
+                  uppercase
+                  tracking-wider
+                  mb-2
+                "
+              >
+                {sectionTitle}
+              </h2>
+
+              <div className="space-y-1">
+                {data.languages.map(
+                  (language) => (
+                    <div
+                      key={language.id}
+                      className="
+                        flex
+                        items-baseline
+                        justify-between
+                        gap-3
+                      "
+                    >
+                      <span
+                        style={{
+                          fontSize:
+                            fs(13),
+                          color:
+                            colors.secondary,
+                        }}
+                        className="font-bold"
+                      >
+                        {language.name}
+                      </span>
+
+                      {language.level && (
+                        <span
+                          style={{
+                            fontSize:
+                              fs(12),
+                            color:
+                              colors.muted,
+                          }}
+                        >
+                          {
+                            language.level
+                          }
+                        </span>
+                      )}
+                    </div>
+                  )
                 )}
               </div>
             </section>
@@ -1093,7 +1281,10 @@ export default function ClassicTemplate({
 
             {data.phone && (
               <a
-                href={`tel:${data.phone}`}
+                href={`tel:${data.phone.replace(
+                  /\s/g,
+                  ''
+                )}`}
                 className="
                   flex
                   items-center
@@ -1261,7 +1452,11 @@ export default function ClassicTemplate({
         )}
 
         {!captureMode && (
-          <ClassicBottomDropZone />
+          <ClassicBottomDropZone
+            captureMode={
+              captureMode
+            }
+          />
         )}
       </div>
     </div>

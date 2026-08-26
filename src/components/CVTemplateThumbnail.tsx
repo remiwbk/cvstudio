@@ -44,86 +44,37 @@ function renderTemplate(
   },
   fontScale: number,
 ) {
+  const commonProps = {
+    data,
+    colors,
+    fonts,
+    fontScale,
+  };
+
   switch (template) {
     case 'modern':
-      return (
-        <ModernTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <ModernTemplate {...commonProps} />;
 
     case 'classic':
-      return (
-        <ClassicTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <ClassicTemplate {...commonProps} />;
 
     case 'minimal':
-      return (
-        <MinimalTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <MinimalTemplate {...commonProps} />;
 
     case 'corporate':
-      return (
-        <CorporateTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <CorporateTemplate {...commonProps} />;
 
     case 'editorial':
-      return (
-        <EditorialTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <EditorialTemplate {...commonProps} />;
 
     case 'executive':
-      return (
-        <ExecutiveTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <ExecutiveTemplate {...commonProps} />;
 
     case 'swiss':
-      return (
-        <SwissTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <SwissTemplate {...commonProps} />;
 
     case 'tech':
-      return (
-        <TechTemplate
-          data={data}
-          colors={colors}
-          fonts={fonts}
-          fontScale={fontScale}
-        />
-      );
+      return <TechTemplate {...commonProps} />;
 
     default:
       return null;
@@ -138,8 +89,14 @@ export default function CVTemplateThumbnail({
   const containerRef =
     useRef<HTMLDivElement>(null);
 
+  const contentRef =
+    useRef<HTMLDivElement>(null);
+
   const [scale, setScale] =
     useState(0.25);
+
+  const [contentScale, setContentScale] =
+    useState(1);
 
   const {
     colors,
@@ -200,32 +157,44 @@ export default function CVTemplateThumbnail({
       },
 
       fontScale:
-        data.style.fontScale,
+        style.fontScale,
     };
   }, [
     data.style,
     template,
   ]);
 
+  /**
+   * =========================================================
+   * SCALE DE LA MINIATURE
+   * =========================================================
+   *
+   * La page prend toujours exactement toute la largeur
+   * disponible du thumbnail.
+   */
+
   useLayoutEffect(() => {
-    const element =
+    const container =
       containerRef.current;
 
-    if (!element) {
+    if (!container) {
       return;
     }
 
     const calculate =
       () => {
         const width =
-          element.clientWidth;
+          container.clientWidth;
 
         if (!width) {
           return;
         }
 
+        const nextScale =
+          width / A4_WIDTH;
+
         setScale(
-          width / A4_WIDTH,
+          nextScale,
         );
       };
 
@@ -237,12 +206,121 @@ export default function CVTemplateThumbnail({
       );
 
     observer.observe(
-      element,
+      container,
     );
 
     return () =>
       observer.disconnect();
   }, []);
+
+  /**
+   * =========================================================
+   * AUTO-FIT DU CONTENU
+   * =========================================================
+   *
+   * IMPORTANT :
+   *
+   * Pas de ResizeObserver ici.
+   *
+   * Le ResizeObserver provoquait une boucle :
+   *
+   * mesure → contentScale → transform → mesure...
+   *
+   * particulièrement visible avec Classic.
+   *
+   * On mesure uniquement après les changements de contenu.
+   */
+
+  useLayoutEffect(() => {
+    const content =
+      contentRef.current;
+
+    if (!content) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const calculate =
+      () => {
+        if (cancelled) {
+          return;
+        }
+
+        /**
+         * On mesure la hauteur naturelle
+         * du contenu AVANT de lui appliquer
+         * une nouvelle réduction.
+         */
+        const naturalHeight =
+          content.scrollHeight;
+
+        if (!naturalHeight) {
+          return;
+        }
+
+        const fit =
+          Math.min(
+            1,
+            A4_HEIGHT /
+              naturalHeight,
+          );
+
+        setContentScale(
+          current =>
+            Math.abs(
+              current - fit,
+            ) < 0.001
+              ? current
+              : fit,
+        );
+      };
+
+    /**
+     * Premier calcul après le layout.
+     */
+    const frame1 =
+      requestAnimationFrame(
+        () => {
+          calculate();
+
+          /**
+           * Deuxième mesure pour laisser
+           * les polices et le layout finir.
+           */
+          const frame2 =
+            requestAnimationFrame(
+              () => {
+                calculate();
+              },
+            );
+
+          cleanupFrame2 =
+            () =>
+              cancelAnimationFrame(
+                frame2,
+              );
+        },
+      );
+
+    let cleanupFrame2 =
+      () => {};
+
+    return () => {
+      cancelled = true;
+
+      cancelAnimationFrame(
+        frame1,
+      );
+
+      cleanupFrame2();
+    };
+  }, [
+    data,
+    template,
+    fontScale,
+    fonts,
+  ]);
 
   return (
     <div
@@ -259,6 +337,10 @@ export default function CVTemplateThumbnail({
           `${A4_WIDTH} / ${A4_HEIGHT}`,
       }}
     >
+      {/* =====================================================
+          PAGE A4
+      ====================================================== */}
+
       <div
         className="
           absolute
@@ -269,35 +351,42 @@ export default function CVTemplateThumbnail({
         style={{
           width: A4_WIDTH,
           height: A4_HEIGHT,
+
           transform:
             `scale(${scale})`,
         }}
       >
+        {/* ===================================================
+            CONTENU
+        ==================================================== */}
+
         <div
+          ref={contentRef}
           className="
             relative
             bg-white
           "
           style={{
-            width: A4_WIDTH,
-            height: A4_HEIGHT,
-            overflow: 'hidden',
+            width:
+              `${100 / contentScale}%`,
+
+            minHeight:
+              A4_HEIGHT,
+
+            transform:
+              `scale(${contentScale})`,
+
+            transformOrigin:
+              'top left',
           }}
         >
-          <div
-            style={{
-              width: A4_WIDTH,
-              minHeight: A4_HEIGHT,
-            }}
-          >
-            {renderTemplate(
-              data,
-              template,
-              colors,
-              fonts,
-              fontScale,
-            )}
-          </div>
+          {renderTemplate(
+            data,
+            template,
+            colors,
+            fonts,
+            fontScale,
+          )}
         </div>
       </div>
     </div>

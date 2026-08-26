@@ -3,6 +3,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type ChangeEvent,
 } from 'react';
 
 import {
@@ -40,6 +41,7 @@ import {
   DEFAULT_SECTION_TITLES,
   type CVData,
   type CVSectionId,
+  type SkillCategory,
   type TemplateId,
 } from '@/types/types';
 
@@ -100,8 +102,18 @@ function getRoute(): AppRoute {
 
 /**
  * ---------------------------------------------------------
- * NORMALISATION DES DONNÉES CV
+ * NORMALISATION / MIGRATION DES DONNÉES CV
  * ---------------------------------------------------------
+ *
+ * Cette fonction permet notamment de conserver
+ * la compatibilité avec les anciens CV qui utilisaient :
+ *
+ *   skills
+ *
+ * au lieu de :
+ *
+ *   technicalSkills
+ *   softSkills
  */
 
 function normalizeCVData(
@@ -109,19 +121,42 @@ function normalizeCVData(
 ): CVData {
   const defaultSectionOrder: CVSectionId[] = [
     'summary',
+    'technicalSkills',
+    'softSkills',
     'experiences',
     'education',
-    'skills',
     'projects',
     'interests',
     'certifications',
     'languages',
   ];
 
-  const sectionOrder: CVSectionId[] =
-    data.sectionOrder?.length
-      ? [...data.sectionOrder]
-      : [...defaultSectionOrder];
+  const legacyData =
+    data as CVData & {
+      skills?: SkillCategory[];
+    };
+
+  let technicalSkills =
+    data.technicalSkills ?? [];
+
+  const softSkills =
+    data.softSkills ?? [];
+
+  /*
+   * Migration des anciens CV :
+   *
+   * Si un ancien CV possède "skills"
+   * et que "technicalSkills" est vide,
+   * on récupère les anciennes compétences
+   * dans la nouvelle propriété.
+   */
+  if (
+    technicalSkills.length === 0 &&
+    legacyData.skills?.length
+  ) {
+    technicalSkills =
+      legacyData.skills;
+  }
 
   const certifications =
     data.certifications ?? [];
@@ -130,44 +165,61 @@ function normalizeCVData(
     data.languages ?? [];
 
   /*
-   * Les anciens CV peuvent contenir
-   * des certifications sans avoir encore
-   * la section dans sectionOrder.
+   * On récupère l'ordre existant.
    */
-  if (
-    certifications.length > 0 &&
-    !sectionOrder.includes(
-      'certifications'
-    )
-  ) {
-    sectionOrder.push(
-      'certifications'
-    );
-  }
+  const existingOrder =
+    data.sectionOrder?.length
+      ? [...data.sectionOrder]
+      : [];
 
   /*
-   * Les anciens CV peuvent aussi
-   * ne pas avoir languages.
+   * On ne conserve que les identifiants
+   * désormais valides.
+   *
+   * Cela permet notamment d'éliminer
+   * l'ancien identifiant "skills".
    */
-  if (
-    languages.length > 0 &&
-    !sectionOrder.includes(
-      'languages'
-    )
-  ) {
-    sectionOrder.push(
-      'languages'
+  const validSectionIds =
+    new Set<CVSectionId>(
+      defaultSectionOrder
     );
+
+  const normalizedOrder =
+    existingOrder.filter(
+      (id) =>
+        validSectionIds.has(id)
+    );
+
+  /*
+   * Ajout des sections manquantes.
+   */
+  for (
+    const sectionId of defaultSectionOrder
+  ) {
+    if (
+      !normalizedOrder.includes(
+        sectionId
+      )
+    ) {
+      normalizedOrder.push(
+        sectionId
+      );
+    }
   }
 
   return {
     ...data,
 
+    technicalSkills,
+
+    softSkills,
+
     certifications,
 
     languages,
 
-    sectionOrder,
+    sectionOrder:
+      normalizedOrder,
 
     sectionTitles: {
       ...DEFAULT_SECTION_TITLES,
@@ -187,6 +239,88 @@ export default function App() {
     useState<AppRoute>(
       getRoute
     );
+
+  const [data, setData] =
+    useState<CVData>(
+      emptyCV
+    );
+
+  const [template, setTemplate] =
+    useState<TemplateId>(
+      'modern'
+    );
+
+  const [
+    currentCVId,
+    setCurrentCVId,
+  ] = useState<string | null>(
+    null
+  );
+
+  const [
+    currentCVName,
+    setCurrentCVName,
+  ] = useState(
+    'Mon CV'
+  );
+
+  const [library, setLibrary] =
+    useState<SavedCV[]>([]);
+
+  const [
+    libraryOpen,
+    setLibraryOpen,
+  ] = useState(false);
+
+  const [
+    templateOpen,
+    setTemplateOpen,
+  ] = useState(false);
+
+  const [
+    loadingStorage,
+    setLoadingStorage,
+  ] = useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [
+    lastSaved,
+    setLastSaved,
+  ] = useState<number | null>(
+    null
+  );
+
+  const [busy, setBusy] =
+    useState<
+      'pdf' | 'png' | null
+    >(null);
+
+  const [
+    mobileView,
+    setMobileView,
+  ] = useState<
+    'edit' | 'preview'
+  >('edit');
+
+  const previewRef =
+    useRef<CVPreviewHandle>(
+      null
+    );
+
+  const saveTimerRef =
+    useRef<
+      ReturnType<
+        typeof setTimeout
+      > | null
+    >(null);
+
+  /**
+   * ---------------------------------------------------------
+   * NAVIGATION
+   * ---------------------------------------------------------
+   */
 
   const openEditor =
     useCallback(
@@ -293,88 +427,6 @@ export default function App() {
 
   /**
    * ---------------------------------------------------------
-   * ÉTAT CV
-   * ---------------------------------------------------------
-   */
-
-  const [data, setData] =
-    useState<CVData>(
-      emptyCV
-    );
-
-  const [template, setTemplate] =
-    useState<TemplateId>(
-      'modern'
-    );
-
-  const [
-    currentCVId,
-    setCurrentCVId,
-  ] = useState<string | null>(
-    null
-  );
-
-  const [
-    currentCVName,
-    setCurrentCVName,
-  ] = useState(
-    'Mon CV'
-  );
-
-  const [library, setLibrary] =
-    useState<SavedCV[]>([]);
-
-  const [
-    libraryOpen,
-    setLibraryOpen,
-  ] = useState(false);
-
-  const [
-    templateOpen,
-    setTemplateOpen,
-  ] = useState(false);
-
-  const [
-    loadingStorage,
-    setLoadingStorage,
-  ] = useState(true);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [
-    lastSaved,
-    setLastSaved,
-  ] = useState<number | null>(
-    null
-  );
-
-  const [busy, setBusy] =
-    useState<
-      'pdf' | 'png' | null
-    >(null);
-
-  const [
-    mobileView,
-    setMobileView,
-  ] = useState<
-    'edit' | 'preview'
-  >('edit');
-
-  const previewRef =
-    useRef<CVPreviewHandle>(
-      null
-    );
-
-  const saveTimerRef =
-    useRef<
-      ReturnType<
-        typeof setTimeout
-      > | null
-    >(null);
-
-  /**
-   * ---------------------------------------------------------
    * INITIALISATION INDEXEDDB
    * ---------------------------------------------------------
    */
@@ -399,6 +451,11 @@ export default function App() {
           const latest =
             cvs[0];
 
+          const normalizedData =
+            normalizeCVData(
+              latest.data
+            );
+
           setCurrentCVId(
             latest.id
           );
@@ -408,9 +465,7 @@ export default function App() {
           );
 
           setData(
-            normalizeCVData(
-              latest.data
-            )
+            normalizedData
           );
 
           setTemplate(
@@ -426,27 +481,29 @@ export default function App() {
 
           const initialCV:
             SavedCV = {
-              id: createCVId(),
-              name: 'Mon CV',
+            id: createCVId(),
 
-              data: {
-                ...emptyCV,
+            name: 'Mon CV',
 
-                sectionOrder: [
-                  ...emptyCV.sectionOrder,
-                ],
+            data: {
+              ...emptyCV,
 
-                sectionTitles: {
-                  ...emptyCV.sectionTitles,
-                },
+              sectionOrder: [
+                ...emptyCV.sectionOrder,
+              ],
+
+              sectionTitles: {
+                ...emptyCV.sectionTitles,
               },
+            },
 
-              template:
-                'modern',
+            template:
+              'modern',
 
-              createdAt: now,
-              updatedAt: now,
-            };
+            createdAt: now,
+
+            updatedAt: now,
+          };
 
           await saveCV(
             initialCV
@@ -462,6 +519,16 @@ export default function App() {
 
           setCurrentCVName(
             initialCV.name
+          );
+
+          setData(
+            normalizeCVData(
+              initialCV.data
+            )
+          );
+
+          setTemplate(
+            initialCV.template
           );
 
           setLibrary([
@@ -537,22 +604,22 @@ export default function App() {
 
             const saved:
               SavedCV = {
-                id: currentCVId,
+              id: currentCVId,
 
-                name:
-                  currentCVName ||
-                  'Mon CV',
+              name:
+                currentCVName ||
+                'Mon CV',
 
-                data,
+              data,
 
-                template,
+              template,
 
-                createdAt:
-                  existing?.createdAt ??
-                  now,
+              createdAt:
+                existing?.createdAt ??
+                now,
 
-                updatedAt: now,
-              };
+              updatedAt: now,
+            };
 
             await saveCV(
               saved
@@ -633,7 +700,11 @@ export default function App() {
   const handleDataChange =
     useCallback(
       (nextData: CVData) => {
-        setData(nextData);
+        setData(
+          normalizeCVData(
+            nextData
+          )
+        );
       },
       []
     );
@@ -712,28 +783,44 @@ export default function App() {
 
         const newCV:
           SavedCV = {
-            id: createCVId(),
+          id: createCVId(),
 
-            name: cleanName,
+          name: cleanName,
 
-            data: {
-              ...emptyCV,
+          data: {
+            ...emptyCV,
 
-              sectionOrder: [
-                ...emptyCV.sectionOrder,
-              ],
+            sectionOrder: [
+              ...emptyCV.sectionOrder,
+            ],
 
-              sectionTitles: {
-                ...DEFAULT_SECTION_TITLES,
-              },
+            sectionTitles: {
+              ...DEFAULT_SECTION_TITLES,
             },
 
-            template:
-              'modern',
+            technicalSkills:
+              emptyCV.technicalSkills.map(
+                (category) => ({
+                  ...category,
 
-            createdAt: now,
-            updatedAt: now,
-          };
+                  items: [
+                    ...category.items,
+                  ],
+                })
+              ),
+
+            softSkills: [
+              ...emptyCV.softSkills,
+            ],
+          },
+
+          template:
+            'modern',
+
+          createdAt: now,
+
+          updatedAt: now,
+        };
 
         try {
           await saveCV(
@@ -748,19 +835,11 @@ export default function App() {
             newCV.name
           );
 
-          setData({
-            ...newCV.data,
-
-            sectionOrder: [
-              ...newCV.data
-                .sectionOrder,
-            ],
-
-            sectionTitles: {
-              ...newCV.data
-                .sectionTitles,
-            },
-          });
+          setData(
+            normalizeCVData(
+              newCV.data
+            )
+          );
 
           setTemplate(
             'modern'
@@ -822,6 +901,9 @@ export default function App() {
           clearTimeout(
             saveTimerRef.current
           );
+
+          saveTimerRef.current =
+            null;
         }
 
         setCurrentCVId(
@@ -891,13 +973,13 @@ export default function App() {
 
         const renamed:
           SavedCV = {
-            ...cv,
+          ...cv,
 
-            name: cleanName,
+          name: cleanName,
 
-            updatedAt:
-              Date.now(),
-          };
+          updatedAt:
+            Date.now(),
+        };
 
         try {
           await saveCV(
@@ -977,19 +1059,44 @@ export default function App() {
 
         const duplicate:
           SavedCV = {
-            id: createCVId(),
+          id: createCVId(),
 
-            name: cleanName,
+          name: cleanName,
 
-            data: cv.data,
+          data: normalizeCVData({
+            ...cv.data,
 
-            template:
-              cv.template,
+            technicalSkills:
+              cv.data.technicalSkills.map(
+                (category) => ({
+                  ...category,
 
-            createdAt: now,
+                  items: [
+                    ...category.items,
+                  ],
+                })
+              ),
 
-            updatedAt: now,
-          };
+            softSkills: [
+              ...cv.data.softSkills,
+            ],
+
+            sectionOrder: [
+              ...cv.data.sectionOrder,
+            ],
+
+            sectionTitles: {
+              ...cv.data.sectionTitles,
+            },
+          }),
+
+          template:
+            cv.template,
+
+          createdAt: now,
+
+          updatedAt: now,
+        };
 
         try {
           await saveCV(
@@ -1124,7 +1231,7 @@ export default function App() {
   const handleImportCVGen =
     useCallback(
       async (
-        event: React.ChangeEvent<HTMLInputElement>
+        event: ChangeEvent<HTMLInputElement>
       ) => {
         const file =
           event.target.files?.[0];
@@ -1154,12 +1261,15 @@ export default function App() {
               'CV importé',
 
             data:
-              imported.data,
+              normalizeCVData(
+                imported.data
+              ),
 
             template:
               imported.template,
 
             createdAt: now,
+
             updatedAt: now,
           };
 
@@ -1230,14 +1340,8 @@ export default function App() {
 
   /**
    * ---------------------------------------------------------
-   * PDF
+   * EXPORT PDF
    * ---------------------------------------------------------
-   *
-   * L'export passe par window.print().
-   *
-   * IMPORTANT :
-   * on conserve le contentScale présent
-   * dans la page clonée afin d'éviter le crop.
    */
 
   const handlePDF =
@@ -1310,9 +1414,8 @@ export default function App() {
          * On supprime uniquement le transform
          * de la page elle-même.
          *
-         * On NE TOUCHE PAS aux transforms
-         * des enfants : le contentScale doit
-         * rester actif.
+         * Les transforms internes sont conservés
+         * afin de préserver le contentScale.
          */
 
         clonedPage.style.transform =
@@ -1494,7 +1597,7 @@ export default function App() {
 
   /**
    * ---------------------------------------------------------
-   * PNG
+   * EXPORT PNG
    * ---------------------------------------------------------
    */
 
@@ -1571,12 +1674,7 @@ export default function App() {
           );
 
           /*
-           * NE PAS parcourir tous les enfants
-           * pour supprimer leurs transforms.
-           *
-           * Le transform du content wrapper
-           * contient le contentScale nécessaire
-           * au fit A4.
+           * On conserve les transforms internes.
            */
 
           const images =
@@ -1618,12 +1716,6 @@ export default function App() {
           ) {
             await document.fonts.ready;
           }
-
-          /*
-           * Deux frames permettent de laisser
-           * le clone prendre sa mise en page
-           * définitive avant html2canvas.
-           */
 
           await new Promise<void>(
             (
@@ -1850,6 +1942,7 @@ export default function App() {
       ====================================================== */}
 
       <header className="no-print shrink-0 bg-white border-b border-slate-200">
+
         <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
 
           {/* BRAND */}
@@ -2050,6 +2143,7 @@ export default function App() {
                       <div className="flex items-center justify-between">
 
                         <div>
+
                           <h2 className="text-sm font-bold text-slate-900">
                             Choisir un template
                           </h2>
@@ -2057,6 +2151,7 @@ export default function App() {
                           <p className="text-[11px] text-slate-500 mt-0.5">
                             Sélectionne le style de ton CV
                           </p>
+
                         </div>
 
                         <button
@@ -2210,6 +2305,7 @@ export default function App() {
                                 pb-1
                                 pr-6
                               ">
+
                                 <div className="
                                   text-xs
                                   font-semibold
@@ -2233,6 +2329,7 @@ export default function App() {
                                     ]
                                   }
                                 </div>
+
                               </div>
 
                             </button>
@@ -2485,6 +2582,7 @@ export default function App() {
             }
           `}
         >
+
           <CVPreview
             ref={
               previewRef
@@ -2502,6 +2600,7 @@ export default function App() {
               handleSectionOrderChange
             }
           />
+
         </main>
 
       </div>
@@ -2687,12 +2786,16 @@ export default function App() {
                               </div>
 
                               <p className="text-[11px] text-slate-400 mt-1">
+
                                 {
                                   themes[
                                     cv.template
                                   ].name
-                                }{' '}
+                                }
+
+                                {' '}
                                 · Modifié le{' '}
+
                                 {new Date(
                                   cv.updatedAt
                                 ).toLocaleDateString(
@@ -2702,8 +2805,11 @@ export default function App() {
                                     month: '2-digit',
                                     year: 'numeric',
                                   }
-                                )}{' '}
+                                )}
+
+                                {' '}
                                 à{' '}
+
                                 {new Date(
                                   cv.updatedAt
                                 ).toLocaleTimeString(
@@ -2713,6 +2819,7 @@ export default function App() {
                                     minute: '2-digit',
                                   }
                                 )}
+
                               </p>
 
                             </button>

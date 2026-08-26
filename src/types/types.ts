@@ -66,7 +66,8 @@ export interface CVStyle {
 
 export type CVSectionId =
   | 'summary'
-  | 'skills'
+  | 'technicalSkills'
+  | 'softSkills'
   | 'experiences'
   | 'education'
   | 'projects'
@@ -96,7 +97,9 @@ export interface CVData {
 
   summary: string;
 
-  skills: SkillCategory[];
+  technicalSkills: SkillCategory[];
+  softSkills: string[];
+
   experiences: Experience[];
   education: Education[];
   projects: Project[];
@@ -149,7 +152,8 @@ export interface Theme {
 
 export const DEFAULT_SECTION_TITLES: CVSectionTitles = {
   summary: 'Profil',
-  skills: 'Compétences',
+  technicalSkills: 'Compétences techniques',
+  softSkills: 'Compétences générales',
   experiences: 'Expériences',
   education: 'Formation',
   projects: 'Projets',
@@ -203,7 +207,8 @@ export const emptyCV: CVData = {
 
   sectionOrder: [
     'summary',
-    'skills',
+    'technicalSkills',
+    'softSkills',
     'experiences',
     'education',
     'projects',
@@ -219,9 +224,9 @@ export const emptyCV: CVData = {
   summary:
     'Product designer with 8+ years crafting digital experiences for startups and enterprises. I blend user research, interaction design, and systems thinking to ship products people love.',
 
-  skills: [
+  technicalSkills: [
     {
-      id: 'sc1',
+      id: 'ts1',
       name: 'Design',
       items: [
         'Figma',
@@ -232,7 +237,7 @@ export const emptyCV: CVData = {
     },
 
     {
-      id: 'sc2',
+      id: 'ts2',
       name: 'Technique',
       items: [
         'React',
@@ -243,7 +248,7 @@ export const emptyCV: CVData = {
     },
 
     {
-      id: 'sc3',
+      id: 'ts3',
       name: 'Systèmes',
       items: [
         'Linux',
@@ -251,6 +256,14 @@ export const emptyCV: CVData = {
         'macOS',
       ],
     },
+  ],
+
+  softSkills: [
+    'Communication',
+    'Travail en équipe',
+    'Autonomie',
+    'Rigueur',
+    'Résolution de problèmes',
   ],
 
   experiences: [

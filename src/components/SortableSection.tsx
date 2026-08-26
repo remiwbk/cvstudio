@@ -183,12 +183,14 @@ const SECTION_LABELS: Record<
   string
 > = {
   summary: 'Profil',
-  skills: 'Compétences',
+  technicalSkills: 'Compétences techniques',
+  softSkills: 'Compétences générales',
   experiences: 'Expériences',
   education: 'Formation',
   projects: 'Projets',
-  interests:
-    "Centres d'intérêt",
+  interests: "Centres d'intérêt",
+  certifications: 'Certifications',
+  languages: 'Langues',
 };
 
 export default function SortableSection({

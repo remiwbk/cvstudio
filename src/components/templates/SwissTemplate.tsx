@@ -49,13 +49,14 @@ interface Props {
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
-  'skills',
-  'languages',
   'projects',
-  'interests',
+  'languages',
   'certifications',
+  'interests',
 ];
 
 /**
@@ -66,7 +67,8 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
 
 const DEFAULT_SWISS_LAYOUT_ORDER: CVSectionId[] = [
   'summary',
-  'skills',
+  'technicalSkills',
+  'softSkills',
   'languages',
   'interests',
   'experiences',
@@ -86,7 +88,9 @@ const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
   languages: 'left',
   interests: 'left',
   certifications: 'left',
@@ -254,25 +258,28 @@ export default function SwissTemplate({
 
   /**
    * =========================================================
-   * COMPÉTENCES
+   * COMPÉTENCES TECHNIQUES
    * =========================================================
    */
 
-  const hasSkills =
-    data.skills.some(
+  const hasTechnicalSkills =
+    data.technicalSkills.some(
       (category) =>
         category.items.length > 0
     );
 
   /**
    * =========================================================
-   * LANGUES
+   * COMPÉTENCES GÉNÉRALES
    * =========================================================
-   *
-   * On vérifie ici la structure utilisée par le type CVData.
-   *
-   * Si data.languages n'existe pas dans ton type, il faudra
-   * également l'ajouter dans types.ts.
+   */
+
+  const hasSoftSkills =
+    data.softSkills.length > 0;
+
+  /**
+   * =========================================================
+   * LANGUES
    * =========================================================
    */
 
@@ -454,26 +461,26 @@ export default function SwissTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
+       * COMPÉTENCES TECHNIQUES
        * =====================================================
        */
 
-      case 'skills':
-        if (!hasSkills) {
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
           return null;
         }
 
         return (
           <SortableSection
-            key="skills"
-            id="skills"
+            key="technicalSkills"
+            id="technicalSkills"
             enabled={!captureMode}
           >
             <section>
               <NumberTitle
                 number={sectionNumber}
                 title={getSectionTitle(
-                  'skills'
+                  'technicalSkills'
                 )}
                 colors={colors}
                 fonts={fonts}
@@ -481,7 +488,7 @@ export default function SwissTemplate({
               />
 
               <div className="space-y-3">
-                {data.skills.map(
+                {data.technicalSkills.map(
                   (category) =>
                     category.items.length > 0 ? (
                       <div
@@ -517,6 +524,52 @@ export default function SwissTemplate({
                     ) : null
                 )}
               </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * COMPÉTENCES GÉNÉRALES
+       * =====================================================
+       */
+
+      case 'softSkills':
+        if (!hasSoftSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="softSkills"
+            id="softSkills"
+            enabled={!captureMode}
+          >
+            <section>
+              <NumberTitle
+                number={sectionNumber}
+                title={getSectionTitle(
+                  'softSkills'
+                )}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
+
+              <p
+                style={{
+                  fontSize: fs(10),
+                  color: colors.muted,
+                  whiteSpace: 'pre-line',
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.softSkills.join(
+                  ' · '
+                )}
+              </p>
             </section>
           </SortableSection>
         );

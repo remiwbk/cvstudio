@@ -269,11 +269,6 @@ function ResizableTextarea({
  * =========================================================
  * TITRE DE SECTION ÉDITABLE
  * =========================================================
- *
- * Le titre est directement modifiable dans le CVForm.
- *
- * Il reste clairement visible sur desktop ET mobile.
- * =========================================================
  */
 
 function SectionEditorTitle({
@@ -327,7 +322,6 @@ function SectionEditorTitle({
           min-w-0
         "
       >
-        {/* INDICATEUR */}
         <span
           className="
             w-1
@@ -338,7 +332,6 @@ function SectionEditorTitle({
           "
         />
 
-        {/* ICÔNE */}
         <Pencil
           className="
             w-3.5
@@ -348,7 +341,6 @@ function SectionEditorTitle({
           "
         />
 
-        {/* TITRE EDITABLE */}
         <input
           className="
             min-w-0
@@ -383,7 +375,6 @@ function SectionEditorTitle({
           aria-label={`Modifier le titre de la section ${defaultTitle}`}
         />
 
-        {/* INDICATION MOBILE / DESKTOP */}
         <span
           className="
             hidden
@@ -397,7 +388,6 @@ function SectionEditorTitle({
           Modifier
         </span>
 
-        {/* ACTION */}
         {action && (
           <div
             className="
@@ -507,7 +497,7 @@ export default function CVForm({
   const handleSortEnd = (
     event: DragEndEvent,
     section:
-      | 'skills'
+      | 'technicalSkills'
       | 'experiences'
       | 'education'
       | 'projects'
@@ -538,9 +528,10 @@ export default function CVForm({
     }
 
     if (
-      section === 'skills'
+      section ===
+      'technicalSkills'
     ) {
-      moveSkillCategory(
+      moveTechnicalSkillCategory(
         activeId,
         overId
       );
@@ -600,245 +591,55 @@ export default function CVForm({
       return;
     }
 
+    const items =
+      [...data[key]];
+
+    const fromIndex =
+      items.findIndex(
+        (item) =>
+          item.id ===
+          draggedItemId
+      );
+
+    const targetIndex =
+      items.findIndex(
+        (item) =>
+          item.id ===
+          targetItemId
+      );
+
     if (
-      key === 'experiences'
+      fromIndex === -1 ||
+      targetIndex === -1
     ) {
-      const items = [
-        ...data.experiences,
-      ];
-
-      const fromIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            draggedItemId
-        );
-
-      const targetIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            targetItemId
-        );
-
-      if (
-        fromIndex === -1 ||
-        targetIndex === -1
-      ) {
-        return;
-      }
-
-      const [movedItem] =
-        items.splice(
-          fromIndex,
-          1
-        );
-
-      items.splice(
-        targetIndex,
-        0,
-        movedItem
-      );
-
-      update(
-        'experiences',
-        items
-      );
-
       return;
     }
 
-    if (key === 'education') {
-      const items = [
-        ...data.education,
-      ];
-
-      const fromIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            draggedItemId
-        );
-
-      const targetIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            targetItemId
-        );
-
-      if (
-        fromIndex === -1 ||
-        targetIndex === -1
-      ) {
-        return;
-      }
-
-      const [movedItem] =
-        items.splice(
-          fromIndex,
-          1
-        );
-
+    const [movedItem] =
       items.splice(
-        targetIndex,
-        0,
-        movedItem
+        fromIndex,
+        1
       );
 
-      update(
-        'education',
-        items
-      );
+    items.splice(
+      targetIndex,
+      0,
+      movedItem
+    );
 
-      return;
-    }
-
-    if (key === 'projects') {
-      const items = [
-        ...data.projects,
-      ];
-
-      const fromIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            draggedItemId
-        );
-
-      const targetIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            targetItemId
-        );
-
-      if (
-        fromIndex === -1 ||
-        targetIndex === -1
-      ) {
-        return;
-      }
-
-      const [movedItem] =
-        items.splice(
-          fromIndex,
-          1
-        );
-
-      items.splice(
-        targetIndex,
-        0,
-        movedItem
-      );
-
-      update(
-        'projects',
-        items
-      );
-
-      return;
-    }
-
-    if (
-      key === 'certifications'
-    ) {
-      const items = [
-        ...data.certifications,
-      ];
-
-      const fromIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            draggedItemId
-        );
-
-      const targetIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            targetItemId
-        );
-
-      if (
-        fromIndex === -1 ||
-        targetIndex === -1
-      ) {
-        return;
-      }
-
-      const [movedItem] =
-        items.splice(
-          fromIndex,
-          1
-        );
-
-      items.splice(
-        targetIndex,
-        0,
-        movedItem
-      );
-
-      update(
-        'certifications',
-        items
-      );
-    }
-    if (
-      key === 'languages'
-    ) {
-      const items = [
-        ...data.languages,
-      ];
-
-      const fromIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            draggedItemId
-        );
-
-      const targetIndex =
-        items.findIndex(
-          (item) =>
-            item.id ===
-            targetItemId
-        );
-
-      if (
-        fromIndex === -1 ||
-        targetIndex === -1
-      ) {
-        return;
-      }
-
-      const [movedItem] =
-        items.splice(
-          fromIndex,
-          1
-        );
-
-      items.splice(
-        targetIndex,
-        0,
-        movedItem
-      );
-
-      update(
-        'languages',
-        items
-      );
-    }
+    update(
+      key,
+      items as CVData[typeof key]
+    );
   };
 
   /*
    * =========================================================
-   * MOVE SKILL CATEGORY
+   * MOVE TECHNICAL SKILL CATEGORY
    * =========================================================
    */
 
-  const moveSkillCategory = (
+  const moveTechnicalSkillCategory = (
     draggedItemId: string,
     targetItemId: string
   ) => {
@@ -851,7 +652,7 @@ export default function CVForm({
     }
 
     const items = [
-      ...data.skills,
+      ...data.technicalSkills,
     ];
 
     const fromIndex =
@@ -888,7 +689,7 @@ export default function CVForm({
     );
 
     update(
-      'skills',
+      'technicalSkills',
       items
     );
   };
@@ -914,90 +715,35 @@ export default function CVForm({
         | Certification
         | Language
     ) => {
-      if (key === 'experiences') {
-        update('experiences', [
-          ...data.experiences,
-          item as Experience,
-        ]);
+      const items =
+        [...data[key]];
 
-        return;
-      }
-
-      if (key === 'education') {
-        update('education', [
-          ...data.education,
-          item as Education,
-        ]);
-
-        return;
-      }
-
-      if (key === 'projects') {
-        update('projects', [
-          ...data.projects,
-          item as Project,
-        ]);
-
-        return;
-      }
-
-      if (key === 'languages') {
-        const nextSectionOrder: CVSectionId[] =
-          data.sectionOrder?.includes(
-            'languages'
-          )
-            ? [...data.sectionOrder]
-            : [
-                ...(data.sectionOrder ?? []),
-                'languages',
-              ];
-
-        onChange({
-          ...data,
-          languages: [
-            ...data.languages,
-            item as Language,
-          ],
-          sectionOrder:
-            nextSectionOrder,
-          sectionTitles: {
-            ...DEFAULT_SECTION_TITLES,
-            ...(data.sectionTitles ?? {}),
-          },
-        });
-
-        return;
-      }
-
-      /*
-      * =======================================================
-      * CERTIFICATIONS
-      * =======================================================
-      */
-
-      const nextSectionOrder: CVSectionId[] =
-        data.sectionOrder?.includes(
-          'certifications'
+      const nextSectionOrder =
+        data.sectionOrder.includes(
+          key
         )
-          ? [...data.sectionOrder]
+          ? [
+              ...data.sectionOrder,
+            ]
           : [
-              ...(data.sectionOrder ?? []),
-              'certifications',
+              ...data.sectionOrder,
+              key,
             ];
 
       onChange({
         ...data,
-        certifications: [
-          ...data.certifications,
-          item as Certification,
+        [key]: [
+          ...items,
+          item,
         ],
         sectionOrder:
           nextSectionOrder,
         sectionTitles: {
           ...DEFAULT_SECTION_TITLES,
-          ...(data.sectionTitles ?? {}),
+          ...(data.sectionTitles ??
+            {}),
         },
-      });
+      } as CVData);
     },
 
     remove: (
@@ -1009,66 +755,12 @@ export default function CVForm({
         | 'languages',
       id: string
     ) => {
-      if (
-        key === 'experiences'
-      ) {
-        update(
-          'experiences',
-          data.experiences.filter(
-            (x) =>
-              x.id !== id
-          )
-        );
-
-        return;
-      }
-
-      if (
-        key === 'education'
-      ) {
-        update(
-          'education',
-          data.education.filter(
-            (x) =>
-              x.id !== id
-          )
-        );
-
-        return;
-      }
-
-      if (
-        key === 'projects'
-      ) {
-        update(
-          'projects',
-          data.projects.filter(
-            (x) =>
-              x.id !== id
-          )
-        );
-
-        return;
-      }
-
-      if (key === 'languages') {
-        update(
-          'languages',
-          data.languages.filter(
-            (x) =>
-              x.id !== id
-          )
-        );
-
-        return;
-      }
-
       update(
-        'certifications',
-        data.certifications.filter(
-          (x) =>
-            x.id !== id
-        )
+        key,
+        data[key].filter(
+          (item) =>
+            item.id !== id
+        ) as CVData[typeof key]
       );
     },
 
@@ -1083,112 +775,34 @@ export default function CVForm({
       field: string,
       value: string
     ) => {
-      if (
-        key === 'experiences'
-      ) {
-        update(
-          'experiences',
-          data.experiences.map(
-            (x) =>
-              x.id === id
-                ? {
-                    ...x,
-                    [field]:
-                      value,
-                  }
-                : x
-          )
-        );
-
-        return;
-      }
-
-      if (
-        key === 'education'
-      ) {
-        update(
-          'education',
-          data.education.map(
-            (x) =>
-              x.id === id
-                ? {
-                    ...x,
-                    [field]:
-                      value,
-                  }
-                : x
-          )
-        );
-
-        return;
-      }
-
-      if (
-        key === 'projects'
-      ) {
-        update(
-          'projects',
-          data.projects.map(
-            (x) =>
-              x.id === id
-                ? {
-                    ...x,
-                    [field]:
-                      value,
-                  }
-                : x
-          )
-        );
-
-        return;
-      }
-
-      if (key === 'languages') {
-        update(
-          'languages',
-          data.languages.map(
-            (x) =>
-              x.id === id
-                ? {
-                    ...x,
-                    [field]:
-                      value,
-                  }
-                : x
-          )
-        );
-
-        return;
-      }
-
       update(
-        'certifications',
-        data.certifications.map(
-          (x) =>
-            x.id === id
+        key,
+        data[key].map(
+          (item) =>
+            item.id === id
               ? {
-                  ...x,
+                  ...item,
                   [field]:
                     value,
                 }
-              : x
-          )
+              : item
+        ) as CVData[typeof key]
       );
     },
   };
 
   /*
    * =========================================================
-   * SKILLS OPERATIONS
+   * COMPÉTENCES TECHNIQUES
    * =========================================================
    */
 
-  const skillOps = {
+  const technicalSkillOps = {
     addCategory: () =>
       update(
-        'skills',
+        'technicalSkills',
         [
-          ...data.skills,
+          ...data.technicalSkills,
           {
             id: uid(),
             name: 'Nouvelle catégorie',
@@ -1201,10 +815,10 @@ export default function CVForm({
       id: string
     ) =>
       update(
-        'skills',
-        data.skills.filter(
-          (c) =>
-            c.id !== id
+        'technicalSkills',
+        data.technicalSkills.filter(
+          (category) =>
+            category.id !== id
         )
       ),
 
@@ -1213,20 +827,20 @@ export default function CVForm({
       name: string
     ) =>
       update(
-        'skills',
-        data.skills.map(
-          (c) =>
-            c.id === id
+        'technicalSkills',
+        data.technicalSkills.map(
+          (category) =>
+            category.id === id
               ? {
-                  ...c,
+                  ...category,
                   name,
                 }
-              : c
+              : category
         )
       ),
 
     addItem: (
-      catId: string,
+      categoryId: string,
       item: string
     ) => {
       const value =
@@ -1237,43 +851,97 @@ export default function CVForm({
       }
 
       update(
-        'skills',
-        data.skills.map(
-          (c) =>
-            c.id === catId
+        'technicalSkills',
+        data.technicalSkills.map(
+          (category) =>
+            category.id ===
+            categoryId
               ? {
-                  ...c,
+                  ...category,
                   items: [
-                    ...c.items,
+                    ...category.items,
                     value,
                   ],
                 }
-              : c
+              : category
         )
       );
     },
 
     removeItem: (
-      catId: string,
-      idx: number
+      categoryId: string,
+      index: number
     ) =>
       update(
-        'skills',
-        data.skills.map(
-          (c) =>
-            c.id === catId
+        'technicalSkills',
+        data.technicalSkills.map(
+          (category) =>
+            category.id ===
+            categoryId
               ? {
-                  ...c,
+                  ...category,
                   items:
-                    c.items.filter(
-                      (_, i) =>
-                        i !== idx
+                    category.items.filter(
+                      (_, itemIndex) =>
+                        itemIndex !==
+                        index
                     ),
                 }
-              : c
+              : category
         )
       ),
   };
+
+  /*
+   * =========================================================
+   * COMPÉTENCES GÉNÉRALES
+   * =========================================================
+   */
+
+  const addSoftSkill = (
+    value: string
+  ) => {
+    const skill =
+      value.trim();
+
+    if (!skill) {
+      return;
+    }
+
+    if (
+      data.softSkills.includes(
+        skill
+      )
+    ) {
+      return;
+    }
+
+    update(
+      'softSkills',
+      [
+        ...data.softSkills,
+        skill,
+      ]
+    );
+  };
+
+  const removeSoftSkill = (
+    index: number
+  ) => {
+    update(
+      'softSkills',
+      data.softSkills.filter(
+        (_, itemIndex) =>
+          itemIndex !== index
+      )
+    );
+  };
+
+  /*
+   * =========================================================
+   * RENDER
+   * =========================================================
+   */
 
   return (
     <div className="space-y-6">
@@ -1368,7 +1036,6 @@ export default function CVForm({
             className={`${labelCls} flex items-center gap-1.5`}
           >
             <Palette className="w-3.5 h-3.5" />
-
             Couleurs
           </label>
 
@@ -1909,12 +1576,12 @@ export default function CVForm({
       </section>
 
       {/* =====================================================
-          COMPÉTENCES
+          COMPÉTENCES TECHNIQUES
       ====================================================== */}
 
       <section className="space-y-3">
         <SectionEditorTitle
-          sectionId="skills"
+          sectionId="technicalSkills"
           data={data}
           updateSectionTitle={
             updateSectionTitle
@@ -1923,14 +1590,16 @@ export default function CVForm({
             <button
               type="button"
               onClick={
-                skillOps.addCategory
+                technicalSkillOps.addCategory
               }
               className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
+
               <span className="hidden sm:inline">
                 Catégorie
               </span>
+
               <span className="sm:hidden">
                 +
               </span>
@@ -1952,24 +1621,29 @@ export default function CVForm({
           onDragEnd={(event) =>
             handleSortEnd(
               event,
-              'skills'
+              'technicalSkills'
             )
           }
         >
           <SortableContext
-            items={data.skills.map(
-              (cat) => cat.id
+            items={data.technicalSkills.map(
+              (category) =>
+                category.id
             )}
             strategy={
               verticalListSortingStrategy
             }
           >
             <div className="space-y-3">
-              {data.skills.map(
-                (cat) => (
+              {data.technicalSkills.map(
+                (category) => (
                   <SortableItem
-                    key={cat.id}
-                    id={cat.id}
+                    key={
+                      category.id
+                    }
+                    id={
+                      category.id
+                    }
                   >
                     {({
                       setNodeRef,
@@ -2009,10 +1683,12 @@ export default function CVForm({
 
                           <input
                             className={`${inputCls} font-semibold`}
-                            value={cat.name}
+                            value={
+                              category.name
+                            }
                             onChange={(e) =>
-                              skillOps.renameCategory(
-                                cat.id,
+                              technicalSkillOps.renameCategory(
+                                category.id,
                                 e.target.value
                               )
                             }
@@ -2022,8 +1698,8 @@ export default function CVForm({
                           <button
                             type="button"
                             onClick={() =>
-                              skillOps.removeCategory(
-                                cat.id
+                              technicalSkillOps.removeCategory(
+                                category.id
                               )
                             }
                             className="text-slate-400 hover:text-red-500 transition shrink-0"
@@ -2034,13 +1710,13 @@ export default function CVForm({
                         </div>
 
                         <div className="flex flex-wrap gap-1.5 pl-6">
-                          {cat.items.map(
+                          {category.items.map(
                             (
                               item,
-                              i
+                              index
                             ) => (
                               <span
-                                key={`${cat.id}-${i}`}
+                                key={`${category.id}-${index}`}
                                 className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-200 pl-2 pr-1 py-0.5 text-xs text-slate-700"
                               >
                                 {item}
@@ -2048,9 +1724,9 @@ export default function CVForm({
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    skillOps.removeItem(
-                                      cat.id,
-                                      i
+                                    technicalSkillOps.removeItem(
+                                      category.id,
+                                      index
                                     )
                                   }
                                   className="rounded p-0.5 hover:bg-slate-200 text-slate-400"
@@ -2074,8 +1750,8 @@ export default function CVForm({
                                   'item'
                                 ) as HTMLInputElement;
 
-                            skillOps.addItem(
-                              cat.id,
+                            technicalSkillOps.addItem(
+                              category.id,
                               input.value
                             );
 
@@ -2103,7 +1779,8 @@ export default function CVForm({
                 )
               )}
 
-              {data.skills.length ===
+              {data.technicalSkills
+                .length ===
                 0 && (
                 <p className="text-xs text-slate-400 italic">
                   Aucune catégorie.
@@ -2115,6 +1792,90 @@ export default function CVForm({
             </div>
           </SortableContext>
         </DndContext>
+      </section>
+
+      {/* =====================================================
+          COMPÉTENCES GÉNÉRALES
+      ====================================================== */}
+
+      <section className="space-y-3">
+        <SectionEditorTitle
+          sectionId="softSkills"
+          data={data}
+          updateSectionTitle={
+            updateSectionTitle
+          }
+        />
+
+        <div className="flex flex-wrap gap-1.5">
+          {data.softSkills.map(
+            (
+              skill,
+              index
+            ) => (
+              <span
+                key={`${skill}-${index}`}
+                className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-200 pl-2.5 pr-1 py-1 text-xs text-slate-700"
+              >
+                {skill}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    removeSoftSkill(
+                      index
+                    )
+                  }
+                  className="rounded p-0.5 hover:bg-slate-200 text-slate-400"
+                  aria-label={`Supprimer ${skill}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )
+          )}
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            const input =
+              e.currentTarget
+                .elements
+                .namedItem(
+                  'softSkill'
+                ) as HTMLInputElement;
+
+            addSoftSkill(
+              input.value
+            );
+
+            input.value = '';
+          }}
+          className="flex gap-2"
+        >
+          <input
+            name="softSkill"
+            className={inputCls}
+            placeholder="Ajouter une compétence (ex: Autonomie)"
+          />
+
+          <button
+            type="submit"
+            className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+
+            <span className="hidden sm:inline">
+              Ajouter
+            </span>
+
+            <span className="sm:hidden">
+              +
+            </span>
+          </button>
+        </form>
       </section>
 
       {/* =====================================================
@@ -2147,9 +1908,11 @@ export default function CVForm({
               className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
+
               <span className="hidden sm:inline">
                 Ajouter
               </span>
+
               <span className="sm:hidden">
                 +
               </span>
@@ -2227,7 +1990,9 @@ export default function CVForm({
                           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input
                               className={inputCls}
-                              value={exp.role}
+                              value={
+                                exp.role
+                              }
                               onChange={(e) =>
                                 arrayOps.patch(
                                   'experiences',
@@ -2241,7 +2006,9 @@ export default function CVForm({
 
                             <input
                               className={inputCls}
-                              value={exp.company}
+                              value={
+                                exp.company
+                              }
                               onChange={(e) =>
                                 arrayOps.patch(
                                   'experiences',
@@ -2271,7 +2038,9 @@ export default function CVForm({
 
                         <input
                           className={inputCls}
-                          value={exp.period}
+                          value={
+                            exp.period
+                          }
                           onChange={(e) =>
                             arrayOps.patch(
                               'experiences',
@@ -2280,7 +2049,7 @@ export default function CVForm({
                               e.target.value
                             )
                           }
-                          placeholder="Période (ex: 2021 — Present)"
+                          placeholder="Période (ex: 2021 — Présent)"
                         />
 
                         <ResizableTextarea
@@ -2337,9 +2106,11 @@ export default function CVForm({
               className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
+
               <span className="hidden sm:inline">
                 Ajouter
               </span>
+
               <span className="sm:hidden">
                 +
               </span>
@@ -2417,7 +2188,9 @@ export default function CVForm({
                           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input
                               className={inputCls}
-                              value={ed.degree}
+                              value={
+                                ed.degree
+                              }
                               onChange={(e) =>
                                 arrayOps.patch(
                                   'education',
@@ -2431,7 +2204,9 @@ export default function CVForm({
 
                             <input
                               className={inputCls}
-                              value={ed.school}
+                              value={
+                                ed.school
+                              }
                               onChange={(e) =>
                                 arrayOps.patch(
                                   'education',
@@ -2461,7 +2236,9 @@ export default function CVForm({
 
                         <input
                           className={inputCls}
-                          value={ed.period}
+                          value={
+                            ed.period
+                          }
                           onChange={(e) =>
                             arrayOps.patch(
                               'education',
@@ -2527,9 +2304,11 @@ export default function CVForm({
               className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
+
               <span className="hidden sm:inline">
                 Ajouter
               </span>
+
               <span className="sm:hidden">
                 +
               </span>
@@ -2741,9 +2520,11 @@ export default function CVForm({
               className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
+
               <span className="hidden sm:inline">
                 Ajouter
               </span>
+
               <span className="sm:hidden">
                 +
               </span>
@@ -2920,9 +2701,11 @@ export default function CVForm({
               className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
+
               <span className="hidden sm:inline">
                 Ajouter
               </span>
+
               <span className="sm:hidden">
                 +
               </span>
@@ -3169,9 +2952,11 @@ export default function CVForm({
             className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition flex items-center gap-1"
           >
             <Plus className="w-4 h-4" />
+
             <span className="hidden sm:inline">
               Ajouter
             </span>
+
             <span className="sm:hidden">
               +
             </span>

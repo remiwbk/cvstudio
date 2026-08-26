@@ -51,18 +51,36 @@ interface Props {
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
-  'skills',
-  'languages',
   'projects',
-  'interests',
+  'languages',
   'certifications',
+  'interests',
 ];
 
 /**
  * =========================================================
  * COLONNES PAR DÉFAUT
+ * =========================================================
+ *
+ * On conserve exactement la logique des colonnes :
+ *
+ * LEFT :
+ * - Profil
+ * - Compétences techniques
+ * - Compétences générales
+ * - Langues
+ * - Centres d'intérêt
+ * - Certifications
+ *
+ * RIGHT :
+ * - Expériences
+ * - Formation
+ * - Projets
+ *
  * =========================================================
  */
 
@@ -71,7 +89,10 @@ const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
+
   languages: 'left',
   interests: 'left',
   certifications: 'left',
@@ -278,11 +299,35 @@ export default function EditorialTemplate({
   ) =>
     `${n * fontScale}px`;
 
-  const hasSkills =
-    data.skills.some(
-      (c) =>
-        c.items.length > 0
+  /**
+   * =======================================================
+   * COMPÉTENCES TECHNIQUES
+   * =======================================================
+   */
+
+  const hasTechnicalSkills =
+    data.technicalSkills.some(
+      (category) =>
+        category.items.length > 0
     );
+
+  /**
+   * =======================================================
+   * COMPÉTENCES GÉNÉRALES
+   * =======================================================
+   */
+
+  const hasSoftSkills =
+    data.softSkills.some(
+      (skill) =>
+        skill.trim().length > 0
+    );
+
+  /**
+   * =======================================================
+   * LANGUES
+   * =======================================================
+   */
 
   const hasLanguages =
     data.languages?.some(
@@ -291,10 +336,22 @@ export default function EditorialTemplate({
         language.level.trim()
     ) ?? false;
 
+  /**
+   * =======================================================
+   * AGE
+   * =======================================================
+   */
+
   const age =
     calculateAge(
       data.birthDate
     );
+
+  /**
+   * =======================================================
+   * CONTACT
+   * =======================================================
+   */
 
   const contactItems = [
     {
@@ -458,19 +515,19 @@ export default function EditorialTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
+       * COMPÉTENCES TECHNIQUES
        * =====================================================
        */
 
-      case 'skills':
-        if (!hasSkills) {
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
           return null;
         }
 
         return (
           <SortableSection
-            key="skills"
-            id="skills"
+            key="technicalSkills"
+            id="technicalSkills"
             enabled={!captureMode}
           >
             <section>
@@ -483,7 +540,7 @@ export default function EditorialTemplate({
               </SectionTitle>
 
               <div className="space-y-3">
-                {data.skills.map(
+                {data.technicalSkills.map(
                   (category) =>
                     category.items.length >
                       0 ? (
@@ -530,6 +587,56 @@ export default function EditorialTemplate({
                     ) : null
                 )}
               </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * COMPÉTENCES GÉNÉRALES
+       * =====================================================
+       */
+
+      case 'softSkills':
+        if (!hasSoftSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="softSkills"
+            id="softSkills"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle
+                fonts={fonts}
+                colors={colors}
+                fontSize={fs(13)}
+              >
+                {sectionTitle}
+              </SectionTitle>
+
+              <p
+                style={{
+                  fontSize:
+                    fs(10.5),
+                  color:
+                    colors.muted,
+                  whiteSpace:
+                    'pre-line',
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.softSkills
+                  .filter(
+                    (skill) =>
+                      skill.trim()
+                  )
+                  .join(' • ')}
+              </p>
             </section>
           </SortableSection>
         );

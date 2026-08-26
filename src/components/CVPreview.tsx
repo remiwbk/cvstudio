@@ -79,15 +79,38 @@ const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 1.5;
 const ZOOM_STEP = 0.1;
 
+/**
+ * =========================================================
+ * ORDRE PAR DÉFAUT DES SECTIONS
+ * =========================================================
+ *
+ * IMPORTANT :
+ * On utilise maintenant les nouveaux IDs :
+ *
+ * technicalSkills
+ * softSkills
+ * languages
+ *
+ * et non plus "skills".
+ */
+
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
-  'skills',
   'projects',
-  'interests',
+  'languages',
   'certifications',
+  'interests',
 ];
+
+/**
+ * =========================================================
+ * IDS DES COLONNES
+ * =========================================================
+ */
 
 const SECTION_COLUMN_IDS = {
   left: 'section-column-left',
@@ -99,6 +122,12 @@ const SECTION_COLUMN_BOTTOM_IDS = {
   right: 'section-column-bottom-right',
 } as const;
 
+/**
+ * =========================================================
+ * TEMPLATES À DEUX COLONNES
+ * =========================================================
+ */
+
 const TWO_COLUMN_TEMPLATES: TemplateId[] = [
   'corporate',
   'editorial',
@@ -108,18 +137,30 @@ const TWO_COLUMN_TEMPLATES: TemplateId[] = [
   'tech',
 ];
 
+/**
+ * =========================================================
+ * COLONNES PAR DÉFAUT
+ * =========================================================
+ *
+ * IMPORTANT :
+ * Tous les nouveaux IDs de sections sont présents.
+ */
+
 const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionId,
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
+  languages: 'left',
   interests: 'left',
-  certifications: 'right',
 
   experiences: 'right',
   education: 'right',
   projects: 'right',
+  certifications: 'right',
 };
 
 /**
@@ -319,39 +360,38 @@ const CVPreview = forwardRef<
       const s =
         data.style;
 
-      const colors: ThemeColors =
-        {
-          primary:
-            s.primary ||
-            theme.colors.primary,
+      const colors: ThemeColors = {
+        primary:
+          s.primary ||
+          theme.colors.primary,
 
-          secondary:
-            s.secondary ||
-            theme.colors.secondary,
+        secondary:
+          s.secondary ||
+          theme.colors.secondary,
 
-          accent:
-            s.accent ||
-            theme.colors.accent,
+        accent:
+          s.accent ||
+          theme.colors.accent,
 
-          text:
-            s.text ||
-            theme.colors.text,
+        text:
+          s.text ||
+          theme.colors.text,
 
-          muted:
-            s.muted ||
-            theme.colors.muted,
+        muted:
+          s.muted ||
+          theme.colors.muted,
 
-          background:
-            theme.colors.background,
+        background:
+          theme.colors.background,
 
-          surface:
-            s.surface ||
-            theme.colors.surface,
+        surface:
+          s.surface ||
+          theme.colors.surface,
 
-          border:
-            s.border ||
-            theme.colors.border,
-        };
+        border:
+          s.border ||
+          theme.colors.border,
+      };
 
       return {
         colors,
@@ -359,6 +399,7 @@ const CVPreview = forwardRef<
         fonts: {
           heading:
             fontStack,
+
           body:
             fontStack,
         },
@@ -420,6 +461,12 @@ const CVPreview = forwardRef<
 
     const collisionDetectionStrategy: CollisionDetection =
       (args) => {
+        /**
+         * -------------------------------------------------------
+         * TEMPLATE UNE COLONNE
+         * -------------------------------------------------------
+         */
+
         if (
           !isTwoColumnTemplate
         ) {
@@ -438,12 +485,23 @@ const CVPreview = forwardRef<
           );
         }
 
+        /**
+         * -------------------------------------------------------
+         * TEMPLATE DEUX COLONNES
+         * -------------------------------------------------------
+         */
+
         const pointer =
           args.pointerCoordinates;
 
         if (!pointer) {
           return [];
         }
+
+        /**
+         * Recherche des conteneurs
+         * gauche / droite.
+         */
 
         const columnContainers =
           args.droppableContainers.filter(
@@ -530,6 +588,12 @@ const CVPreview = forwardRef<
           return [];
         }
 
+        /**
+         * -------------------------------------------------------
+         * SECTIONS DE LA COLONNE CIBLE
+         * -------------------------------------------------------
+         */
+
         const sectionCandidates:
           Array<{
             id: CVSectionId;
@@ -549,6 +613,11 @@ const CVPreview = forwardRef<
               container.id
             );
 
+          /**
+           * Les conteneurs de colonnes
+           * ne sont pas des sections.
+           */
+
           if (
             id ===
               SECTION_COLUMN_IDS.left ||
@@ -558,6 +627,11 @@ const CVPreview = forwardRef<
             continue;
           }
 
+          /**
+           * Les zones "bottom" ne sont
+           * pas des sections.
+           */
+
           if (
             id ===
               SECTION_COLUMN_BOTTOM_IDS.left ||
@@ -566,6 +640,11 @@ const CVPreview = forwardRef<
           ) {
             continue;
           }
+
+          /**
+           * La section doit exister
+           * dans sectionOrder.
+           */
 
           if (
             !sectionOrder.includes(
@@ -577,6 +656,11 @@ const CVPreview = forwardRef<
 
           const sectionId =
             id as CVSectionId;
+
+          /**
+           * La section doit appartenir
+           * à la colonne actuellement ciblée.
+           */
 
           if (
             getSectionColumn(
@@ -602,11 +686,22 @@ const CVPreview = forwardRef<
           });
         }
 
+        /**
+         * On trie les sections
+         * verticalement.
+         */
+
         sectionCandidates.sort(
           (a, b) =>
             a.rect.top -
             b.rect.top
         );
+
+        /**
+         * -------------------------------------------------------
+         * POINTEUR DIRECTEMENT SUR UNE SECTION
+         * -------------------------------------------------------
+         */
 
         for (
           const candidate of
@@ -629,12 +724,19 @@ const CVPreview = forwardRef<
               {
                 id:
                   candidate.id,
+
                 rect:
                   candidate.rect,
               },
             ];
           }
         }
+
+        /**
+         * -------------------------------------------------------
+         * POINTEUR AVANT UNE SECTION
+         * -------------------------------------------------------
+         */
 
         for (
           const candidate of
@@ -648,12 +750,19 @@ const CVPreview = forwardRef<
               {
                 id:
                   candidate.id,
+
                 rect:
                   candidate.rect,
               },
             ];
           }
         }
+
+        /**
+         * -------------------------------------------------------
+         * POINTEUR APRÈS LA DERNIÈRE SECTION
+         * -------------------------------------------------------
+         */
 
         if (
           sectionCandidates.length >
@@ -696,6 +805,7 @@ const CVPreview = forwardRef<
                   {
                     id:
                       bottomContainer.id,
+
                     rect:
                       bottomRect,
                   },
@@ -707,12 +817,19 @@ const CVPreview = forwardRef<
               {
                 id:
                   targetColumnId,
+
                 rect:
                   targetColumnRect,
               },
             ];
           }
         }
+
+        /**
+         * -------------------------------------------------------
+         * COLONNE VIDE
+         * -------------------------------------------------------
+         */
 
         const emptyBottomId =
           targetColumn ===
@@ -744,6 +861,7 @@ const CVPreview = forwardRef<
               {
                 id:
                   emptyBottomContainer.id,
+
                 rect:
                   emptyBottomRect,
               },
@@ -755,6 +873,7 @@ const CVPreview = forwardRef<
           {
             id:
               targetColumnId,
+
             rect:
               targetColumnRect,
           },
@@ -792,6 +911,12 @@ const CVPreview = forwardRef<
       const overId =
         String(over.id);
 
+      /**
+       * =======================================================
+       * DEUX COLONNES
+       * =======================================================
+       */
+
       if (
         isTwoColumnTemplate
       ) {
@@ -799,6 +924,12 @@ const CVPreview = forwardRef<
           getSectionColumn(
             activeId
           );
+
+        /**
+         * -----------------------------------------------------
+         * DROP DANS LE BAS DE LA COLONNE
+         * -----------------------------------------------------
+         */
 
         if (
           overId ===
@@ -846,20 +977,33 @@ const CVPreview = forwardRef<
             activeId
           );
 
-          onChange?.({
+          const nextData: CVData = {
             ...data,
+
             sectionOrder:
               nextOrder,
+
             sectionColumns: {
               ...(data.sectionColumns ??
                 {}),
+
               [activeId]:
                 targetColumn,
             },
-          });
+          };
+
+          onChange?.(
+            nextData
+          );
 
           return;
         }
+
+        /**
+         * -----------------------------------------------------
+         * DROP DIRECTEMENT DANS UNE COLONNE
+         * -----------------------------------------------------
+         */
 
         if (
           overId ===
@@ -907,20 +1051,33 @@ const CVPreview = forwardRef<
             activeId
           );
 
-          onChange?.({
+          const nextData: CVData = {
             ...data,
+
             sectionOrder:
               nextOrder,
+
             sectionColumns: {
               ...(data.sectionColumns ??
                 {}),
+
               [activeId]:
                 targetColumn,
             },
-          });
+          };
+
+          onChange?.(
+            nextData
+          );
 
           return;
         }
+
+        /**
+         * -----------------------------------------------------
+         * DROP SUR UNE SECTION
+         * -----------------------------------------------------
+         */
 
         const overSectionId =
           over.id as CVSectionId;
@@ -936,6 +1093,12 @@ const CVPreview = forwardRef<
           getSectionColumn(
             overSectionId
           );
+
+        /**
+         * -----------------------------------------------------
+         * CHANGEMENT DE COLONNE
+         * -----------------------------------------------------
+         */
 
         if (
           activeColumn !==
@@ -963,20 +1126,33 @@ const CVPreview = forwardRef<
             activeId
           );
 
-          onChange?.({
+          const nextData: CVData = {
             ...data,
+
             sectionOrder:
               nextOrder,
+
             sectionColumns: {
               ...(data.sectionColumns ??
                 {}),
+
               [activeId]:
                 targetColumn,
             },
-          });
+          };
+
+          onChange?.(
+            nextData
+          );
 
           return;
         }
+
+        /**
+         * -----------------------------------------------------
+         * RÉORDONNANCEMENT DANS LA MÊME COLONNE
+         * -----------------------------------------------------
+         */
 
         const columnItems =
           sectionOrder.filter(
@@ -1053,12 +1229,23 @@ const CVPreview = forwardRef<
 
         onChange?.({
           ...data,
+
           sectionOrder:
             newOrder,
         });
 
         return;
       }
+
+      /**
+       * =======================================================
+       * UNE COLONNE
+       * =======================================================
+       */
+
+      /**
+       * Drop tout en bas.
+       */
 
       if (
         String(over.id) ===
@@ -1086,12 +1273,17 @@ const CVPreview = forwardRef<
 
         onChange?.({
           ...data,
+
           sectionOrder:
             nextOrder,
         });
 
         return;
       }
+
+      /**
+       * Drop sur une autre section.
+       */
 
       const overSectionId =
         over.id as CVSectionId;
@@ -1139,6 +1331,7 @@ const CVPreview = forwardRef<
 
       onChange?.({
         ...data,
+
         sectionOrder:
           newOrder,
       });
@@ -1190,7 +1383,9 @@ const CVPreview = forwardRef<
           compute
         );
 
-      ro.observe(pane);
+      ro.observe(
+        pane
+      );
 
       return () => {
         ro.disconnect();
@@ -1282,10 +1477,6 @@ const CVPreview = forwardRef<
           setFitScale(1);
           setZoomScale(1);
 
-          /*
-           * Laisse React terminer son rendu avant
-           * de recalculer la hauteur naturelle.
-           */
           await new Promise<void>(
             (resolve) =>
               requestAnimationFrame(
@@ -1300,8 +1491,7 @@ const CVPreview = forwardRef<
             try {
               await document.fonts.ready;
             } catch {
-              // Rien à faire si le navigateur
-              // ne permet pas d'attendre les polices.
+              // Rien à faire.
             }
           }
 
@@ -1313,11 +1503,14 @@ const CVPreview = forwardRef<
           setIsPrinting(false);
         };
 
-      window.addEventListener(
-        'beforeprint',
+      const beforePrintHandler =
         () => {
           void handleBeforePrint();
-        }
+        };
+
+      window.addEventListener(
+        'beforeprint',
+        beforePrintHandler
       );
 
       window.addEventListener(
@@ -1326,6 +1519,11 @@ const CVPreview = forwardRef<
       );
 
       return () => {
+        window.removeEventListener(
+          'beforeprint',
+          beforePrintHandler
+        );
+
         window.removeEventListener(
           'afterprint',
           handleAfterPrint

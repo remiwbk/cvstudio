@@ -49,7 +49,8 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
   'experiences',
   'education',
-  'skills',
+  'technicalSkills',
+  'softSkills',
   'projects',
   'languages',
   'interests',
@@ -67,7 +68,9 @@ const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
   interests: 'left',
   projects: 'left',
   certifications: 'left',
@@ -143,35 +146,33 @@ function ModernColumn({
     >
       {children}
 
-      {!className?.includes('hidden') && (
-        <div
-          ref={setBottomNodeRef}
-          className="
-            relative
-            w-full
-            h-4
-            mt-0
-          "
-        >
-          {isBottomOver && (
-            <div
-              className="
-                pointer-events-none
-                absolute
-                left-0
-                right-0
-                top-1/2
-                -translate-y-1/2
-                z-[100]
-                h-[3px]
-                rounded-full
-                bg-slate-900
-                shadow-sm
-              "
-            />
-          )}
-        </div>
-      )}
+      <div
+        ref={setBottomNodeRef}
+        className="
+          relative
+          w-full
+          h-4
+          mt-0
+        "
+      >
+        {isBottomOver && (
+          <div
+            className="
+              pointer-events-none
+              absolute
+              left-0
+              right-0
+              top-1/2
+              -translate-y-1/2
+              z-[100]
+              h-[3px]
+              rounded-full
+              bg-slate-900
+              shadow-sm
+            "
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -242,11 +243,14 @@ export default function ModernTemplate({
   const fs = (n: number) =>
     `${n * fontScale}px`;
 
-  const hasSkills =
-    data.skills.some(
+  const hasTechnicalSkills =
+    data.technicalSkills.some(
       (category) =>
         category.items.length > 0
     );
+
+  const hasSoftSkills =
+    data.softSkills.length > 0;
 
   const age =
     calculateAge(
@@ -393,28 +397,28 @@ export default function ModernTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
+       * COMPÉTENCES TECHNIQUES
        * =====================================================
        */
 
-      case 'skills':
-        if (!hasSkills) {
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
           return null;
         }
 
         return (
           <SortableSection
-            key="skills"
-            id="skills"
+            key="technicalSkills"
+            id="technicalSkills"
             enabled={!captureMode}
           >
             <section>
               <SectionTitle
-                sectionId="skills"
+                sectionId="technicalSkills"
               />
 
               <div className="space-y-3">
-                {data.skills.map(
+                {data.technicalSkills.map(
                   (category) =>
                     category.items.length >
                       0 ? (
@@ -440,11 +444,13 @@ export default function ModernTemplate({
                           }
                         </h3>
 
-                        <div className="
-                          flex
-                          flex-wrap
-                          gap-1.5
-                        ">
+                        <div
+                          className="
+                            flex
+                            flex-wrap
+                            gap-1.5
+                          "
+                        >
                           {category.items.map(
                             (
                               skill,
@@ -489,14 +495,51 @@ export default function ModernTemplate({
 
       /**
        * =====================================================
+       * COMPÉTENCES GÉNÉRALES
+       * =====================================================
+       */
+
+      case 'softSkills':
+        if (!hasSoftSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="softSkills"
+            id="softSkills"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionTitle
+                sectionId="softSkills"
+              />
+
+              <p
+                style={{
+                  fontSize: fs(12),
+                  color: colors.muted,
+                  whiteSpace: 'pre-line',
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.softSkills.join(' • ')}
+              </p>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
        * INTÉRÊTS
        * =====================================================
        */
 
       case 'interests':
         if (
-          data.interests.length ===
-          0
+          data.interests.length === 0
         ) {
           return null;
         }
@@ -512,43 +555,18 @@ export default function ModernTemplate({
                 sectionId="interests"
               />
 
-              <div className="
-                flex
-                flex-wrap
-                gap-1.5
-              ">
-                {data.interests.map(
-                  (
-                    interest,
-                    index
-                  ) => (
-                    <span
-                      key={index}
-                      style={{
-                        background:
-                          colors.surface,
-                        color:
-                          colors.secondary,
-                        borderColor:
-                          colors.border,
-                        fontSize:
-                          fs(11),
-                      }}
-                      className="
-                        font-medium
-                        px-2
-                        py-0.5
-                        rounded-full
-                        border
-                      "
-                    >
-                      {
-                        interest
-                      }
-                    </span>
-                  )
-                )}
-              </div>
+              <p
+                style={{
+                  fontSize: fs(12),
+                  color: colors.muted,
+                  whiteSpace: 'pre-line',
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.interests.join(' • ')}
+              </p>
             </section>
           </SortableSection>
         );
@@ -578,9 +596,11 @@ export default function ModernTemplate({
                 sectionId="projects"
               />
 
-              <div className="
-                space-y-3
-              ">
+              <div
+                className="
+                  space-y-3
+                "
+              >
                 {data.projects.map(
                   (project) => (
                     <div
@@ -686,9 +706,11 @@ export default function ModernTemplate({
                 sectionId="experiences"
               />
 
-              <div className="
-                space-y-4
-              ">
+              <div
+                className="
+                  space-y-4
+                "
+              >
                 {data.experiences.map(
                   (exp) => (
                     <div
@@ -720,12 +742,14 @@ export default function ModernTemplate({
                         }}
                       />
 
-                      <div className="
-                        flex
-                        items-baseline
-                        justify-between
-                        gap-3
-                      ">
+                      <div
+                        className="
+                          flex
+                          items-baseline
+                          justify-between
+                          gap-3
+                        "
+                      >
                         <h3
                           style={{
                             fontSize:
@@ -832,9 +856,11 @@ export default function ModernTemplate({
                 sectionId="education"
               />
 
-              <div className="
-                space-y-3
-              ">
+              <div
+                className="
+                  space-y-3
+                "
+              >
                 {data.education.map(
                   (education) => (
                     <div
@@ -842,12 +868,14 @@ export default function ModernTemplate({
                         education.id
                       }
                     >
-                      <div className="
-                        flex
-                        items-baseline
-                        justify-between
-                        gap-3
-                      ">
+                      <div
+                        className="
+                          flex
+                          items-baseline
+                          justify-between
+                          gap-3
+                        "
+                      >
                         <h3
                           style={{
                             fontSize:
@@ -949,9 +977,11 @@ export default function ModernTemplate({
                 sectionId="languages"
               />
 
-              <div className="
-                space-y-2
-              ">
+              <div
+                className="
+                  space-y-2
+                "
+              >
                 {data.languages.map(
                   (language) => (
                     <div
@@ -1028,9 +1058,11 @@ export default function ModernTemplate({
                 sectionId="certifications"
               />
 
-              <div className="
-                space-y-1.5
-              ">
+              <div
+                className="
+                  space-y-1.5
+                "
+              >
                 {data.certifications.map(
                   (certification) => {
                     const certificationUrl =
@@ -1460,9 +1492,11 @@ export default function ModernTemplate({
               verticalListSortingStrategy
             }
           >
-            <aside className="
-              space-y-7
-            ">
+            <aside
+              className="
+                space-y-7
+              "
+            >
               {leftOrder.map(
                 (sectionId) =>
                   renderSection(
@@ -1487,9 +1521,11 @@ export default function ModernTemplate({
               verticalListSortingStrategy
             }
           >
-            <main className="
-              space-y-7
-            ">
+            <main
+              className="
+                space-y-7
+              "
+            >
               {rightOrder.map(
                 (sectionId) =>
                   renderSection(

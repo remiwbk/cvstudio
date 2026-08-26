@@ -50,13 +50,14 @@ interface Props {
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
-  'skills',
-  'languages',
   'projects',
-  'interests',
+  'languages',
   'certifications',
+  'interests',
 ];
 
 /**
@@ -70,7 +71,10 @@ const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
+
   languages: 'left',
   interests: 'left',
   certifications: 'left',
@@ -171,21 +175,15 @@ function ExecutiveColumn({
             <div
               className="
                 pointer-events-none
-
                 absolute
                 left-0
                 right-0
                 top-1/2
                 -translate-y-1/2
-
                 z-[100]
-
                 h-[3px]
-
                 rounded-full
-
                 bg-slate-900
-
                 shadow-sm
               "
             />
@@ -282,11 +280,35 @@ export default function ExecutiveTemplate({
   const fs = (n: number) =>
     `${n * fontScale}px`;
 
-  const hasSkills =
-    data.skills.some(
-      (c) =>
-        c.items.length > 0
-    );
+  /**
+   * =========================================================
+   * COMPÉTENCES TECHNIQUES
+   * =========================================================
+   */
+
+  const hasTechnicalSkills =
+    data.technicalSkills?.some(
+      (category) =>
+        category.items.length > 0
+    ) ?? false;
+
+  /**
+   * =========================================================
+   * COMPÉTENCES GÉNÉRALES
+   * =========================================================
+   */
+
+  const hasSoftSkills =
+    data.softSkills?.some(
+      (skill) =>
+        skill.trim().length > 0
+    ) ?? false;
+
+  /**
+   * =========================================================
+   * LANGUES
+   * =========================================================
+   */
 
   const hasLanguages =
     data.languages?.some(
@@ -402,19 +424,19 @@ export default function ExecutiveTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
+       * COMPÉTENCES TECHNIQUES
        * =====================================================
        */
 
-      case 'skills':
-        if (!hasSkills) {
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
           return null;
         }
 
         return (
           <SortableSection
-            key="skills"
-            id="skills"
+            key="technicalSkills"
+            id="technicalSkills"
             enabled={!captureMode}
           >
             <section>
@@ -426,7 +448,7 @@ export default function ExecutiveTemplate({
               />
 
               <div className="space-y-4">
-                {data.skills.map(
+                {data.technicalSkills.map(
                   (category) =>
                     category.items.length >
                       0 ? (
@@ -471,6 +493,54 @@ export default function ExecutiveTemplate({
                     ) : null
                 )}
               </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * COMPÉTENCES GÉNÉRALES
+       * =====================================================
+       */
+
+      case 'softSkills':
+        if (!hasSoftSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="softSkills"
+            id="softSkills"
+            enabled={!captureMode}
+          >
+            <section>
+              <SectionHeader
+                title={sectionTitle}
+                colors={colors}
+                fonts={fonts}
+                size={fs(13)}
+              />
+
+              <p
+                style={{
+                  color:
+                    colors.muted,
+                  fontSize:
+                    fs(9.5),
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.softSkills
+                  .filter(
+                    (skill) =>
+                      skill.trim()
+                        .length > 0
+                  )
+                  .join(' · ')}
+              </p>
             </section>
           </SortableSection>
         );

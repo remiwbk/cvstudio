@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {
   Mail,
   Phone,
@@ -51,10 +53,11 @@ interface Props {
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
+  'languages',
   'experiences',
   'education',
-  'skills',
-  'languages',
   'projects',
   'interests',
   'certifications',
@@ -71,7 +74,9 @@ const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
   languages: 'left',
   interests: 'left',
   certifications: 'left',
@@ -177,12 +182,9 @@ function CorporateColumn({
                 right-0
                 top-1/2
                 -translate-y-1/2
-
                 z-[100]
-
                 h-[3px]
                 rounded-full
-
                 bg-slate-900
                 shadow-sm
               "
@@ -280,11 +282,35 @@ export default function CorporateTemplate({
   const fs = (n: number) =>
     `${n * fontScale}px`;
 
-  const hasSkills =
-    data.skills.some(
+  /**
+   * =========================================================
+   * COMPÉTENCES TECHNIQUES
+   * =========================================================
+   */
+
+  const hasTechnicalSkills =
+    data.technicalSkills?.some(
       (category) =>
-        category.items.length > 0
-    );
+        category.items?.length > 0
+    ) ?? false;
+
+  /**
+   * =========================================================
+   * COMPÉTENCES GÉNÉRALES
+   * =========================================================
+   */
+
+  const hasSoftSkills =
+    data.softSkills?.some(
+      (skill) =>
+        skill.trim().length > 0
+    ) ?? false;
+
+  /**
+   * =========================================================
+   * LANGUES
+   * =========================================================
+   */
 
   const hasLanguages =
     data.languages?.some(
@@ -293,10 +319,34 @@ export default function CorporateTemplate({
         language.level.trim()
     ) ?? false;
 
+  /**
+   * =========================================================
+   * INTÉRÊTS
+   * =========================================================
+   */
+
+  const hasInterests =
+    data.interests?.some(
+      (interest) =>
+        interest.trim().length > 0
+    ) ?? false;
+
+  /**
+   * =========================================================
+   * AGE
+   * =========================================================
+   */
+
   const age =
     calculateAge(
       data.birthDate
     );
+
+  /**
+   * =========================================================
+   * ORDRE DES SECTIONS
+   * =========================================================
+   */
 
   const sectionOrder: CVSectionId[] =
     data.sectionOrder?.length
@@ -400,19 +450,19 @@ export default function CorporateTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
+       * COMPÉTENCES TECHNIQUES
        * =====================================================
        */
 
-      case 'skills':
-        if (!hasSkills) {
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
           return null;
         }
 
         return (
           <SortableSection
-            key="skills"
-            id="skills"
+            key="technicalSkills"
+            id="technicalSkills"
             enabled={!captureMode}
           >
             <section>
@@ -424,33 +474,35 @@ export default function CorporateTemplate({
               />
 
               <div className="space-y-4">
-                {data.skills.map(
+                {data.technicalSkills.map(
                   (category) =>
-                    category.items.length >
+                    category.items?.length >
                       0 ? (
                       <div
                         key={
                           category.id
                         }
                       >
-                        <h3
-                          style={{
-                            color:
-                              colors.secondary,
-                            fontSize:
-                              fs(10.5),
-                          }}
-                          className="
-                            font-bold
-                            uppercase
-                            tracking-wide
-                            mb-1.5
-                          "
-                        >
-                          {
-                            category.name
-                          }
-                        </h3>
+                        {category.name && (
+                          <h3
+                            style={{
+                              color:
+                                colors.secondary,
+                              fontSize:
+                                fs(10.5),
+                            }}
+                            className="
+                              font-bold
+                              uppercase
+                              tracking-wide
+                              mb-1.5
+                            "
+                          >
+                            {
+                              category.name
+                            }
+                          </h3>
+                        )}
 
                         <div className="flex flex-wrap gap-1.5">
                           {category.items.map(
@@ -460,7 +512,7 @@ export default function CorporateTemplate({
                             ) => (
                               <span
                                 key={
-                                  index
+                                  `${category.id}-${index}`
                                 }
                                 style={{
                                   color:
@@ -490,6 +542,58 @@ export default function CorporateTemplate({
                     ) : null
                 )}
               </div>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
+       * COMPÉTENCES GÉNÉRALES
+       * =====================================================
+       */
+
+      case 'softSkills':
+        if (!hasSoftSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="softSkills"
+            id="softSkills"
+            enabled={!captureMode}
+          >
+            <section>
+              <Title
+                text={sectionTitle}
+                fonts={fonts}
+                colors={colors}
+                size={fs(14)}
+              />
+
+              <p
+                style={{
+                  color:
+                    colors.muted,
+                  fontSize:
+                    fs(10.5),
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.softSkills
+                  .filter(
+                    (skill) =>
+                      skill.trim()
+                        .length > 0
+                  )
+                  .map(
+                    (skill) =>
+                      skill.trim()
+                  )
+                  .join(' • ')}
+              </p>
             </section>
           </SortableSection>
         );
@@ -590,9 +694,7 @@ export default function CorporateTemplate({
        */
 
       case 'interests':
-        if (
-          data.interests.length === 0
-        ) {
+        if (!hasInterests) {
           return null;
         }
 
@@ -610,26 +712,29 @@ export default function CorporateTemplate({
                 size={fs(14)}
               />
 
-              <div className="space-y-1.5">
-                {data.interests.map(
-                  (
-                    interest,
-                    index
-                  ) => (
-                    <div
-                      key={index}
-                      style={{
-                        fontSize:
-                          fs(10.5),
-                        color:
-                          colors.muted,
-                      }}
-                    >
-                      • {interest}
-                    </div>
+              <p
+                style={{
+                  color:
+                    colors.muted,
+                  fontSize:
+                    fs(10.5),
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.interests
+                  .filter(
+                    (interest) =>
+                      interest.trim()
+                        .length > 0
                   )
-                )}
-              </div>
+                  .map(
+                    (interest) =>
+                      interest.trim()
+                  )
+                  .join(' • ')}
+              </p>
             </section>
           </SortableSection>
         );
@@ -642,7 +747,7 @@ export default function CorporateTemplate({
 
       case 'experiences':
         if (
-          data.experiences.length === 0
+          !data.experiences?.length
         ) {
           return null;
         }
@@ -795,7 +900,7 @@ export default function CorporateTemplate({
 
       case 'education':
         if (
-          data.education.length === 0
+          !data.education?.length
         ) {
           return null;
         }
@@ -1027,7 +1132,7 @@ export default function CorporateTemplate({
 
       case 'projects':
         if (
-          data.projects.length === 0
+          !data.projects?.length
         ) {
           return null;
         }
@@ -1128,6 +1233,12 @@ export default function CorporateTemplate({
             </section>
           </SortableSection>
         );
+
+      /**
+       * =====================================================
+       * AUTRES
+       * =====================================================
+       */
 
       default:
         return null;

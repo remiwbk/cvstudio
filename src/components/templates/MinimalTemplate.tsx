@@ -48,7 +48,7 @@ const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
   'experiences',
   'education',
-  'skills',
+  'technicalSkills',
   'projects',
   'languages',
   'interests',
@@ -173,10 +173,10 @@ export default function MinimalTemplate({
   ) =>
     `${n * fontScale}px`;
 
-  const hasSkills =
-    data.skills.some(
-      (c) =>
-        c.items.length > 0
+  const hasTechnicalSkills =
+    data.technicalSkills.some(
+      (category) =>
+        category.items.length > 0
     );
 
   const hasLanguages =
@@ -521,34 +521,34 @@ export default function MinimalTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
+       * COMPÉTENCES TECHNIQUES
        * =====================================================
        */
 
-      case 'skills':
-        if (!hasSkills) {
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
           return null;
         }
 
         return (
           <SortableSection
-            key="skills"
-            id="skills"
+            key="technicalSkills"
+            id="technicalSkills"
             enabled={!captureMode}
           >
             <section>
               <SectionTitle
-                sectionId="skills"
+                sectionId="technicalSkills"
               />
 
               <div className="space-y-2">
-                {data.skills.map(
-                  (cat) =>
-                    cat.items.length >
+                {data.technicalSkills.map(
+                  (category) =>
+                    category.items.length >
                       0 ? (
                       <div
                         key={
-                          cat.id
+                          category.id
                         }
                         className="
                           grid
@@ -570,7 +570,7 @@ export default function MinimalTemplate({
                           "
                         >
                           {
-                            cat.name
+                            category.name
                           }
                         </div>
 
@@ -585,20 +585,21 @@ export default function MinimalTemplate({
                             col-span-3
                           "
                         >
-                          {cat.items.map(
+                          {category.items.map(
                             (
-                              s,
-                              i
+                              skill,
+                              index
                             ) => (
                               <span
                                 key={
-                                  i
+                                  index
                                 }
                               >
-                                {s}
+                                {skill}
 
-                                {i <
-                                  cat.items
+                                {index <
+                                  category
+                                    .items
                                     .length -
                                     1 && (
                                   <span
@@ -649,9 +650,11 @@ export default function MinimalTemplate({
 
               <div className="space-y-3">
                 {data.projects.map(
-                  (p) => (
+                  (project) => (
                     <div
-                      key={p.id}
+                      key={
+                        project.id
+                      }
                       className="
                         grid
                         grid-cols-4
@@ -670,14 +673,14 @@ export default function MinimalTemplate({
                           pt-0.5
                         "
                       >
-                        {p.url && (
+                        {project.url && (
                           <a
                             href={
-                              p.url.startsWith(
+                              project.url.startsWith(
                                 'http'
                               )
-                                ? p.url
-                                : `https://${p.url}`
+                                ? project.url
+                                : `https://${project.url}`
                             }
                             target="_blank"
                             rel="noopener noreferrer"
@@ -689,7 +692,7 @@ export default function MinimalTemplate({
                             }}
                           >
                             {
-                              p.url
+                              project.url
                             }
                           </a>
                         )}
@@ -706,11 +709,11 @@ export default function MinimalTemplate({
                           "
                         >
                           {
-                            p.name
+                            project.name
                           }
                         </h3>
 
-                        {p.description && (
+                        {project.description && (
                           <p
                             style={{
                               fontSize:
@@ -726,7 +729,7 @@ export default function MinimalTemplate({
                             "
                           >
                             {
-                              p.description
+                              project.description
                             }
                           </p>
                         )}
@@ -855,15 +858,15 @@ export default function MinimalTemplate({
               >
                 {data.interests.map(
                   (
-                    it,
-                    i
+                    interest,
+                    index
                   ) => (
                     <span
-                      key={i}
+                      key={index}
                     >
-                      {it}
+                      {interest}
 
-                      {i <
+                      {index <
                         data
                           .interests
                           .length -

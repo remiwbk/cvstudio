@@ -4,6 +4,7 @@ import type {
   TemplateId,
   CVSectionId,
   CVSectionColumn,
+  SkillCategory,
 } from '@/types/types';
 
 export interface SavedCV {
@@ -39,7 +40,8 @@ const VALID_TEMPLATES: TemplateId[] = [
 
 const VALID_SECTION_IDS: CVSectionId[] = [
   'summary',
-  'skills',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
   'projects',
@@ -55,13 +57,14 @@ const VALID_SECTION_COLUMNS: CVSectionColumn[] = [
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
-  'skills',
   'projects',
-  'interests',
   'languages',
   'certifications',
+  'interests',
 ];
 
 const DEFAULT_SECTION_COLUMNS: Record<
@@ -69,7 +72,9 @@ const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
   interests: 'left',
   languages: 'left',
   certifications: 'left',
@@ -84,9 +89,10 @@ const DEFAULT_SECTION_TITLES: Record<
   string
 > = {
   summary: 'Profil',
+  technicalSkills: 'Compétences techniques',
+  softSkills: 'Compétences générales',
   experiences: 'Expériences',
   education: 'Formation',
-  skills: 'Compétences',
   projects: 'Projets',
   interests: "Centres d'intérêt",
   certifications: 'Certifications',
@@ -110,49 +116,42 @@ const defaultStyle: CVStyle = {
 ========================================================= */
 
 function openDB(): Promise<IDBDatabase> {
-  return new Promise(
-    (resolve, reject) => {
-      const request =
-        indexedDB.open(
-          DB_NAME,
-          DB_VERSION
-        );
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(
+      DB_NAME,
+      DB_VERSION
+    );
 
-      request.onupgradeneeded =
-        () => {
-          const db =
-            request.result;
+    request.onupgradeneeded = () => {
+      const db = request.result;
 
-          if (
-            !db.objectStoreNames.contains(
-              STORE_NAME
-            )
-          ) {
-            db.createObjectStore(
-              STORE_NAME,
-              {
-                keyPath: 'id',
-              }
-            );
+      if (
+        !db.objectStoreNames.contains(
+          STORE_NAME
+        )
+      ) {
+        db.createObjectStore(
+          STORE_NAME,
+          {
+            keyPath: 'id',
           }
-        };
-
-      request.onsuccess = () => {
-        resolve(
-          request.result
         );
-      };
+      }
+    };
 
-      request.onerror = () => {
-        reject(
-          request.error ??
-            new Error(
-              'Impossible d’ouvrir IndexedDB.'
-            )
-        );
-      };
-    }
-  );
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(
+        request.error ??
+          new Error(
+            'Impossible d’ouvrir IndexedDB.'
+          )
+      );
+    };
+  });
 }
 
 /* =========================================================
@@ -211,11 +210,8 @@ function normalizeStyle(
   }
 
   const fontScale =
-    typeof value.fontScale ===
-      'number' &&
-    Number.isFinite(
-      value.fontScale
-    )
+    typeof value.fontScale === 'number' &&
+    Number.isFinite(value.fontScale)
       ? Math.min(
           1.3,
           Math.max(
@@ -228,46 +224,38 @@ function normalizeStyle(
   return {
     fontScale,
 
-    fontFamily:
-      stringValue(
-        value.fontFamily,
-        'inter'
-      ),
+    fontFamily: stringValue(
+      value.fontFamily,
+      'inter'
+    ),
 
-    primary:
-      stringValue(
-        value.primary
-      ),
+    primary: stringValue(
+      value.primary
+    ),
 
-    secondary:
-      stringValue(
-        value.secondary
-      ),
+    secondary: stringValue(
+      value.secondary
+    ),
 
-    accent:
-      stringValue(
-        value.accent
-      ),
+    accent: stringValue(
+      value.accent
+    ),
 
-    text:
-      stringValue(
-        value.text
-      ),
+    text: stringValue(
+      value.text
+    ),
 
-    muted:
-      stringValue(
-        value.muted
-      ),
+    muted: stringValue(
+      value.muted
+    ),
 
-    surface:
-      stringValue(
-        value.surface
-      ),
+    surface: stringValue(
+      value.surface
+    ),
 
-    border:
-      stringValue(
-        value.border
-      ),
+    border: stringValue(
+      value.border
+    ),
   };
 }
 
@@ -289,8 +277,7 @@ function normalizeSectionOrder(
       (
         section
       ): section is CVSectionId =>
-        typeof section ===
-          'string' &&
+        typeof section === 'string' &&
         VALID_SECTION_IDS.includes(
           section as CVSectionId
         )
@@ -355,8 +342,7 @@ function normalizeSectionColumns(
       value[sectionId];
 
     if (
-      typeof rawColumn ===
-        'string' &&
+      typeof rawColumn === 'string' &&
       VALID_SECTION_COLUMNS.includes(
         rawColumn as CVSectionColumn
       )
@@ -398,8 +384,7 @@ function normalizeSectionTitles(
       value[sectionId];
 
     if (
-      typeof title ===
-        'string'
+      typeof title === 'string'
     ) {
       result[sectionId] =
         title;
@@ -410,12 +395,12 @@ function normalizeSectionTitles(
 }
 
 /* =========================================================
-   NORMALISATION SKILLS
+   NORMALISATION COMPÉTENCES TECHNIQUES
 ========================================================= */
 
-function normalizeSkills(
+function normalizeTechnicalSkills(
   value: unknown
-) {
+): SkillCategory[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -444,12 +429,22 @@ function normalizeSkills(
 }
 
 /* =========================================================
+   NORMALISATION COMPÉTENCES GÉNÉRALES
+========================================================= */
+
+function normalizeSoftSkills(
+  value: unknown
+): string[] {
+  return stringArray(value);
+}
+
+/* =========================================================
    NORMALISATION EXPERIENCES
 ========================================================= */
 
 function normalizeExperiences(
   value: unknown
-) {
+): CVData['experiences'] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -496,7 +491,7 @@ function normalizeExperiences(
 
 function normalizeEducation(
   value: unknown
-) {
+): CVData['education'] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -543,7 +538,7 @@ function normalizeEducation(
 
 function normalizeProjects(
   value: unknown
-) {
+): CVData['projects'] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -582,7 +577,7 @@ function normalizeProjects(
 
 function normalizeCertifications(
   value: unknown
-) {
+): CVData['certifications'] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -629,7 +624,7 @@ function normalizeCertifications(
 
 function normalizeLanguages(
   value: unknown
-) {
+): CVData['languages'] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -687,6 +682,18 @@ function normalizeCVData(
     normalizeSectionTitles(
       value.sectionTitles
     );
+
+  /*
+   * Compatibilité avec les anciens
+   * fichiers .cvgen utilisant "skills".
+   *
+   * Les anciennes compétences sont
+   * migrées automatiquement vers
+   * technicalSkills.
+   */
+  const technicalSkillsSource =
+    value.technicalSkills ??
+    value.skills;
 
   const result: CVData = {
     name:
@@ -760,9 +767,14 @@ function normalizeCVData(
         value.summary
       ),
 
-    skills:
-      normalizeSkills(
-        value.skills
+    technicalSkills:
+      normalizeTechnicalSkills(
+        technicalSkillsSource
+      ),
+
+    softSkills:
+      normalizeSoftSkills(
+        value.softSkills
       ),
 
     experiences:
@@ -860,7 +872,6 @@ export async function saveCV(
       transaction.oncomplete =
         () => {
           db.close();
-
           resolve();
         };
 
@@ -977,7 +988,6 @@ export async function deleteCV(
       transaction.oncomplete =
         () => {
           db.close();
-
           resolve();
         };
 
@@ -1005,28 +1015,26 @@ export function downloadCVGen(
 ): void {
   const payload = {
     /*
-     * Version 5 :
-     *
-     * Toutes les données du CV sont
-     * conservées dans data :
+     * Version 6 :
      *
      * - identité
      * - coordonnées
      * - photo
      * - résumé
-     * - compétences
+     * - compétences techniques
+     * - compétences générales
      * - expériences
      * - formation
      * - projets
      * - intérêts
      * - certifications
-     * - languages
+     * - langues
      * - style
      * - ordre des sections
      * - colonnes
      * - titres personnalisés
      */
-    version: 5,
+    version: 6,
 
     name:
       cv.name,

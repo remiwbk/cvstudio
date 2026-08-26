@@ -50,18 +50,24 @@ interface Props {
 
 const DEFAULT_SECTION_ORDER: CVSectionId[] = [
   'summary',
+  'technicalSkills',
+  'softSkills',
   'experiences',
   'education',
-  'skills',
-  'languages',
   'projects',
-  'interests',
+  'languages',
   'certifications',
+  'interests',
 ];
 
 /**
  * =========================================================
  * COLONNES PAR DÉFAUT
+ * =========================================================
+ *
+ * TECH :
+ * - gauche  → profil + compétences + langues + intérêts
+ * - droite  → expériences + formation + projets + certifications
  * =========================================================
  */
 
@@ -70,7 +76,9 @@ const DEFAULT_SECTION_COLUMNS: Record<
   CVSectionColumn
 > = {
   summary: 'left',
-  skills: 'left',
+
+  technicalSkills: 'left',
+  softSkills: 'left',
   languages: 'left',
   interests: 'left',
   certifications: 'left',
@@ -243,28 +251,53 @@ export default function TechTemplate({
 
   /**
    * =========================================================
-   * COMPÉTENCES
+   * COMPÉTENCES TECHNIQUES
    * =========================================================
    */
 
-  const hasSkills =
-    data.skills.some(
+  const hasTechnicalSkills =
+    data.technicalSkills.some(
       (category) =>
         category.items.length > 0
     );
 
   /**
    * =========================================================
-   * LANGUES
+   * COMPÉTENCES GÉNÉRALES
    * =========================================================
-   *
-   * On considère une langue présente si le tableau existe
-   * et contient au moins une entrée.
+   */
+
+  const hasSoftSkills =
+    data.softSkills.some(
+      (skill) =>
+        skill.trim().length > 0
+    );
+
+  /**
+   * =========================================================
+   * LANGUES
    * =========================================================
    */
 
   const hasLanguages =
-    !!data.languages?.length;
+    data.languages?.some(
+      (language) =>
+        Boolean(
+          language.name?.trim()
+        )
+    ) ?? false;
+
+  /**
+   * =========================================================
+   * CENTRES D'INTÉRÊT
+   * =========================================================
+   */
+
+  const hasInterests =
+    data.interests?.some(
+      (interest) =>
+        interest.trim().length > 0
+    ) ?? false;
 
   /**
    * =========================================================
@@ -358,6 +391,7 @@ export default function TechTemplate({
     sectionId: CVSectionId
   ) => {
     switch (sectionId) {
+
       /**
        * =====================================================
        * PROFIL
@@ -404,25 +438,25 @@ export default function TechTemplate({
 
       /**
        * =====================================================
-       * COMPÉTENCES
+       * COMPÉTENCES TECHNIQUES
        * =====================================================
        */
 
-      case 'skills':
-        if (!hasSkills) {
+      case 'technicalSkills':
+        if (!hasTechnicalSkills) {
           return null;
         }
 
         return (
           <SortableSection
-            key="skills"
-            id="skills"
+            key="technicalSkills"
+            id="technicalSkills"
             enabled={!captureMode}
           >
             <section>
               <Heading
                 title={getSectionTitle(
-                  'skills'
+                  'technicalSkills'
                 )}
                 colors={colors}
                 fonts={fonts}
@@ -430,7 +464,7 @@ export default function TechTemplate({
               />
 
               <div className="space-y-4">
-                {data.skills.map(
+                {data.technicalSkills.map(
                   (category) =>
                     category.items.length >
                     0 ? (
@@ -458,7 +492,13 @@ export default function TechTemplate({
                           }
                         </h3>
 
-                        <div className="flex flex-wrap gap-1">
+                        <div
+                          className="
+                            flex
+                            flex-wrap
+                            gap-1
+                          "
+                        >
                           {category.items.map(
                             (
                               skill,
@@ -500,6 +540,54 @@ export default function TechTemplate({
 
       /**
        * =====================================================
+       * COMPÉTENCES GÉNÉRALES
+       * =====================================================
+       */
+
+      case 'softSkills':
+        if (!hasSoftSkills) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="softSkills"
+            id="softSkills"
+            enabled={!captureMode}
+          >
+            <section>
+              <Heading
+                title={getSectionTitle(
+                  'softSkills'
+                )}
+                colors={colors}
+                fonts={fonts}
+                size={fs(14)}
+              />
+
+              <p
+                style={{
+                  fontSize: fs(10),
+                  color: colors.muted,
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.softSkills
+                  .filter(
+                    (skill) =>
+                      skill.trim()
+                        .length > 0
+                  )
+                  .join(' • ')}
+              </p>
+            </section>
+          </SortableSection>
+        );
+
+      /**
+       * =====================================================
        * LANGUES
        * =====================================================
        */
@@ -526,49 +614,58 @@ export default function TechTemplate({
               />
 
               <div className="space-y-2">
-                {data.languages?.map(
-                  (language) => (
-                    <div
-                      key={
-                        language.id
-                      }
-                      className="
-                        flex
-                        justify-between
-                        gap-3
-                      "
-                    >
-                      <span
-                        style={{
-                          color:
-                            colors.secondary,
-                          fontSize:
-                            fs(10),
-                        }}
+                {data.languages
+                  .filter(
+                    (language) =>
+                      Boolean(
+                        language.name?.trim()
+                      )
+                  )
+                  .map(
+                    (language) => (
+                      <div
+                        key={
+                          language.id
+                        }
                         className="
-                          font-semibold
+                          flex
+                          justify-between
+                          gap-3
                         "
                       >
-                        {
-                          language.name
-                        }
-                      </span>
+                        <span
+                          style={{
+                            color:
+                              colors.secondary,
+                            fontSize:
+                              fs(10),
+                          }}
+                          className="
+                            font-semibold
+                          "
+                        >
+                          {
+                            language.name
+                          }
+                        </span>
 
-                      <span
-                        style={{
-                          color:
-                            colors.muted,
-                          fontSize:
-                            fs(9.5),
-                        }}
-                      >
-                        {
-                          language.level
-                        }
-                      </span>
-                    </div>
-                  )
-                )}
+                        {language.level && (
+                          <span
+                            style={{
+                              color:
+                                colors.muted,
+                              fontSize:
+                                fs(9.5),
+                            }}
+                          >
+                            {
+                              language.level
+                            }
+                          </span>
+                        )}
+                      </div>
+                    )
+                  )}
               </div>
             </section>
           </SortableSection>
@@ -581,10 +678,7 @@ export default function TechTemplate({
        */
 
       case 'interests':
-        if (
-          data.interests.length ===
-          0
-        ) {
+        if (!hasInterests) {
           return null;
         }
 
@@ -608,151 +702,19 @@ export default function TechTemplate({
                 style={{
                   fontSize: fs(10),
                   color: colors.muted,
-                  whiteSpace:
-                    'pre-line',
                 }}
                 className="
                   leading-relaxed
                 "
               >
-                {data.interests.join(
-                  ' • '
-                )}
+                {data.interests
+                  .filter(
+                    (interest) =>
+                      interest.trim()
+                        .length > 0
+                  )
+                  .join(' • ')}
               </p>
-            </section>
-          </SortableSection>
-        );
-
-      /**
-       * =====================================================
-       * CERTIFICATIONS
-       * =====================================================
-       */
-
-      case 'certifications':
-        if (
-          !data.certifications?.length
-        ) {
-          return null;
-        }
-
-        return (
-          <SortableSection
-            key="certifications"
-            id="certifications"
-            enabled={!captureMode}
-          >
-            <section>
-              <Heading
-                title={getSectionTitle(
-                  'certifications'
-                )}
-                colors={colors}
-                fonts={fonts}
-                size={fs(14)}
-              />
-
-              <div
-                style={{
-                  fontSize: fs(9.5),
-                  color: colors.muted,
-                }}
-                className="
-                  leading-relaxed
-                "
-              >
-                {data.certifications.map(
-                  (
-                    certification,
-                    index
-                  ) => {
-                    const certificationUrl =
-                      certification.url
-                        ? certification.url.startsWith(
-                            'http://'
-                          ) ||
-                          certification.url.startsWith(
-                            'https://'
-                          )
-                          ? certification.url
-                          : `https://${certification.url}`
-                        : null;
-
-                    return (
-                      <div
-                        key={
-                          certification.id
-                        }
-                        className="
-                          leading-relaxed
-                        "
-                        style={{
-                          marginBottom:
-                            index <
-                            data
-                              .certifications
-                              .length -
-                              1
-                              ? fs(3)
-                              : undefined,
-                        }}
-                      >
-                        <span
-                          style={{
-                            color:
-                              colors.secondary,
-                            fontWeight:
-                              700,
-                          }}
-                        >
-                          {
-                            certification.name
-                          }
-                        </span>
-
-                        {certification.organization && (
-                          <>
-                            {' — '}
-                            {
-                              certification.organization
-                            }
-                          </>
-                        )}
-
-                        {certification.date && (
-                          <>
-                            {' — '}
-                            {
-                              certification.date
-                            }
-                          </>
-                        )}
-
-                        {certificationUrl && (
-                          <>
-                            {' — '}
-                            <a
-                              href={
-                                certificationUrl
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                color:
-                                  colors.accent,
-                                textDecoration:
-                                  'underline',
-                              }}
-                            >
-                              Voir
-                            </a>
-                          </>
-                        )}
-                      </div>
-                    );
-                  }
-                )}
-              </div>
             </section>
           </SortableSection>
         );
@@ -1105,6 +1067,139 @@ export default function TechTemplate({
           </SortableSection>
         );
 
+      /**
+       * =====================================================
+       * CERTIFICATIONS
+       * =====================================================
+       */
+
+      case 'certifications':
+        if (
+          !data.certifications?.length
+        ) {
+          return null;
+        }
+
+        return (
+          <SortableSection
+            key="certifications"
+            id="certifications"
+            enabled={!captureMode}
+          >
+            <section>
+              <Heading
+                title={getSectionTitle(
+                  'certifications'
+                )}
+                colors={colors}
+                fonts={fonts}
+                size={fs(14)}
+              />
+
+              <div
+                style={{
+                  fontSize:
+                    fs(9.5),
+                  color:
+                    colors.muted,
+                }}
+                className="
+                  leading-relaxed
+                "
+              >
+                {data.certifications.map(
+                  (
+                    certification,
+                    index
+                  ) => {
+                    const certificationUrl =
+                      certification.url
+                        ? certification.url.startsWith(
+                            'http://'
+                          ) ||
+                          certification.url.startsWith(
+                            'https://'
+                          )
+                          ? certification.url
+                          : `https://${certification.url}`
+                        : null;
+
+                    return (
+                      <div
+                        key={
+                          certification.id
+                        }
+                        style={{
+                          marginBottom:
+                            index <
+                            data
+                              .certifications
+                              .length -
+                              1
+                              ? fs(3)
+                              : undefined,
+                        }}
+                      >
+                        <span
+                          style={{
+                            color:
+                              colors.secondary,
+                            fontWeight:
+                              700,
+                          }}
+                        >
+                          {
+                            certification.name
+                          }
+                        </span>
+
+                        {certification.organization && (
+                          <>
+                            {' — '}
+                            {
+                              certification.organization
+                            }
+                          </>
+                        )}
+
+                        {certification.date && (
+                          <>
+                            {' — '}
+                            {
+                              certification.date
+                            }
+                          </>
+                        )}
+
+                        {certificationUrl && (
+                          <>
+                            {' — '}
+                            <a
+                              href={
+                                certificationUrl
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color:
+                                  colors.accent,
+                                textDecoration:
+                                  'underline',
+                              }}
+                            >
+                              Voir
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </section>
+          </SortableSection>
+        );
+
       default:
         return null;
     }
@@ -1133,6 +1228,7 @@ export default function TechTemplate({
         py-9
       "
     >
+
       {/* =====================================================
           HEADER
       ====================================================== */}
@@ -1438,6 +1534,7 @@ export default function TechTemplate({
           items-start
         "
       >
+
         {/* ===================================================
             COLONNE GAUCHE
         ==================================================== */}
@@ -1497,6 +1594,7 @@ export default function TechTemplate({
             </main>
           </SortableContext>
         </TechColumn>
+
       </div>
     </div>
   );

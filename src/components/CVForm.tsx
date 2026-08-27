@@ -59,21 +59,16 @@ type SortableRenderProps = {
   setNodeRef: (
     node: HTMLElement | null
   ) => void;
-
   style: React.CSSProperties;
-
   attributes: Record<string, any>;
-
   listeners:
     | Record<string, any>
     | undefined;
-
   isDragging: boolean;
 };
 
 interface SortableItemProps {
   id: string;
-
   children: (
     props: SortableRenderProps
   ) => React.ReactNode;
@@ -98,9 +93,7 @@ function SortableItem({
     transform:
       CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging
-      ? 50
-      : undefined,
+    zIndex: isDragging ? 50 : undefined,
     position: 'relative',
   };
 
@@ -123,11 +116,32 @@ function uid() {
     .slice(2, 9);
 }
 
+/*
+ * =========================================================
+ * STYLES COMMUNS
+ * =========================================================
+ */
+
 const inputCls =
-  'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 bg-white outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 placeholder:text-slate-400';
+  'w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 bg-white outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 placeholder:text-slate-400';
 
 const labelCls =
-  'block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide';
+  'block text-[11px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider';
+
+const sectionCls =
+  'space-y-5 pt-7 first:pt-0';
+
+const sectionHeaderCls =
+  'flex items-center justify-between gap-3 pb-4 border-b border-slate-200';
+
+const sectionTitleCls =
+  'text-xl font-bold tracking-tight text-slate-950';
+
+const cardCls =
+  'rounded-xl border border-slate-200 bg-slate-50/60 p-4';
+
+const subtleCardCls =
+  'rounded-xl border border-slate-200 bg-white p-4';
 
 /*
  * =========================================================
@@ -139,16 +153,13 @@ function ResizableTextarea({
   value,
   onChange,
   placeholder,
-  minHeight = 60,
+  minHeight = 70,
 }: {
   value: string;
-
   onChange: (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => void;
-
   placeholder?: string;
-
   minHeight?: number;
 }) {
   const [height, setHeight] =
@@ -170,12 +181,8 @@ function ResizableTextarea({
     e.stopPropagation();
 
     resizing.current = true;
-
-    startY.current =
-      e.clientY;
-
-    startHeight.current =
-      height;
+    startY.current = e.clientY;
+    startHeight.current = height;
 
     e.currentTarget.setPointerCapture(
       e.pointerId
@@ -190,14 +197,12 @@ function ResizableTextarea({
     }
 
     const delta =
-      e.clientY -
-      startY.current;
+      e.clientY - startY.current;
 
     setHeight(
       Math.max(
         minHeight,
-        startHeight.current +
-          delta
+        startHeight.current + delta
       )
     );
   };
@@ -205,8 +210,7 @@ function ResizableTextarea({
   const handlePointerUp = (
     e: React.PointerEvent<HTMLDivElement>
   ) => {
-    resizing.current =
-      false;
+    resizing.current = false;
 
     if (
       e.currentTarget.hasPointerCapture(
@@ -232,18 +236,10 @@ function ResizableTextarea({
       />
 
       <div
-        onPointerDown={
-          handlePointerDown
-        }
-        onPointerMove={
-          handlePointerMove
-        }
-        onPointerUp={
-          handlePointerUp
-        }
-        onPointerCancel={
-          handlePointerUp
-        }
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         className="
           absolute
           bottom-1
@@ -267,7 +263,7 @@ function ResizableTextarea({
 
 /*
  * =========================================================
- * TITRE DE SECTION ÉDITABLE
+ * TITRE DE SECTION
  * =========================================================
  */
 
@@ -278,80 +274,38 @@ function SectionEditorTitle({
   updateSectionTitle,
 }: {
   sectionId: CVSectionId;
-
   action?: React.ReactNode;
-
   data: CVData;
-
   updateSectionTitle: (
     sectionId: CVSectionId,
     title: string
   ) => void;
 }) {
   const title =
-    data.sectionTitles?.[
-      sectionId
-    ] ??
-    DEFAULT_SECTION_TITLES[
-      sectionId
-    ];
+    data.sectionTitles?.[sectionId] ??
+    DEFAULT_SECTION_TITLES[sectionId];
 
   const defaultTitle =
-    DEFAULT_SECTION_TITLES[
-      sectionId
-    ];
+    DEFAULT_SECTION_TITLES[sectionId];
 
   return (
-    <div
-      className="
-        rounded-lg
-        border
-        border-slate-200
-        bg-slate-50/70
-        px-3
-        py-2.5
-        sm:px-3
-        sm:py-2
-      "
-    >
-      <div
-        className="
-          flex
-          items-center
-          gap-2
-          min-w-0
-        "
-      >
-        <span
-          className="
-            w-1
-            h-5
-            bg-slate-900
-            rounded-full
-            shrink-0
-          "
-        />
+    <div className={sectionHeaderCls}>
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="w-1 h-7 rounded-full bg-slate-900 shrink-0" />
 
-        <Pencil
-          className="
-            w-3.5
-            h-3.5
-            text-slate-400
-            shrink-0
-          "
-        />
+        <Pencil className="w-4 h-4 text-slate-400 shrink-0" />
 
         <input
           className="
             min-w-0
-            flex-1
             bg-transparent
             border-none
             outline-none
             p-0
-            text-sm
+            text-xl
             font-bold
-            text-slate-900
+            tracking-tight
+            text-slate-950
             focus:ring-0
           "
           value={title}
@@ -374,32 +328,32 @@ function SectionEditorTitle({
           }}
           aria-label={`Modifier le titre de la section ${defaultTitle}`}
         />
-
-        <span
-          className="
-            hidden
-            sm:inline
-            shrink-0
-            text-[10px]
-            font-medium
-            text-slate-400
-          "
-        >
-          Modifier
-        </span>
-
-        {action && (
-          <div
-            className="
-              shrink-0
-              ml-auto
-            "
-          >
-            {action}
-          </div>
-        )}
       </div>
+
+      {action && (
+        <div className="shrink-0">
+          {action}
+        </div>
+      )}
     </div>
+  );
+}
+
+/*
+ * =========================================================
+ * EN-TÊTE DE SOUS-BLOC
+ * =========================================================
+ */
+
+function SubTitle({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <h4 className="text-sm font-bold text-slate-800">
+      {children}
+    </h4>
   );
 }
 
@@ -408,31 +362,27 @@ export default function CVForm({
   onChange,
 }: Props) {
   const [draggedId, setDraggedId] =
-    useState<string | null>(
-      null
-    );
+    useState<string | null>(null);
 
   /*
    * =========================================================
-   * DND-KIT SENSORS
+   * DND-KIT
    * =========================================================
    */
 
-  const sensors =
-    useSensors(
-      useSensor(PointerSensor, {
-        activationConstraint: {
-          distance: 6,
-        },
-      }),
-
-      useSensor(TouchSensor, {
-        activationConstraint: {
-          delay: 180,
-          tolerance: 8,
-        },
-      })
-    );
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 180,
+        tolerance: 8,
+      },
+    })
+  );
 
   /*
    * =========================================================
@@ -453,9 +403,7 @@ export default function CVForm({
   };
 
   const updateStyle = (
-    patch: Partial<
-      CVData['style']
-    >
+    patch: Partial<CVData['style']>
   ) => {
     onChange({
       ...data,
@@ -468,7 +416,7 @@ export default function CVForm({
 
   /*
    * =========================================================
-   * TITRES DES SECTIONS
+   * TITRES
    * =========================================================
    */
 
@@ -480,17 +428,15 @@ export default function CVForm({
       ...data,
       sectionTitles: {
         ...DEFAULT_SECTION_TITLES,
-        ...(data.sectionTitles ??
-          {}),
-        [sectionId]:
-          title,
+        ...(data.sectionTitles ?? {}),
+        [sectionId]: title,
       },
     });
   };
 
   /*
    * =========================================================
-   * DRAG END
+   * DRAG
    * =========================================================
    */
 
@@ -521,9 +467,7 @@ export default function CVForm({
     const overId =
       String(over.id);
 
-    if (
-      activeId === overId
-    ) {
+    if (activeId === overId) {
       return;
     }
 
@@ -546,30 +490,21 @@ export default function CVForm({
     );
   };
 
-  /*
-   * =========================================================
-   * DRAG START
-   * =========================================================
-   */
-
   const handleDragStart = (
     event: any
   ) => {
     setDraggedId(
-      String(
-        event.active.id
-      )
+      String(event.active.id)
     );
   };
 
-  const handleDragCancel =
-    () => {
-      setDraggedId(null);
-    };
+  const handleDragCancel = () => {
+    setDraggedId(null);
+  };
 
   /*
    * =========================================================
-   * MOVE ARRAY ITEM
+   * MOVE ARRAY
    * =========================================================
    */
 
@@ -585,27 +520,23 @@ export default function CVForm({
   ) => {
     if (
       !draggedItemId ||
-      draggedItemId ===
-        targetItemId
+      draggedItemId === targetItemId
     ) {
       return;
     }
 
-    const items =
-      [...data[key]];
+    const items = [...data[key]];
 
     const fromIndex =
       items.findIndex(
         (item) =>
-          item.id ===
-          draggedItemId
+          item.id === draggedItemId
       );
 
     const targetIndex =
       items.findIndex(
         (item) =>
-          item.id ===
-          targetItemId
+          item.id === targetItemId
       );
 
     if (
@@ -616,10 +547,7 @@ export default function CVForm({
     }
 
     const [movedItem] =
-      items.splice(
-        fromIndex,
-        1
-      );
+      items.splice(fromIndex, 1);
 
     items.splice(
       targetIndex,
@@ -635,7 +563,7 @@ export default function CVForm({
 
   /*
    * =========================================================
-   * MOVE TECHNICAL SKILL CATEGORY
+   * MOVE TECHNICAL SKILLS
    * =========================================================
    */
 
@@ -644,9 +572,7 @@ export default function CVForm({
     targetItemId: string
   ) => {
     if (
-      !draggedItemId ||
-      draggedItemId ===
-        targetItemId
+      draggedItemId === targetItemId
     ) {
       return;
     }
@@ -658,15 +584,13 @@ export default function CVForm({
     const fromIndex =
       items.findIndex(
         (item) =>
-          item.id ===
-          draggedItemId
+          item.id === draggedItemId
       );
 
     const targetIndex =
       items.findIndex(
         (item) =>
-          item.id ===
-          targetItemId
+          item.id === targetItemId
       );
 
     if (
@@ -677,10 +601,7 @@ export default function CVForm({
     }
 
     const [movedItem] =
-      items.splice(
-        fromIndex,
-        1
-      );
+      items.splice(fromIndex, 1);
 
     items.splice(
       targetIndex,
@@ -715,16 +636,11 @@ export default function CVForm({
         | Certification
         | Language
     ) => {
-      const items =
-        [...data[key]];
+      const items = [...data[key]];
 
       const nextSectionOrder =
-        data.sectionOrder.includes(
-          key
-        )
-          ? [
-              ...data.sectionOrder,
-            ]
+        data.sectionOrder.includes(key)
+          ? [...data.sectionOrder]
           : [
               ...data.sectionOrder,
               key,
@@ -732,16 +648,12 @@ export default function CVForm({
 
       onChange({
         ...data,
-        [key]: [
-          ...items,
-          item,
-        ],
+        [key]: [...items, item],
         sectionOrder:
           nextSectionOrder,
         sectionTitles: {
           ...DEFAULT_SECTION_TITLES,
-          ...(data.sectionTitles ??
-            {}),
+          ...(data.sectionTitles ?? {}),
         },
       } as CVData);
     },
@@ -782,8 +694,7 @@ export default function CVForm({
             item.id === id
               ? {
                   ...item,
-                  [field]:
-                    value,
+                  [field]: value,
                 }
               : item
         ) as CVData[typeof key]
@@ -854,8 +765,7 @@ export default function CVForm({
         'technicalSkills',
         data.technicalSkills.map(
           (category) =>
-            category.id ===
-            categoryId
+            category.id === categoryId
               ? {
                   ...category,
                   items: [
@@ -876,8 +786,7 @@ export default function CVForm({
         'technicalSkills',
         data.technicalSkills.map(
           (category) =>
-            category.id ===
-            categoryId
+            category.id === categoryId
               ? {
                   ...category,
                   items:
@@ -904,14 +813,9 @@ export default function CVForm({
     const skill =
       value.trim();
 
-    if (!skill) {
-      return;
-    }
-
     if (
-      data.softSkills.includes(
-        skill
-      )
+      !skill ||
+      data.softSkills.includes(skill)
     ) {
       return;
     }
@@ -944,264 +848,276 @@ export default function CVForm({
    */
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-0 pb-8">
 
       {/* =====================================================
           STYLE
       ====================================================== */}
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <span className="w-1 h-4 bg-slate-900 rounded-full" />
-          Style
-        </h3>
+      <section className={sectionCls}>
+        <div className={sectionHeaderCls}>
+          <div className="flex items-center gap-3">
+            <span className="w-1 h-7 rounded-full bg-slate-900" />
 
-        <div>
-          <label
-            className={`${labelCls} flex items-center gap-1.5`}
-          >
-            <Type className="w-3.5 h-3.5" />
+            <div>
+              <h2 className={sectionTitleCls}>
+                Style
+              </h2>
 
-            Taille du texte
-
-            <span className="ml-auto normal-case tracking-normal text-slate-400 font-medium">
-              {Math.round(
-                data.style.fontScale *
-                  100
-              )}
-              %
-            </span>
-          </label>
-
-          <input
-            type="range"
-            min={0.8}
-            max={1.3}
-            step={0.05}
-            value={
-              data.style.fontScale
-            }
-            onChange={(e) =>
-              updateStyle({
-                fontScale:
-                  parseFloat(
-                    e.target.value
-                  ),
-              })
-            }
-            className="w-full accent-slate-900"
-          />
-        </div>
-
-        <div>
-          <label
-            className={labelCls}
-          >
-            Police
-          </label>
-
-          <div className="grid grid-cols-2 gap-2">
-            {fontFamilies.map(
-              (font) => (
-                <button
-                  key={font.id}
-                  type="button"
-                  onClick={() =>
-                    updateStyle({
-                      fontFamily:
-                        font.id,
-                    })
-                  }
-                  style={{
-                    fontFamily:
-                      font.stack,
-                  }}
-                  className={`rounded-lg border px-3 py-2 text-sm transition text-left ${
-                    data.style
-                      .fontFamily ===
-                    font.id
-                      ? 'border-slate-900 bg-slate-50 text-slate-900 ring-1 ring-slate-900'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-400'
-                  }`}
-                >
-                  {font.label}
-                </button>
-              )
-            )}
+              <p className="mt-0.5 text-xs text-slate-500">
+                Personnalisez l'apparence de votre CV.
+              </p>
+            </div>
           </div>
         </div>
 
-        <div>
-          <label
-            className={`${labelCls} flex items-center gap-1.5`}
-          >
-            <Palette className="w-3.5 h-3.5" />
-            Couleurs
-          </label>
+        <div className="space-y-5">
 
-          <div className="grid grid-cols-6 gap-2 mb-3">
-            {colorPresets.map(
-              (preset) => (
-                <button
-                  key={preset.name}
-                  type="button"
-                  onClick={() =>
+          {/* Taille + police */}
+
+          <div className={cardCls}>
+            <SubTitle>
+              Typographie
+            </SubTitle>
+
+            <div className="mt-4 space-y-5">
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className={labelCls}>
+                    Taille du texte
+                  </label>
+
+                  <span className="text-xs font-semibold text-slate-600">
+                    {Math.round(
+                      data.style.fontScale *
+                        100
+                    )}
+                    %
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min={0.8}
+                  max={2.5}
+                  step={0.05}
+                  value={
+                    data.style.fontScale
+                  }
+                  onChange={(e) =>
                     updateStyle({
-                      primary:
-                        preset.primary,
-                      secondary:
-                        preset.secondary,
-                      accent:
-                        preset.accent,
-                      text:
-                        preset.text,
-                      muted:
-                        preset.muted,
-                      surface:
-                        preset.surface,
-                      border:
-                        preset.border,
+                      fontScale:
+                        parseFloat(
+                          e.target.value
+                        ),
                     })
                   }
-                  title={
-                    preset.name
-                  }
-                  className={`h-9 rounded-lg transition border-2 ${
-                    data.style
-                      .primary ===
-                    preset.primary
-                      ? 'ring-2 ring-offset-1 ring-slate-900 border-white'
-                      : 'border-white hover:scale-105'
-                  }`}
-                  style={{
-                    background:
-                      preset.primary,
-                  }}
+                  className="w-full accent-slate-900"
                 />
-              )
-            )}
+
+                <div className="flex justify-between mt-1.5 text-[10px] text-slate-400">
+                  <span>Compact</span>
+                  <span>Grand</span>
+                </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>
+                  Police
+                </label>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {fontFamilies.map(
+                    (font) => (
+                      <button
+                        key={font.id}
+                        type="button"
+                        onClick={() =>
+                          updateStyle({
+                            fontFamily:
+                              font.id,
+                          })
+                        }
+                        style={{
+                          fontFamily:
+                            font.stack,
+                        }}
+                        className={`rounded-lg border px-3 py-2.5 text-sm transition text-left ${
+                          data.style
+                            .fontFamily ===
+                          font.id
+                            ? 'border-slate-900 bg-white text-slate-900 ring-1 ring-slate-900'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'
+                        }`}
+                      >
+                        {font.label}
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 rounded-lg border border-slate-200 p-3 bg-slate-50/60">
-            {([
-              [
-                'primary',
-                'Principale',
-              ],
-              [
-                'secondary',
-                'Secondaire',
-              ],
-              [
-                'accent',
-                'Accent',
-              ],
-              [
-                'text',
-                'Texte',
-              ],
-              [
-                'muted',
-                'Texte léger',
-              ],
-              [
-                'surface',
-                'Fond clair',
-              ],
-              [
-                'border',
-                'Bordures',
-              ],
-            ] as [
-              keyof CVStyle,
-              string
-            ][]).map(
-              ([
-                key,
-                label,
-              ]) => (
-                <div
-                  key={key}
-                  className="flex items-center gap-2"
-                >
-                  <input
-                    type="color"
-                    value={
-                      (data.style[
-                        key
-                      ] as string) ||
-                      '#000000'
-                    }
-                    onChange={(e) =>
-                      updateStyle({
-                        [key]:
-                          e.target.value,
-                      } as Partial<CVStyle>)
-                    }
-                    className="w-8 h-8 rounded border border-slate-200 cursor-pointer bg-white p-0.5 shrink-0"
-                  />
+          {/* Couleurs */}
 
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs font-medium text-slate-600 block leading-tight">
-                      {label}
-                    </span>
+          <div className={cardCls}>
+            <div className="flex items-center justify-between gap-3">
+              <SubTitle>
+                Couleurs
+              </SubTitle>
 
-                    <input
-                      className="w-full text-[10px] text-slate-400 bg-transparent border-none outline-none p-0"
-                      value={
-                        (data.style[
-                          key
-                        ] as string) ||
-                        ''
-                      }
-                      onChange={(e) =>
-                        updateStyle({
-                          [key]:
-                            e.target.value,
-                        } as Partial<CVStyle>)
-                      }
-                      placeholder="auto"
-                    />
-                  </div>
+              <Palette className="w-4 h-4 text-slate-400" />
+            </div>
 
-                  {data.style[
-                    key
-                  ] && (
+            <div className="mt-4">
+              <label className={labelCls}>
+                Palette
+              </label>
+
+              <div className="grid grid-cols-6 gap-2">
+                {colorPresets.map(
+                  (preset) => (
                     <button
+                      key={preset.name}
                       type="button"
                       onClick={() =>
                         updateStyle({
-                          [key]: '',
-                        } as Partial<CVStyle>)
+                          primary:
+                            preset.primary,
+                          secondary:
+                            preset.secondary,
+                          accent:
+                            preset.accent,
+                          text:
+                            preset.text,
+                          muted:
+                            preset.muted,
+                          surface:
+                            preset.surface,
+                          border:
+                            preset.border,
+                        })
                       }
-                      className="text-slate-300 hover:text-slate-600 shrink-0"
-                      aria-label="Réinitialiser"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              )
-            )}
-          </div>
+                      title={preset.name}
+                      className={`h-9 rounded-lg transition border-2 ${
+                        data.style.primary ===
+                        preset.primary
+                          ? 'ring-2 ring-offset-1 ring-slate-900 border-white'
+                          : 'border-white hover:scale-105'
+                      }`}
+                      style={{
+                        background:
+                          preset.primary,
+                      }}
+                    />
+                  )
+                )}
+              </div>
+            </div>
 
-          <button
-            type="button"
-            onClick={() =>
-              updateStyle({
-                primary: '',
-                secondary: '',
-                accent: '',
-                text: '',
-                muted: '',
-                surface: '',
-                border: '',
-              })
-            }
-            className="mt-2 text-xs text-slate-400 hover:text-slate-700"
-          >
-            Réinitialiser toutes les couleurs
-          </button>
+            <div className="mt-5 pt-5 border-t border-slate-200">
+              <label className={labelCls}>
+                Personnalisation avancée
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {([
+                  ['primary', 'Principale'],
+                  ['secondary', 'Secondaire'],
+                  ['accent', 'Accent'],
+                  ['text', 'Texte'],
+                  ['muted', 'Texte léger'],
+                  ['surface', 'Fond clair'],
+                  ['border', 'Bordures'],
+                ] as [
+                  keyof CVStyle,
+                  string
+                ][]).map(
+                  ([key, label]) => (
+                    <div
+                      key={key}
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2.5"
+                    >
+                      <input
+                        type="color"
+                        value={
+                          (data.style[
+                            key
+                          ] as string) ||
+                          '#000000'
+                        }
+                        onChange={(e) =>
+                          updateStyle({
+                            [key]:
+                              e.target.value,
+                          } as Partial<CVStyle>)
+                        }
+                        className="w-8 h-8 rounded border border-slate-200 cursor-pointer bg-white p-0.5 shrink-0"
+                      />
+
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-medium text-slate-600 block">
+                          {label}
+                        </span>
+
+                        <input
+                          className="w-full text-[10px] text-slate-400 bg-transparent border-none outline-none p-0 mt-0.5"
+                          value={
+                            (data.style[
+                              key
+                            ] as string) ||
+                            ''
+                          }
+                          onChange={(e) =>
+                            updateStyle({
+                              [key]:
+                                e.target.value,
+                            } as Partial<CVStyle>)
+                          }
+                          placeholder="auto"
+                        />
+                      </div>
+
+                      {data.style[key] && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateStyle({
+                              [key]: '',
+                            } as Partial<CVStyle>)
+                          }
+                          className="text-slate-300 hover:text-slate-600 shrink-0"
+                          aria-label="Réinitialiser"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  updateStyle({
+                    primary: '',
+                    secondary: '',
+                    accent: '',
+                    text: '',
+                    muted: '',
+                    surface: '',
+                    border: '',
+                  })
+                }
+                className="mt-3 text-xs text-slate-400 hover:text-slate-700 transition"
+              >
+                Réinitialiser toutes les couleurs
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1209,343 +1125,393 @@ export default function CVForm({
           IDENTITÉ
       ====================================================== */}
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <span className="w-1 h-4 bg-slate-900 rounded-full" />
-          Identité
-        </h3>
+      <section className={sectionCls}>
+        <div className={sectionHeaderCls}>
+          <div className="flex items-center gap-3">
+            <span className="w-1 h-7 rounded-full bg-slate-900" />
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-4">
-            <div className="relative shrink-0">
-              {data.photo ? (
-                <div className="relative">
-                  <img
-                    src={data.photo}
-                    alt="Photo"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-slate-200"
-                  />
+            <div>
+              <h2 className={sectionTitleCls}>
+                Identité
+              </h2>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      update(
-                        'photo',
-                        ''
-                      )
-                    }
-                    className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-700 transition shadow"
-                    aria-label="Supprimer la photo"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-slate-300 cursor-pointer hover:border-slate-500 hover:bg-slate-50 transition gap-1 text-slate-400">
-                  <ImagePlus className="w-5 h-5" />
-
-                  <span className="text-[9px] font-medium text-center leading-tight">
-                    Photo
-                  </span>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(event) => {
-                      const file =
-                        event
-                          .target
-                          .files?.[0];
-
-                      if (!file) {
-                        return;
-                      }
-
-                      const reader =
-                        new FileReader();
-
-                      reader.onload =
-                        () =>
-                          update(
-                            'photo',
-                            reader.result as string
-                          );
-
-                      reader.readAsDataURL(
-                        file
-                      );
-                    }}
-                  />
-                </label>
-              )}
+              <p className="mt-0.5 text-xs text-slate-500">
+                Vos informations personnelles et coordonnées.
+              </p>
             </div>
-
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Ajoutez une photo de profil.
-              Elle apparaîtra dans l'en-tête
-              du CV. Utilisez un cadrage carré
-              pour un meilleur rendu.
-            </p>
           </div>
-
-          {data.photo && (
-            <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                  Taille de la photo
-                </label>
-
-                <span className="text-[11px] font-medium text-slate-500">
-                  {Math.round(
-                    (data.photoScale ??
-                      1) *
-                      100
-                  )}
-                  %
-                </span>
-              </div>
-
-              <input
-                type="range"
-                min="0.6"
-                max="1.5"
-                step="0.05"
-                value={
-                  data.photoScale ??
-                  1
-                }
-                onChange={(e) =>
-                  update(
-                    'photoScale',
-                    Number(
-                      e.target.value
-                    )
-                  )
-                }
-                className="w-full accent-slate-900 cursor-pointer"
-              />
-
-              <div className="flex justify-between mt-1 text-[10px] text-slate-400">
-                <span>Petite</span>
-                <span>Grande</span>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className={labelCls}>
-              Nom complet
-            </label>
+        <div className="space-y-5">
 
-            <input
-              className={inputCls}
-              value={data.name}
-              onChange={(e) =>
-                update(
-                  'name',
-                  e.target.value
-                )
-              }
-              placeholder="Alex Martin"
-            />
-          </div>
+          {/* Photo */}
 
-          <div>
-            <label className={labelCls}>
-              Titre / Poste
-            </label>
+          <div className={cardCls}>
+            <SubTitle>
+              Photo de profil
+            </SubTitle>
 
-            <input
-              className={inputCls}
-              value={data.title}
-              onChange={(e) =>
-                update(
-                  'title',
-                  e.target.value
-                )
-              }
-              placeholder="Senior Product Designer"
-            />
-          </div>
+            <div className="mt-4 flex items-center gap-4">
+              <div className="relative shrink-0">
+                {data.photo ? (
+                  <div className="relative">
+                    <img
+                      src={data.photo}
+                      alt="Photo"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-slate-200"
+                    />
 
-          <div>
-            <label className={labelCls}>
-              Email
-            </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update(
+                          'photo',
+                          ''
+                        )
+                      }
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-700 transition shadow"
+                      aria-label="Supprimer la photo"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-slate-300 cursor-pointer hover:border-slate-500 hover:bg-slate-50 transition gap-1 text-slate-400">
+                    <ImagePlus className="w-5 h-5" />
 
-            <input
-              className={inputCls}
-              value={data.email}
-              onChange={(e) =>
-                update(
-                  'email',
-                  e.target.value
-                )
-              }
-              placeholder="alex@email.com"
-            />
-          </div>
+                    <span className="text-[9px] font-medium">
+                      Ajouter
+                    </span>
 
-          <div>
-            <label className={labelCls}>
-              Téléphone
-            </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file =
+                          event.target.files?.[0];
 
-            <input
-              className={inputCls}
-              value={data.phone}
-              onChange={(e) =>
-                update(
-                  'phone',
-                  e.target.value
-                )
-              }
-              placeholder="+33 6 ..."
-            />
-          </div>
+                        if (!file) {
+                          return;
+                        }
 
-          <div>
-            <label className={labelCls}>
-              Localisation
-            </label>
+                        const reader =
+                          new FileReader();
 
-            <input
-              className={inputCls}
-              value={data.location}
-              onChange={(e) =>
-                update(
-                  'location',
-                  e.target.value
-                )
-              }
-              placeholder="Paris, France"
-            />
-          </div>
+                        reader.onload =
+                          () =>
+                            update(
+                              'photo',
+                              reader.result as string
+                            );
 
-          <div>
-            <label className={labelCls}>
-              Site web
-            </label>
+                        reader.readAsDataURL(
+                          file
+                        );
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
 
-            <input
-              className={inputCls}
-              value={data.website}
-              onChange={(e) =>
-                update(
-                  'website',
-                  e.target.value
-                )
-              }
-              placeholder="alex.design"
-            />
-          </div>
+              <div className="text-xs text-slate-500 leading-relaxed">
+                <p>
+                  Ajoutez une photo de profil.
+                </p>
 
-          <div>
-            <label
-              className={`${labelCls} flex items-center justify-between`}
-            >
-              <span>
-                Date de naissance
-              </span>
+                <p className="mt-1 text-slate-400">
+                  Un cadrage carré est recommandé.
+                </p>
+              </div>
+            </div>
 
-              {data.birthDate && (
-                <button
-                  type="button"
-                  onClick={() =>
+            {data.photo && (
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between mb-2">
+                  <label className={labelCls}>
+                    Taille de la photo
+                  </label>
+
+                  <span className="text-[11px] font-medium text-slate-500">
+                    {Math.round(
+                      (data.photoScale ?? 1) *
+                        100
+                    )}
+                    %
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="0.6"
+                  max="1.5"
+                  step="0.05"
+                  value={
+                    data.photoScale ?? 1
+                  }
+                  onChange={(e) =>
                     update(
-                      'birthDate',
-                      ''
+                      'photoScale',
+                      Number(
+                        e.target.value
+                      )
                     )
                   }
-                  className="normal-case tracking-normal text-[10px] font-medium text-slate-400 hover:text-slate-700 transition"
-                >
-                  Effacer
-                </button>
-              )}
-            </label>
+                  className="w-full accent-slate-900 cursor-pointer"
+                />
 
-            <input
-              type="date"
-              className={inputCls}
-              value={
-                data.birthDate ||
-                ''
-              }
-              onChange={(e) =>
-                update(
-                  'birthDate',
-                  e.target.value
-                )
-              }
-            />
+                <div className="flex justify-between mt-1 text-[10px] text-slate-400">
+                  <span>Petite</span>
+                  <span>Grande</span>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-end">
-            <label className="flex items-center gap-2 h-[38px] px-3 rounded-lg border border-slate-300 bg-white cursor-pointer hover:bg-slate-50 transition w-full">
-              <input
-                type="checkbox"
-                checked={
-                  data.hasDrivingLicense ??
-                  false
-                }
-                onChange={(e) =>
-                  update(
-                    'hasDrivingLicense',
-                    e.target.checked
-                  )
-                }
-                className="w-4 h-4 accent-slate-900"
-              />
+          {/* Informations principales */}
 
-              <span className="text-sm text-slate-700">
-                Permis B
-              </span>
-            </label>
+          <div className={cardCls}>
+            <SubTitle>
+              Informations principales
+            </SubTitle>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>
+                  Nom complet
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.name}
+                  onChange={(e) =>
+                    update(
+                      'name',
+                      e.target.value
+                    )
+                  }
+                  placeholder="Alex Martin"
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>
+                  Titre / Poste
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.title}
+                  onChange={(e) =>
+                    update(
+                      'title',
+                      e.target.value
+                    )
+                  }
+                  placeholder="Senior Product Designer"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label
-              className={`${labelCls} flex items-center gap-1`}
-            >
-              <Linkedin className="w-3 h-3" />
-              LinkedIn
-            </label>
+          {/* Coordonnées */}
 
-            <input
-              className={inputCls}
-              value={data.linkedin}
-              onChange={(e) =>
-                update(
-                  'linkedin',
-                  e.target.value
-                )
-              }
-              placeholder="linkedin.com/in/..."
-            />
+          <div className={cardCls}>
+            <SubTitle>
+              Coordonnées
+            </SubTitle>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>
+                  Email
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.email}
+                  onChange={(e) =>
+                    update(
+                      'email',
+                      e.target.value
+                    )
+                  }
+                  placeholder="alex@email.com"
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>
+                  Téléphone
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.phone}
+                  onChange={(e) =>
+                    update(
+                      'phone',
+                      e.target.value
+                    )
+                  }
+                  placeholder="+33 6 ..."
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>
+                  Localisation
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.location}
+                  onChange={(e) =>
+                    update(
+                      'location',
+                      e.target.value
+                    )
+                  }
+                  placeholder="Paris, France"
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>
+                  Site web
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.website}
+                  onChange={(e) =>
+                    update(
+                      'website',
+                      e.target.value
+                    )
+                  }
+                  placeholder="alex.design"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label
-              className={`${labelCls} flex items-center gap-1`}
-            >
-              <Github className="w-3 h-3" />
-              GitHub
-            </label>
+          {/* Informations complémentaires */}
 
-            <input
-              className={inputCls}
-              value={data.github}
-              onChange={(e) =>
-                update(
-                  'github',
-                  e.target.value
-                )
-              }
-              placeholder="github.com/..."
-            />
+          <div className={cardCls}>
+            <SubTitle>
+              Informations complémentaires
+            </SubTitle>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="flex items-center justify-between mb-1.5">
+                  <span className={labelCls}>
+                    Date de naissance
+                  </span>
+
+                  {data.birthDate && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update(
+                          'birthDate',
+                          ''
+                        )
+                      }
+                      className="text-[10px] text-slate-400 hover:text-slate-700"
+                    >
+                      Effacer
+                    </button>
+                  )}
+                </label>
+
+                <input
+                  type="date"
+                  className={inputCls}
+                  value={
+                    data.birthDate || ''
+                  }
+                  onChange={(e) =>
+                    update(
+                      'birthDate',
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 h-[42px] px-3 rounded-lg border border-slate-300 bg-white cursor-pointer hover:bg-slate-50 transition w-full">
+                  <input
+                    type="checkbox"
+                    checked={
+                      data.hasDrivingLicense ??
+                      false
+                    }
+                    onChange={(e) =>
+                      update(
+                        'hasDrivingLicense',
+                        e.target.checked
+                      )
+                    }
+                    className="w-4 h-4 accent-slate-900"
+                  />
+
+                  <span className="text-sm text-slate-700">
+                    Permis B
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Réseaux */}
+
+          <div className={cardCls}>
+            <SubTitle>
+              Réseaux professionnels
+            </SubTitle>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={`${labelCls} flex items-center gap-1.5`}>
+                  <Linkedin className="w-3.5 h-3.5" />
+                  LinkedIn
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.linkedin}
+                  onChange={(e) =>
+                    update(
+                      'linkedin',
+                      e.target.value
+                    )
+                  }
+                  placeholder="linkedin.com/in/..."
+                />
+              </div>
+
+              <div>
+                <label className={`${labelCls} flex items-center gap-1.5`}>
+                  <Github className="w-3.5 h-3.5" />
+                  GitHub
+                </label>
+
+                <input
+                  className={inputCls}
+                  value={data.github}
+                  onChange={(e) =>
+                    update(
+                      'github',
+                      e.target.value
+                    )
+                  }
+                  placeholder="github.com/..."
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1554,7 +1520,7 @@ export default function CVForm({
           PROFIL
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="summary"
           data={data}
@@ -1563,23 +1529,26 @@ export default function CVForm({
           }
         />
 
-        <ResizableTextarea
-          value={data.summary}
-          onChange={(e) =>
-            update(
-              'summary',
-              e.target.value
-            )
-          }
-          placeholder="Présentez votre profil, vos compétences et vos objectifs..."
-        />
+        <div className={cardCls}>
+          <ResizableTextarea
+            value={data.summary}
+            onChange={(e) =>
+              update(
+                'summary',
+                e.target.value
+              )
+            }
+            placeholder="Présentez votre profil, vos compétences et vos objectifs..."
+            minHeight={110}
+          />
+        </div>
       </section>
 
       {/* =====================================================
           COMPÉTENCES TECHNIQUES
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="technicalSkills"
           data={data}
@@ -1592,16 +1561,11 @@ export default function CVForm({
               onClick={
                 technicalSkillOps.addCategory
               }
-              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900 transition flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-
-              <span className="hidden sm:inline">
-                Catégorie
-              </span>
-
-              <span className="sm:hidden">
-                +
+              <span>
+                Ajouter une catégorie
               </span>
             </button>
           }
@@ -1609,15 +1573,9 @@ export default function CVForm({
 
         <DndContext
           sensors={sensors}
-          collisionDetection={
-            closestCenter
-          }
-          onDragStart={
-            handleDragStart
-          }
-          onDragCancel={
-            handleDragCancel
-          }
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
           onDragEnd={(event) =>
             handleSortEnd(
               event,
@@ -1638,12 +1596,8 @@ export default function CVForm({
               {data.technicalSkills.map(
                 (category) => (
                   <SortableItem
-                    key={
-                      category.id
-                    }
-                    id={
-                      category.id
-                    }
+                    key={category.id}
+                    id={category.id}
                   >
                     {({
                       setNodeRef,
@@ -1655,7 +1609,7 @@ export default function CVForm({
                       <div
                         ref={setNodeRef}
                         style={style}
-                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2.5 bg-slate-50/60 transition ${
+                        className={`relative rounded-xl border border-slate-200 bg-white p-4 transition ${
                           isDragging
                             ? 'opacity-60 shadow-xl scale-[1.01] z-50'
                             : 'hover:border-slate-300'
@@ -1666,7 +1620,7 @@ export default function CVForm({
                             type="button"
                             {...attributes}
                             {...listeners}
-                            className="cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            className="cursor-grab active:cursor-grabbing touch-none shrink-0 p-1.5 rounded-lg hover:bg-slate-100"
                             title="Déplacer la catégorie"
                             aria-label="Déplacer la catégorie"
                           >
@@ -1674,7 +1628,7 @@ export default function CVForm({
                               className={`w-4 h-4 ${
                                 isDragging
                                   ? 'text-slate-900'
-                                  : 'text-slate-300 hover:text-slate-600'
+                                  : 'text-slate-300'
                               }`}
                             />
                           </button>
@@ -1702,92 +1656,96 @@ export default function CVForm({
                                 category.id
                               )
                             }
-                            className="text-slate-400 hover:text-red-500 transition shrink-0"
+                            className="p-1.5 text-slate-400 hover:text-red-500 transition shrink-0"
                             aria-label="Supprimer la catégorie"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
 
-                        <div className="flex flex-wrap gap-1.5 pl-6">
-                          {category.items.map(
-                            (
-                              item,
-                              index
-                            ) => (
-                              <span
-                                key={`${category.id}-${index}`}
-                                className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-200 pl-2 pr-1 py-0.5 text-xs text-slate-700"
-                              >
-                                {item}
-
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    technicalSkillOps.removeItem(
-                                      category.id,
-                                      index
-                                    )
-                                  }
-                                  className="rounded p-0.5 hover:bg-slate-200 text-slate-400"
-                                  aria-label="Supprimer"
+                        <div className="mt-3 pl-9">
+                          <div className="flex flex-wrap gap-1.5">
+                            {category.items.map(
+                              (
+                                item,
+                                index
+                              ) => (
+                                <span
+                                  key={`${category.id}-${index}`}
+                                  className="inline-flex items-center gap-1 rounded-md bg-slate-50 border border-slate-200 pl-2.5 pr-1 py-1 text-xs text-slate-700"
                                 >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </span>
-                            )
-                          )}
-                        </div>
+                                  {item}
 
-                        <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      technicalSkillOps.removeItem(
+                                        category.id,
+                                        index
+                                      )
+                                    }
+                                    className="rounded p-0.5 hover:bg-slate-200 text-slate-400"
+                                    aria-label="Supprimer"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </span>
+                              )
+                            )}
+                          </div>
 
-                            const input =
-                              e.currentTarget
-                                .elements
-                                .namedItem(
-                                  'item'
-                                ) as HTMLInputElement;
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
 
-                            technicalSkillOps.addItem(
-                              category.id,
-                              input.value
-                            );
+                              const input =
+                                e.currentTarget
+                                  .elements
+                                  .namedItem(
+                                    'item'
+                                  ) as HTMLInputElement;
 
-                            input.value =
-                              '';
-                          }}
-                          className="flex gap-2 pl-6"
-                        >
-                          <input
-                            name="item"
-                            className={inputCls}
-                            placeholder="Ajouter un élément (ex: Linux)"
-                          />
+                              technicalSkillOps.addItem(
+                                category.id,
+                                input.value
+                              );
 
-                          <button
-                            type="submit"
-                            className="shrink-0 rounded-lg bg-slate-200 px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-300 transition flex items-center gap-1"
+                              input.value =
+                                '';
+                            }}
+                            className="flex gap-2 mt-3"
                           >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </form>
+                            <input
+                              name="item"
+                              className={inputCls}
+                              placeholder="Ajouter une compétence, ex. Linux"
+                            />
+
+                            <button
+                              type="submit"
+                              className="shrink-0 rounded-lg bg-slate-900 px-3 text-white hover:bg-slate-700 transition"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </form>
+                        </div>
                       </div>
                     )}
                   </SortableItem>
                 )
               )}
 
-              {data.technicalSkills
-                .length ===
+              {data.technicalSkills.length ===
                 0 && (
-                <p className="text-xs text-slate-400 italic">
-                  Aucune catégorie.
-                  Cliquez sur «
-                  Catégorie » pour
-                  commencer.
-                </p>
+                <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center">
+                  <p className="text-sm text-slate-400">
+                    Aucune catégorie de compétences.
+                  </p>
+
+                  <p className="text-xs text-slate-400 mt-1">
+                    Cliquez sur « Ajouter une catégorie » pour commencer.
+                  </p>
+                </div>
               )}
             </div>
           </SortableContext>
@@ -1798,7 +1756,7 @@ export default function CVForm({
           COMPÉTENCES GÉNÉRALES
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="softSkills"
           data={data}
@@ -1807,82 +1765,80 @@ export default function CVForm({
           }
         />
 
-        <div className="flex flex-wrap gap-1.5">
-          {data.softSkills.map(
-            (
-              skill,
-              index
-            ) => (
-              <span
-                key={`${skill}-${index}`}
-                className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-200 pl-2.5 pr-1 py-1 text-xs text-slate-700"
-              >
-                {skill}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    removeSoftSkill(
-                      index
-                    )
-                  }
-                  className="rounded p-0.5 hover:bg-slate-200 text-slate-400"
-                  aria-label={`Supprimer ${skill}`}
+        <div className={cardCls}>
+          <div className="flex flex-wrap gap-2">
+            {data.softSkills.map(
+              (
+                skill,
+                index
+              ) => (
+                <span
+                  key={`${skill}-${index}`}
+                  className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 pl-3 pr-1.5 py-1.5 text-xs font-medium text-slate-700"
                 >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )
-          )}
-        </div>
+                  {skill}
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeSoftSkill(
+                        index
+                      )
+                    }
+                    className="rounded-full p-0.5 hover:bg-slate-200 text-slate-400"
+                    aria-label={`Supprimer ${skill}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )
+            )}
+          </div>
 
-            const input =
-              e.currentTarget
-                .elements
-                .namedItem(
-                  'softSkill'
-                ) as HTMLInputElement;
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
 
-            addSoftSkill(
-              input.value
-            );
+              const input =
+                e.currentTarget
+                  .elements
+                  .namedItem(
+                    'softSkill'
+                  ) as HTMLInputElement;
 
-            input.value = '';
-          }}
-          className="flex gap-2"
-        >
-          <input
-            name="softSkill"
-            className={inputCls}
-            placeholder="Ajouter une compétence (ex: Autonomie)"
-          />
+              addSoftSkill(
+                input.value
+              );
 
-          <button
-            type="submit"
-            className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition flex items-center gap-1"
+              input.value = '';
+            }}
+            className="flex gap-2 mt-4 pt-4 border-t border-slate-200"
           >
-            <Plus className="w-4 h-4" />
+            <input
+              name="softSkill"
+              className={inputCls}
+              placeholder="Ajouter une compétence, ex. Autonomie"
+            />
 
-            <span className="hidden sm:inline">
-              Ajouter
-            </span>
+            <button
+              type="submit"
+              className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition flex items-center gap-1"
+            >
+              <Plus className="w-4 h-4" />
 
-            <span className="sm:hidden">
-              +
-            </span>
-          </button>
-        </form>
+              <span className="hidden sm:inline">
+                Ajouter
+              </span>
+            </button>
+          </form>
+        </div>
       </section>
 
       {/* =====================================================
           EXPÉRIENCES
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="experiences"
           data={data}
@@ -1900,37 +1856,23 @@ export default function CVForm({
                     role: '',
                     company: '',
                     period: '',
-                    description:
-                      '',
+                    description: '',
                   } as Experience
                 )
               }
-              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900 transition flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-
-              <span className="hidden sm:inline">
-                Ajouter
-              </span>
-
-              <span className="sm:hidden">
-                +
-              </span>
+              Ajouter
             </button>
           }
         />
 
         <DndContext
           sensors={sensors}
-          collisionDetection={
-            closestCenter
-          }
-          onDragStart={
-            handleDragStart
-          }
-          onDragCancel={
-            handleDragCancel
-          }
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
           onDragEnd={(event) =>
             handleSortEnd(
               event,
@@ -1963,62 +1905,113 @@ export default function CVForm({
                       <div
                         ref={setNodeRef}
                         style={style}
-                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
+                        className={`relative rounded-xl border border-slate-200 bg-white p-4 transition ${
                           isDragging
                             ? 'opacity-60 shadow-xl scale-[1.01] z-50'
                             : 'hover:border-slate-300'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-3">
                           <button
                             type="button"
                             {...attributes}
                             {...listeners}
-                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1.5 rounded-lg hover:bg-slate-100"
                             title="Déplacer l'expérience"
                             aria-label="Déplacer l'expérience"
                           >
                             <GripVertical
-                              className={`w-4 h-4 ${
-                                isDragging
-                                  ? 'text-slate-900'
-                                  : 'text-slate-300 hover:text-slate-600'
-                              }`}
+                              className="w-4 h-4 text-slate-300"
                             />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              className={inputCls}
-                              value={
-                                exp.role
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'experiences',
-                                  exp.id,
-                                  'role',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Poste"
-                            />
+                          <div className="flex-1 min-w-0">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className={labelCls}>
+                                  Poste
+                                </label>
 
-                            <input
-                              className={inputCls}
-                              value={
-                                exp.company
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'experiences',
-                                  exp.id,
-                                  'company',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Entreprise"
-                            />
+                                <input
+                                  className={inputCls}
+                                  value={exp.role}
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'experiences',
+                                      exp.id,
+                                      'role',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Poste occupé"
+                                />
+                              </div>
+
+                              <div>
+                                <label className={labelCls}>
+                                  Entreprise
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    exp.company
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'experiences',
+                                      exp.id,
+                                      'company',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Nom de l'entreprise"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className={labelCls}>
+                                  Période
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    exp.period
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'experiences',
+                                      exp.id,
+                                      'period',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="2021 — Présent"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className={labelCls}>
+                                  Missions et résultats
+                                </label>
+
+                                <ResizableTextarea
+                                  value={
+                                    exp.description
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'experiences',
+                                      exp.id,
+                                      'description',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Décrivez vos missions, réalisations et résultats..."
+                                />
+                              </div>
+                            </div>
                           </div>
 
                           <button
@@ -2029,43 +2022,12 @@ export default function CVForm({
                                 exp.id
                               )
                             }
-                            className="mt-2 text-slate-400 hover:text-red-500 transition"
+                            className="mt-2 p-1 text-slate-400 hover:text-red-500 transition shrink-0"
                             aria-label="Supprimer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-
-                        <input
-                          className={inputCls}
-                          value={
-                            exp.period
-                          }
-                          onChange={(e) =>
-                            arrayOps.patch(
-                              'experiences',
-                              exp.id,
-                              'period',
-                              e.target.value
-                            )
-                          }
-                          placeholder="Période (ex: 2021 — Présent)"
-                        />
-
-                        <ResizableTextarea
-                          value={
-                            exp.description
-                          }
-                          onChange={(e) =>
-                            arrayOps.patch(
-                              'experiences',
-                              exp.id,
-                              'description',
-                              e.target.value
-                            )
-                          }
-                          placeholder="Description des missions et résultats"
-                        />
                       </div>
                     )}
                   </SortableItem>
@@ -2080,7 +2042,7 @@ export default function CVForm({
           FORMATION
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="education"
           data={data}
@@ -2098,37 +2060,23 @@ export default function CVForm({
                     degree: '',
                     school: '',
                     period: '',
-                    description:
-                      '',
+                    description: '',
                   } as Education
                 )
               }
-              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900 transition flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-
-              <span className="hidden sm:inline">
-                Ajouter
-              </span>
-
-              <span className="sm:hidden">
-                +
-              </span>
+              Ajouter
             </button>
           }
         />
 
         <DndContext
           sensors={sensors}
-          collisionDetection={
-            closestCenter
-          }
-          onDragStart={
-            handleDragStart
-          }
-          onDragCancel={
-            handleDragCancel
-          }
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
           onDragEnd={(event) =>
             handleSortEnd(
               event,
@@ -2161,62 +2109,107 @@ export default function CVForm({
                       <div
                         ref={setNodeRef}
                         style={style}
-                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
+                        className={`relative rounded-xl border border-slate-200 bg-white p-4 transition ${
                           isDragging
                             ? 'opacity-60 shadow-xl scale-[1.01] z-50'
                             : 'hover:border-slate-300'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-3">
                           <button
                             type="button"
                             {...attributes}
                             {...listeners}
-                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1.5 rounded-lg hover:bg-slate-100"
                             title="Déplacer la formation"
                             aria-label="Déplacer la formation"
                           >
-                            <GripVertical
-                              className={`w-4 h-4 ${
-                                isDragging
-                                  ? 'text-slate-900'
-                                  : 'text-slate-300 hover:text-slate-600'
-                              }`}
-                            />
+                            <GripVertical className="w-4 h-4 text-slate-300" />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              className={inputCls}
-                              value={
-                                ed.degree
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'education',
-                                  ed.id,
-                                  'degree',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Diplôme"
-                            />
+                          <div className="flex-1 min-w-0">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className={labelCls}>
+                                  Diplôme / Formation
+                                </label>
 
-                            <input
-                              className={inputCls}
-                              value={
-                                ed.school
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'education',
-                                  ed.id,
-                                  'school',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Établissement"
-                            />
+                                <input
+                                  className={inputCls}
+                                  value={ed.degree}
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'education',
+                                      ed.id,
+                                      'degree',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Diplôme"
+                                />
+                              </div>
+
+                              <div>
+                                <label className={labelCls}>
+                                  Établissement
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={ed.school}
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'education',
+                                      ed.id,
+                                      'school',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Établissement"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className={labelCls}>
+                                  Période
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={ed.period}
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'education',
+                                      ed.id,
+                                      'period',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="2023 — 2025"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className={labelCls}>
+                                  Description
+                                </label>
+
+                                <ResizableTextarea
+                                  value={
+                                    ed.description
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'education',
+                                      ed.id,
+                                      'description',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Description complémentaire (optionnelle)"
+                                />
+                              </div>
+                            </div>
                           </div>
 
                           <button
@@ -2227,43 +2220,12 @@ export default function CVForm({
                                 ed.id
                               )
                             }
-                            className="mt-2 text-slate-400 hover:text-red-500 transition"
+                            className="mt-2 p-1 text-slate-400 hover:text-red-500 transition shrink-0"
                             aria-label="Supprimer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-
-                        <input
-                          className={inputCls}
-                          value={
-                            ed.period
-                          }
-                          onChange={(e) =>
-                            arrayOps.patch(
-                              'education',
-                              ed.id,
-                              'period',
-                              e.target.value
-                            )
-                          }
-                          placeholder="Période"
-                        />
-
-                        <ResizableTextarea
-                          value={
-                            ed.description
-                          }
-                          onChange={(e) =>
-                            arrayOps.patch(
-                              'education',
-                              ed.id,
-                              'description',
-                              e.target.value
-                            )
-                          }
-                          placeholder="Description (optionnelle)"
-                        />
                       </div>
                     )}
                   </SortableItem>
@@ -2278,7 +2240,7 @@ export default function CVForm({
           CERTIFICATIONS
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="certifications"
           data={data}
@@ -2294,39 +2256,25 @@ export default function CVForm({
                   {
                     id: uid(),
                     name: '',
-                    organization:
-                      '',
+                    organization: '',
                     date: '',
                     url: '',
                   } as Certification
                 )
               }
-              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900 transition flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-
-              <span className="hidden sm:inline">
-                Ajouter
-              </span>
-
-              <span className="sm:hidden">
-                +
-              </span>
+              Ajouter
             </button>
           }
         />
 
         <DndContext
           sensors={sensors}
-          collisionDetection={
-            closestCenter
-          }
-          onDragStart={
-            handleDragStart
-          }
-          onDragCancel={
-            handleDragCancel
-          }
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
           onDragEnd={(event) =>
             handleSortEnd(
               event,
@@ -2345,9 +2293,7 @@ export default function CVForm({
           >
             <div className="space-y-3">
               {data.certifications.map(
-                (
-                  certification
-                ) => (
+                (certification) => (
                   <SortableItem
                     key={
                       certification.id
@@ -2366,62 +2312,114 @@ export default function CVForm({
                       <div
                         ref={setNodeRef}
                         style={style}
-                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
+                        className={`relative rounded-xl border border-slate-200 bg-white p-4 transition ${
                           isDragging
                             ? 'opacity-60 shadow-xl scale-[1.01] z-50'
                             : 'hover:border-slate-300'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-3">
                           <button
                             type="button"
                             {...attributes}
                             {...listeners}
-                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1.5 rounded-lg hover:bg-slate-100"
                             title="Déplacer la certification"
                             aria-label="Déplacer la certification"
                           >
-                            <GripVertical
-                              className={`w-4 h-4 ${
-                                isDragging
-                                  ? 'text-slate-900'
-                                  : 'text-slate-300 hover:text-slate-600'
-                              }`}
-                            />
+                            <GripVertical className="w-4 h-4 text-slate-300" />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              className={inputCls}
-                              value={
-                                certification.name
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'certifications',
-                                  certification.id,
-                                  'name',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Nom de la certification"
-                            />
+                          <div className="flex-1 min-w-0">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className={labelCls}>
+                                  Certification
+                                </label>
 
-                            <input
-                              className={inputCls}
-                              value={
-                                certification.organization
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'certifications',
-                                  certification.id,
-                                  'organization',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Organisme"
-                            />
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    certification.name
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'certifications',
+                                      certification.id,
+                                      'name',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Nom de la certification"
+                                />
+                              </div>
+
+                              <div>
+                                <label className={labelCls}>
+                                  Organisme
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    certification.organization
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'certifications',
+                                      certification.id,
+                                      'organization',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Organisme"
+                                />
+                              </div>
+
+                              <div>
+                                <label className={labelCls}>
+                                  Date / Année
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    certification.date
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'certifications',
+                                      certification.id,
+                                      'date',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="2026"
+                                />
+                              </div>
+
+                              <div>
+                                <label className={labelCls}>
+                                  URL
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    certification.url
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'certifications',
+                                      certification.id,
+                                      'url',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="https://..."
+                                />
+                              </div>
+                            </div>
                           </div>
 
                           <button
@@ -2432,45 +2430,11 @@ export default function CVForm({
                                 certification.id
                               )
                             }
-                            className="mt-2 text-slate-400 hover:text-red-500 transition"
+                            className="mt-2 p-1 text-slate-400 hover:text-red-500 transition shrink-0"
                             aria-label="Supprimer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <input
-                            className={inputCls}
-                            value={
-                              certification.date
-                            }
-                            onChange={(e) =>
-                              arrayOps.patch(
-                                'certifications',
-                                certification.id,
-                                'date',
-                                e.target.value
-                              )
-                            }
-                            placeholder="Date / année"
-                          />
-
-                          <input
-                            className={inputCls}
-                            value={
-                              certification.url
-                            }
-                            onChange={(e) =>
-                              arrayOps.patch(
-                                'certifications',
-                                certification.id,
-                                'url',
-                                e.target.value
-                              )
-                            }
-                            placeholder="URL"
-                          />
                         </div>
                       </div>
                     )}
@@ -2478,15 +2442,17 @@ export default function CVForm({
                 )
               )}
 
-              {data.certifications
-                .length ===
+              {data.certifications.length ===
                 0 && (
-                <p className="text-xs text-slate-400 italic">
-                  Aucune certification.
-                  Cliquez sur «
-                  Ajouter » pour
-                  commencer.
-                </p>
+                <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center">
+                  <p className="text-sm text-slate-400">
+                    Aucune certification.
+                  </p>
+
+                  <p className="text-xs text-slate-400 mt-1">
+                    Cliquez sur « Ajouter » pour commencer.
+                  </p>
+                </div>
               )}
             </div>
           </SortableContext>
@@ -2497,7 +2463,7 @@ export default function CVForm({
           LANGUES
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="languages"
           data={data}
@@ -2517,32 +2483,19 @@ export default function CVForm({
                   } as Language
                 )
               }
-              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900 transition flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-
-              <span className="hidden sm:inline">
-                Ajouter
-              </span>
-
-              <span className="sm:hidden">
-                +
-              </span>
+              Ajouter
             </button>
           }
         />
 
         <DndContext
           sensors={sensors}
-          collisionDetection={
-            closestCenter
-          }
-          onDragStart={
-            handleDragStart
-          }
-          onDragCancel={
-            handleDragCancel
-          }
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
           onDragEnd={(event) =>
             handleSortEnd(
               event,
@@ -2563,12 +2516,8 @@ export default function CVForm({
               {data.languages.map(
                 (language) => (
                   <SortableItem
-                    key={
-                      language.id
-                    }
-                    id={
-                      language.id
-                    }
+                    key={language.id}
+                    id={language.id}
                   >
                     {({
                       setNodeRef,
@@ -2580,62 +2529,68 @@ export default function CVForm({
                       <div
                         ref={setNodeRef}
                         style={style}
-                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
+                        className={`relative rounded-xl border border-slate-200 bg-white p-4 transition ${
                           isDragging
                             ? 'opacity-60 shadow-xl scale-[1.01] z-50'
                             : 'hover:border-slate-300'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-3">
                           <button
                             type="button"
                             {...attributes}
                             {...listeners}
-                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1.5 rounded-lg hover:bg-slate-100"
                             title="Déplacer la langue"
                             aria-label="Déplacer la langue"
                           >
-                            <GripVertical
-                              className={`w-4 h-4 ${
-                                isDragging
-                                  ? 'text-slate-900'
-                                  : 'text-slate-300 hover:text-slate-600'
-                              }`}
-                            />
+                            <GripVertical className="w-4 h-4 text-slate-300" />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              className={inputCls}
-                              value={
-                                language.name
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'languages',
-                                  language.id,
-                                  'name',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Langue (ex: Français)"
-                            />
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className={labelCls}>
+                                Langue
+                              </label>
 
-                            <input
-                              className={inputCls}
-                              value={
-                                language.level
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'languages',
-                                  language.id,
-                                  'level',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Niveau (ex: Courant, B2, C1...)"
-                            />
+                              <input
+                                className={inputCls}
+                                value={
+                                  language.name
+                                }
+                                onChange={(e) =>
+                                  arrayOps.patch(
+                                    'languages',
+                                    language.id,
+                                    'name',
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Français"
+                              />
+                            </div>
+
+                            <div>
+                              <label className={labelCls}>
+                                Niveau
+                              </label>
+
+                              <input
+                                className={inputCls}
+                                value={
+                                  language.level
+                                }
+                                onChange={(e) =>
+                                  arrayOps.patch(
+                                    'languages',
+                                    language.id,
+                                    'level',
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Courant, B2, C1..."
+                              />
+                            </div>
                           </div>
 
                           <button
@@ -2646,7 +2601,7 @@ export default function CVForm({
                                 language.id
                               )
                             }
-                            className="mt-2 text-slate-400 hover:text-red-500 transition"
+                            className="mt-2 p-1 text-slate-400 hover:text-red-500 transition shrink-0"
                             aria-label="Supprimer la langue"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -2660,12 +2615,15 @@ export default function CVForm({
 
               {data.languages.length ===
                 0 && (
-                <p className="text-xs text-slate-400 italic">
-                  Aucune langue.
-                  Cliquez sur «
-                  Ajouter » pour
-                  commencer.
-                </p>
+                <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center">
+                  <p className="text-sm text-slate-400">
+                    Aucune langue.
+                  </p>
+
+                  <p className="text-xs text-slate-400 mt-1">
+                    Cliquez sur « Ajouter » pour commencer.
+                  </p>
+                </div>
               )}
             </div>
           </SortableContext>
@@ -2676,7 +2634,7 @@ export default function CVForm({
           PROJETS
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="projects"
           data={data}
@@ -2693,37 +2651,23 @@ export default function CVForm({
                     id: uid(),
                     name: '',
                     url: '',
-                    description:
-                      '',
+                    description: '',
                   } as Project
                 )
               }
-              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 shrink-0"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-900 hover:text-slate-900 transition flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-
-              <span className="hidden sm:inline">
-                Ajouter
-              </span>
-
-              <span className="sm:hidden">
-                +
-              </span>
+              Ajouter
             </button>
           }
         />
 
         <DndContext
           sensors={sensors}
-          collisionDetection={
-            closestCenter
-          }
-          onDragStart={
-            handleDragStart
-          }
-          onDragCancel={
-            handleDragCancel
-          }
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
           onDragEnd={(event) =>
             handleSortEnd(
               event,
@@ -2744,12 +2688,8 @@ export default function CVForm({
               {data.projects.map(
                 (project) => (
                   <SortableItem
-                    key={
-                      project.id
-                    }
-                    id={
-                      project.id
-                    }
+                    key={project.id}
+                    id={project.id}
                   >
                     {({
                       setNodeRef,
@@ -2761,62 +2701,91 @@ export default function CVForm({
                       <div
                         ref={setNodeRef}
                         style={style}
-                        className={`relative rounded-xl border border-slate-200 p-3 space-y-2 bg-slate-50/60 transition ${
+                        className={`relative rounded-xl border border-slate-200 bg-white p-4 transition ${
                           isDragging
                             ? 'opacity-60 shadow-xl scale-[1.01] z-50'
                             : 'hover:border-slate-300'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-3">
                           <button
                             type="button"
                             {...attributes}
                             {...listeners}
-                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1 rounded hover:bg-slate-200"
+                            className="mt-2 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1.5 rounded-lg hover:bg-slate-100"
                             title="Déplacer le projet"
                             aria-label="Déplacer le projet"
                           >
-                            <GripVertical
-                              className={`w-4 h-4 ${
-                                isDragging
-                                  ? 'text-slate-900'
-                                  : 'text-slate-300 hover:text-slate-600'
-                              }`}
-                            />
+                            <GripVertical className="w-4 h-4 text-slate-300" />
                           </button>
 
-                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              className={inputCls}
-                              value={
-                                project.name
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'projects',
-                                  project.id,
-                                  'name',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Nom du projet"
-                            />
+                          <div className="flex-1 min-w-0">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className={labelCls}>
+                                  Nom du projet
+                                </label>
 
-                            <input
-                              className={inputCls}
-                              value={
-                                project.url
-                              }
-                              onChange={(e) =>
-                                arrayOps.patch(
-                                  'projects',
-                                  project.id,
-                                  'url',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="URL"
-                            />
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    project.name
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'projects',
+                                      project.id,
+                                      'name',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Nom du projet"
+                                />
+                              </div>
+
+                              <div>
+                                <label className={labelCls}>
+                                  URL
+                                </label>
+
+                                <input
+                                  className={inputCls}
+                                  value={
+                                    project.url
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'projects',
+                                      project.id,
+                                      'url',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="https://..."
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className={labelCls}>
+                                  Description
+                                </label>
+
+                                <ResizableTextarea
+                                  value={
+                                    project.description
+                                  }
+                                  onChange={(e) =>
+                                    arrayOps.patch(
+                                      'projects',
+                                      project.id,
+                                      'description',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Décrivez brièvement le projet..."
+                                />
+                              </div>
+                            </div>
                           </div>
 
                           <button
@@ -2827,27 +2796,12 @@ export default function CVForm({
                                 project.id
                               )
                             }
-                            className="mt-2 text-slate-400 hover:text-red-500 transition"
+                            className="mt-2 p-1 text-slate-400 hover:text-red-500 transition shrink-0"
                             aria-label="Supprimer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-
-                        <ResizableTextarea
-                          value={
-                            project.description
-                          }
-                          onChange={(e) =>
-                            arrayOps.patch(
-                              'projects',
-                              project.id,
-                              'description',
-                              e.target.value
-                            )
-                          }
-                          placeholder="Description du projet"
-                        />
                       </div>
                     )}
                   </SortableItem>
@@ -2862,7 +2816,7 @@ export default function CVForm({
           CENTRES D'INTÉRÊT
       ====================================================== */}
 
-      <section className="space-y-3">
+      <section className={sectionCls}>
         <SectionEditorTitle
           sectionId="interests"
           data={data}
@@ -2871,97 +2825,95 @@ export default function CVForm({
           }
         />
 
-        <div className="flex flex-wrap gap-2">
-          {data.interests.map(
-            (
-              interest,
-              index
-            ) => (
-              <span
-                key={index}
-                className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 pl-3 pr-1.5 py-1 text-xs font-medium text-slate-700"
-              >
-                {interest}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    update(
-                      'interests',
-                      data.interests.filter(
-                        (
-                          _,
-                          itemIndex
-                        ) =>
-                          itemIndex !==
-                          index
-                      )
-                    )
-                  }
-                  className="rounded-full p-0.5 hover:bg-slate-300 transition text-slate-500"
-                  aria-label="Supprimer"
+        <div className={cardCls}>
+          <div className="flex flex-wrap gap-2">
+            {data.interests.map(
+              (
+                interest,
+                index
+              ) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 pl-3 pr-1.5 py-1.5 text-xs font-medium text-slate-700"
                 >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              </span>
-            )
-          )}
-        </div>
+                  {interest}
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-
-            const input =
-              e.currentTarget
-                .elements
-                .namedItem(
-                  'interest'
-                ) as HTMLInputElement;
-
-            const value =
-              input.value.trim();
-
-            if (
-              value &&
-              !data.interests.includes(
-                value
+                  <button
+                    type="button"
+                    onClick={() =>
+                      update(
+                        'interests',
+                        data.interests.filter(
+                          (
+                            _,
+                            itemIndex
+                          ) =>
+                            itemIndex !==
+                            index
+                        )
+                      )
+                    }
+                    className="rounded-full p-0.5 hover:bg-slate-200 transition text-slate-500"
+                    aria-label={`Supprimer ${interest}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
               )
-            ) {
-              update(
-                'interests',
-                [
-                  ...data.interests,
-                  value,
-                ]
-              );
-            }
+            )}
+          </div>
 
-            input.value = '';
-          }}
-          className="flex gap-2"
-        >
-          <input
-            name="interest"
-            className={inputCls}
-            placeholder="Ajouter (ex: Photographie)"
-          />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
 
-          <button
-            type="submit"
-            className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition flex items-center gap-1"
+              const input =
+                e.currentTarget
+                  .elements
+                  .namedItem(
+                    'interest'
+                  ) as HTMLInputElement;
+
+              const value =
+                input.value.trim();
+
+              if (
+                value &&
+                !data.interests.includes(
+                  value
+                )
+              ) {
+                update(
+                  'interests',
+                  [
+                    ...data.interests,
+                    value,
+                  ]
+                );
+              }
+
+              input.value = '';
+            }}
+            className="flex gap-2 mt-4 pt-4 border-t border-slate-200"
           >
-            <Plus className="w-4 h-4" />
+            <input
+              name="interest"
+              className={inputCls}
+              placeholder="Ajouter un centre d'intérêt, ex. Photographie"
+            />
 
-            <span className="hidden sm:inline">
-              Ajouter
-            </span>
+            <button
+              type="submit"
+              className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition flex items-center gap-1"
+            >
+              <Plus className="w-4 h-4" />
 
-            <span className="sm:hidden">
-              +
-            </span>
-          </button>
-        </form>
+              <span className="hidden sm:inline">
+                Ajouter
+              </span>
+            </button>
+          </form>
+        </div>
       </section>
     </div>
   );

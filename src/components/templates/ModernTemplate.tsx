@@ -72,12 +72,12 @@ const DEFAULT_SECTION_COLUMNS: Record<
   technicalSkills: 'left',
   softSkills: 'left',
   interests: 'left',
-  projects: 'left',
   certifications: 'left',
   languages: 'left',
 
   experiences: 'right',
   education: 'right',
+  projects: 'right',
 };
 
 /**

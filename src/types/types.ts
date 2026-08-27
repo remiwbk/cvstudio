@@ -189,21 +189,21 @@ export const defaultStyle: CVStyle = {
 
 export const emptyCV: CVData = {
   name: 'Alex Martin',
-  title: 'Senior Product Designer',
+  title: 'Responsable marketing digital',
 
-  email: 'alex.martin@email.com',
-  phone: '+33 6 12 34 56 78',
-  location: 'Paris, France',
+  email: 'alex.martin@email.fr',
+  phone: '06 12 34 56 78',
+  location: 'Lyon, France',
 
-  website: 'alexmartin.design',
+  website: 'alexmartin.fr',
   linkedin: 'linkedin.com/in/alexmartin',
   github: 'github.com/alexmartin',
 
   photo: '/images/portrait.jpg',
   photoScale: 1.5,
 
-  birthDate: '1990-02-15',
-  hasDrivingLicense: false,
+  birthDate: '1992-05-18',
+  hasDrivingLicense: true,
 
   sectionOrder: [
     'summary',
@@ -222,38 +222,39 @@ export const emptyCV: CVData = {
   },
 
   summary:
-    'Product designer with 8+ years crafting digital experiences for startups and enterprises. I blend user research, interaction design, and systems thinking to ship products people love.',
+    'Professionnelle du marketing digital avec plus de 7 ans d’expérience dans la conception et le déploiement de stratégies numériques. J’allie analyse des données, créativité et gestion de projet pour développer la visibilité des marques et améliorer leurs performances.',
 
   technicalSkills: [
     {
       id: 'ts1',
-      name: 'Design',
+      name: 'Marketing',
       items: [
-        'Figma',
-        'Design Systems',
-        'Prototyping',
-        'User Research',
+        'Stratégie digitale',
+        'SEO',
+        'SEA',
+        'Réseaux sociaux',
       ],
     },
 
     {
       id: 'ts2',
-      name: 'Technique',
+      name: 'Outils',
       items: [
-        'React',
-        'TypeScript',
-        'Accessibility',
-        'Design Ops',
+        'Google Analytics',
+        'Google Ads',
+        'Figma',
+        'WordPress',
       ],
     },
 
     {
       id: 'ts3',
-      name: 'Systèmes',
+      name: 'Analyse',
       items: [
-        'Linux',
-        'Windows',
-        'macOS',
+        'Analyse de données',
+        'Reporting',
+        'KPI',
+        'Études de marché',
       ],
     },
   ],
@@ -263,56 +264,56 @@ export const emptyCV: CVData = {
     'Travail en équipe',
     'Autonomie',
     'Rigueur',
-    'Résolution de problèmes',
+    'Gestion de projet',
+    'Esprit d’analyse',
   ],
 
   experiences: [
     {
       id: 'e1',
-      role: 'Senior Product Designer',
-      company: 'Acme Corp',
-      period: '2021 — Present',
+      role: 'Responsable marketing digital',
+      company: 'Nova Solutions',
+      period: '2021 — Aujourd’hui',
       description:
-        'Lead designer for the core product suite. Built the design system used across 6 product teams. Drove a redesign that lifted activation by 23%.',
+        'Pilotage de la stratégie digitale et des campagnes d’acquisition. Mise en place d’un plan SEO ayant permis d’augmenter le trafic organique de 35 %. Gestion des campagnes publicitaires et suivi des principaux indicateurs de performance.',
     },
 
     {
       id: 'e2',
-      role: 'Product Designer',
-      company: 'Nimbus Labs',
-      period: '2017 — 2021',
+      role: 'Chargée de marketing digital',
+      company: 'Studio Horizon',
+      period: '2018 — 2021',
       description:
-        'Owned end-to-end design for the mobile onboarding flow. Conducted 40+ user interviews and shipped a 3x faster signup experience.',
+        'Création et gestion de campagnes digitales, animation des réseaux sociaux et production de contenus. Analyse des performances et mise en place de recommandations pour améliorer l’engagement et les conversions.',
     },
   ],
 
   education: [
     {
       id: 'd1',
-      degree: 'M.A. Interaction Design',
-      school:
-        'École Nationale Supérieure des Arts Décoratifs',
-      period: '2015 — 2017',
+      degree: 'Master Marketing digital',
+      school: 'Université Lumière Lyon 2',
+      period: '2016 — 2018',
       description:
-        'Focus on HCI, prototyping, and speculative design.',
+        'Spécialisation en stratégie digitale, communication numérique, analyse de données et gestion de projet.',
     },
   ],
 
   projects: [
     {
       id: 'p1',
-      name: 'Atlas Design System',
-      url: 'atlas.design',
+      name: 'Refonte du site e-commerce',
+      url: 'projet-exemple.fr',
       description:
-        'Open-source design system with 120+ components, used by 3k+ teams.',
+        'Pilotage de la refonte d’un site e-commerce avec pour objectifs d’améliorer l’expérience utilisateur, le référencement naturel et le taux de conversion.',
     },
   ],
 
   interests: [
     'Photographie',
     'Course à pied',
-    'Cuisine japonaise',
-    'Typographie',
+    'Voyages',
+    'Cuisine',
   ],
 
   certifications: [],
@@ -326,7 +327,12 @@ export const emptyCV: CVData = {
     {
       id: 'l2',
       name: 'Anglais',
-      level: 'Professionnel',
+      level: 'Courant',
+    },
+    {
+      id: 'l3',
+      name: 'Espagnol',
+      level: 'Intermédiaire',
     },
   ],
 
